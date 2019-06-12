@@ -39,7 +39,7 @@ cd PATH_TO_FABRIC_FOLDERS/fabric-samples/medrecords
 Load required packages
 ```
 $ npm init -y
-$ npm install fabric-ca-client fabric-network crypto-js jsrasign -S
+$ npm install fabric-ca-client fabric-network crypto-js jsrsasign -S
 ```
 
 Step 2: Set Up Network
