@@ -46,6 +46,7 @@ Step 2: Set Up Network
 ```
 $ cd ../first-network
 $ ./byfn.sh down
+// The next two commands only need to run once. If you have already run it once before, ignore them
 $ docker rm -f $(docker ps -aq)
 $ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
 ```
