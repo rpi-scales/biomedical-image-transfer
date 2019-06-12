@@ -17,10 +17,10 @@ if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang"  ]; then
 	CC_SRC_PATH=/home/forbug/SCALES:/opt/gopath/src/github.com/biomedical-image-transfer/medrecords/go
 elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH=/home/forbug/SCALES:/opt/gopath/src/github.com/biomedical-image-transfer/medrecords/javascript
+	CC_SRC_PATH=$GOPATH/pkg/mod/github.com/rpi-scales/biomedical-image-transfer/medrecords
 elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH=/home/forbug/SCALES:/opt/gopath/src/github.com/biomedical-image-transfer/medrecords/typescript
+	CC_SRC_PATH=/opt/gopath/src/github.com/rpi-scales/biomedical-image-transfer/medrecords/typescript
 	echo Compiling TypeScript code into JavaScript ...
 	pushd ../chaincode/medrecords/typescript
 	npm install
@@ -55,7 +55,7 @@ cat <<EOF
 
 Total setup execution time : $(($(date +%s) - starttime)) secs ...
 
-Next, use the FabCar applications to interact with the deployed FabCar contract.
+Next, use the MedRec applications to interact with the deployed FabCar contract.
 The FabCar applications are available in multiple programming languages.
 Follow the instructions for the programming language of your choice:
 
