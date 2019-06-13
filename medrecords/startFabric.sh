@@ -17,7 +17,7 @@ if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang"  ]; then
 	CC_SRC_PATH=/home/forbug/SCALES:/opt/gopath/src/github.com/biomedical-image-transfer/medrecords/go
 elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH=$GOPATH/pkg/mod/github.com/rpi-scales/biomedical-image-transfer/medrecords
+	CC_SRC_PATH=file://home/forbug/SCALES/biomedical-image-transfer/fabric-samples/medrecords/javascript
 elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 	CC_SRC_PATH=/opt/gopath/src/github.com/rpi-scales/biomedical-image-transfer/medrecords/typescript
@@ -46,17 +46,17 @@ cd ../basic-network
 docker-compose -f ./docker-compose.yml up -d cli
 docker ps -a
 
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabcar -v 1.0 -p "$CC_SRC_PATH" -l "$CC_RUNTIME_LANGUAGE"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n fabcar -l "$CC_RUNTIME_LANGUAGE" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
-sleep 10
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n fabcar -c '{"function":"initLedger","Args":[]}'
+#docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/home/forbug/SCALES/biomedical-image-transfer/fabric-samples/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n medrec -v 1.0 -p "$CC_SRC_PATH" -l "$CC_RUNTIME_LANGUAGE"
+#docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/home/forbug/SCALES/biomedical-image-transfer/fabric-samples/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n medrec -l "$CC_RUNTIME_LANGUAGE" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+#sleep 10
+#docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/home/forbug/SCALES/biomedical-image-transfer/fabric-samples/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n medrec -c '{"function":"initLedger","Args":[]}'
 
 cat <<EOF
 
 Total setup execution time : $(($(date +%s) - starttime)) secs ...
 
-Next, use the MedRec applications to interact with the deployed FabCar contract.
-The FabCar applications are available in multiple programming languages.
+Next, use the MedRec applications to interact with the deployed medrec contract.
+The medrec applications are available in multiple programming languages.
 Follow the instructions for the programming language of your choice:
 
 JavaScript:
@@ -69,7 +69,7 @@ JavaScript:
 
   Then run the following applications to enroll the admin user, and register a new user
   called user1 which will be used by the other applications to interact with the deployed
-  FabCar contract:
+  medrec contract:
     node enrollAdmin
     node registerUser
 
@@ -94,7 +94,7 @@ TypeScript:
 
   Then run the following applications to enroll the admin user, and register a new user
   called user1 which will be used by the other applications to interact with the deployed
-  FabCar contract:
+  medrec contract:
     node dist/enrollAdmin
     node dist/registerUser
 

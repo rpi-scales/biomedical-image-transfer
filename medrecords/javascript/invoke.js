@@ -14,106 +14,8 @@ const ccp = JSON.parse(ccpJSON);
 
 async function main() {
     try {
-        if(argc < 3){
-           console.log(`Incorrect number of arguments. Must be 5.`);
-            return; 
-        }
-        else{
-            const txn = process.argv[2];
-
-            if(typeof txn != "string" || !txn.includes(" ")){
-                console.log(`Incorrect format for ${txn}.`);
-                console.log(`Must be formatted as \"camelCase\"`);
-                return;
-            }
-            const recNum = process.argv[3];
-            if(typeof recNum != "number"){
-                console.log(`Incorrect format for ${recNum}.`);
-                console.log(`Must be integer between 0 and 999`);
-                return;
-            }
-            else if(recNum < 0 || recNum >999){
-                console.log(`Incorrect format for ${recNum}.`);
-                console.log(`Must be integer between 0 and 999`);
-                return;
-            }
-
-            const reqName, ownName, recipName, hash;
-
-            if(txn == 'requestRec' && argc != 5)
-            {
-                console.log(`Incorrect number of arguments. Must be 5.`);
-                return;
-            }
-            else{
-                reqName = process.argv[4];
-                if(typeof reqName != "string" || !reqName.includes(", ")){
-                    console.log(`Incorrect format for ${reqName}.`);
-                    console.log(`Must be formatted as \"LastName, FirstName\"`);
-                    return;
-                }
-
-            }
-            if((txn == 'revokeAccess') && argc != 5)
-            {
-                console.log(`Incorrect number of arguments. Must be 5.`);
-                return;
-            }
-            else{
-                ownName = process.argv[4];
-                if(typeof ownName != "string" || !ownName.includes(", ")){
-                    console.log(`Incorrect format for ${ownName}.`);
-                    console.log(`Must be formatted as \"LastName, FirstName\"`);
-                    return;
-                }
-            }
-            if((txn == 'giveAccess') && argc != 6)
-            {
-                console.log(`Incorrect number of arguments. Must be 5.`);
-                return;
-            }
-            else{
-                ownName = process.argv[4];
-                if(typeof ownName != "string" || !ownName.includes(", ")){
-                    console.log(`Incorrect format for ${ownName}.`);
-                    console.log(`Must be formatted as \"LastName, FirstName\"`);
-                    return;
-                }
-                recipName = process.argv[5];
-                if(typeof recipName != "string" || !recipName.includes(", ")){
-                    console.log(`Incorrect format for ${recipName}.`);
-                    console.log(`Must be formatted as \"LastName, FirstName\"`);
-                    return;
-                }
-
-            }
-            if(txn == 'createRec' && argc != 6)
-            {
-                console.log(`Incorrect number of arguments. Must be 5.`);
-                return;
-            }
-            else{
-                ownName = process.argv[4];
-                if(typeof ownName != "string" || !ownName.includes(", ")){
-                    console.log(`Incorrect format for ${ownName}.`);
-                    console.log(`Must be formatted as \"LastName, FirstName\"`);
-                    return;
-                }
-                hash = process.argv[5];
-                if(typeof ownName != "string"){
-                    console.log(`Incorrect format for ${hash}.`);
-                    console.log(`Must be formatted as a string.`);
-                    return;
-                }
-            }
-            if(txn == 'createRec' && argc != 3)
-            {
-                console.log(`Incorrect number of arguments. Must be 5.`);
-                return;
-            }
-        }
-        
-
+        //Name of invoker.
+        const user = process.argv[2];
 
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
@@ -138,9 +40,136 @@ async function main() {
         // Get the contract from the network.
         const contract = network.getContract('medrec');
 
-        // Submit the specified transaction.
-        // createRec transaction - requires 4 arguments, ex: ('createRec', 'Jane', 'Doe', FILE)
-        await contract.submitTransaction('createRec', recNum, ownName, hash);
+        if(process.argv.length < 3){
+           console.log(`Incorrect number of arguments. Must be 3.`);
+            return; 
+        }
+        else{
+            const txn = process.argv[3];
+
+            if(typeof txn != "string" || txn.includes(" ")){
+                console.log(`Incorrect format for ${txn}.`);
+                console.log(`Must be formatted as \"camelCase\"`);
+                return;
+            }
+            const recNum = process.argv[4];
+            console.log(recNum);
+            if(typeof recNum != "number"){
+                console.log(`Incorrect format for ${recNum}.`);
+                console.log(`Must be integer between 0 and 999`);
+                return;
+            }
+            //else if(recNum < 0 || recNum >999){
+            //    console.log(`Incorrect format for ${recNum}.`);
+            //    console.log(`Must be integer between 0 and 999`);
+            //    return;
+            //}
+
+            let reqName, ownName, recipName, hash;
+
+            if(txn == 'requestRec')
+            {
+                console.log(recNum);
+                if(process.argv.length != 6){
+                    console.log(`Incorrect number of arguments. Must be 6.`);
+                    return;
+                }
+            
+                else{
+                    reqName = process.argv[5];
+                    if(typeof reqName != "string"){
+                        console.log(`Incorrect format for ${reqName}.`);
+                        console.log(`Must be formatted as \"Hospital Name\"`);
+                        return;
+                    }
+                    console.log(recNum);
+                    await contract.submitTransaction(txn, recNum, reqName);
+
+                }
+            }
+            else if((txn == 'revokeAccess'))
+            {
+                console.log(recNum);
+                if(process.argv.length != 6){
+                    console.log(`Incorrect number of arguments. Must be 6.`);
+                    return;
+                }
+                else{
+                    ownName = process.argv[5];
+                    if(typeof ownName != "string"){
+                        console.log(`Incorrect format for ${ownName}.`);
+                        console.log(`Must be formatted as \"Hospital Name\"`);
+                        return;
+                    }
+                    console.log(recNum);
+                    await contract.submitTransaction(txn, recNum, ownName);
+                }
+            }
+            else if((txn == 'giveAccess'))
+            {
+                console.log(recNum);
+                if(process.argv.length != 7){
+                    console.log(`Incorrect number of arguments. Must be 7.`);
+                    return;
+                }
+            
+                else{
+                    ownName = process.argv[5];
+                    if(typeof ownName != "string"){
+                        console.log(`Incorrect format for ${ownName}.`);
+                        console.log(`Must be formatted as \"Hospital Name\"`);
+                        return;
+                    }
+                    recipName = process.argv[6];
+                    if(typeof recipName != "string"){
+                        console.log(`Incorrect format for ${recipName}.`);
+                        console.log(`Must be formatted as \"Hospital Name\"`);
+                        return;
+                    }
+                    await contract.submitTransaction(txn, recNum, ownName, recipName);
+
+                }
+            }
+            else if(txn == 'createRec')
+            {
+                console.log(recNum);
+                if( process.argv.length != 7){
+                    console.log(`Incorrect number of arguments. Must be 7.`);
+                    return;
+                }
+                else{
+
+                    ownName = process.argv[5];
+                    if(typeof ownName != "string"){
+                        console.log(`Incorrect format for ${ownName}.`);
+                        console.log(`Must be formatted as \"Hospital Name\"`);
+                        return;
+                    }
+                    hash = process.argv[6];
+                    if(typeof hash != "string"){
+                        console.log(`Incorrect format for ${hash}.`);
+                        console.log(`Must be formatted as a string.`);
+                        return;
+                    }
+                    await contract.submitTransaction(txn, recNum, ownName, hash);
+                }
+            }
+            else if(txn == 'queryAllRecs')
+            {
+                if( process.argv.length != 4){
+                    console.log(`Incorrect number of arguments. Must be 4.`);
+                    return;
+                }
+                else{
+                     await contract.submitTransaction(txn);
+                }
+            }
+            else{
+                console.log(`Transaction is not defined.`);
+                    return;
+            }
+        }
+
         console.log('Transaction has been submitted');
 
         // Disconnect from the gateway.

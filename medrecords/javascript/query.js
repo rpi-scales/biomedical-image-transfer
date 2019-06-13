@@ -15,16 +15,16 @@ const ccp = JSON.parse(ccpJSON);
 async function main() {
     try {
 
-        if(argc != 3){
-           console.log(`Incorrect number of arguments. Must be 5.`);
+        if(process.argv.length != 3){
+           console.log(`Incorrect number of arguments. Must be 3.`);
             return; 
         }
 
         const user = process.argv[2];
 
-        if(typeof user != "string" || !user.includes(", ")){
+        if(typeof user != "string"){
             console.log(`Incorrect format for ${user}.`);
-            console.log(`Must be formatted as \"LastName, FirstName\"`);
+            console.log(`Must be formatted as \"Hospital Name\"`);
             return;
         }
 

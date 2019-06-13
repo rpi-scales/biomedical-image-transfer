@@ -14,9 +14,8 @@ const ccp = JSON.parse(ccpJSON);
 
 async function main() {
     try {
-
-        if(argc != 3){
-           console.log(`Incorrect number of arguments. Must be 5.`);
+        if(process.argv.length != 3){
+           console.log(`Incorrect number of arguments. Must be 3.`);
             return; 
         }
         // Create a new file system based wallet for managing identities.
@@ -26,9 +25,9 @@ async function main() {
 
         const user = process.argv[2];
 
-        if(typeof user != "string" || !user.includes(", ")){
+        if(typeof user != "string"){
             console.log(`Incorrect format for ${user}.`);
-            console.log(`Must be formatted as \"LastName, FirstName\"`);
+            console.log(`Must be formatted as \"Hospital Name\"`);
             return;
         }
 
@@ -60,7 +59,7 @@ async function main() {
         const enrollment = await ca.enroll({ enrollmentID: user, enrollmentSecret: secret });
         const userIdentity = X509WalletMixin.createIdentity('Org1MSP', enrollment.certificate, enrollment.key.toBytes());
         wallet.import(user, userIdentity);
-        console.log('Successfully registered and enrolled admin user'+ user + ' and imported it into the wallet');
+        console.log('Successfully registered and enrolled admin user '+ user + ' and imported it into the wallet');
 
     } catch (error) {
         console.error(`Failed to register user : ${error}`);

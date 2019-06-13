@@ -62,7 +62,7 @@ Step 4: Enroll!
 ```
 node enrollAdmin.js
 
-node registerUser.js <"Last Name, First Name">
+node registerUser.js <"Hospital Name">
 ```
 
 Step 5: Upload files to IPFS
@@ -76,13 +76,13 @@ $ipfs add <filename>
 Step 6: Use IPFSHash to Create New Records
 
 ```
-$ node invoke.js 'createRec' <recNum> <"Owner Last Name, Owner First"> <IPFSHash>
+$ node invoke.js <"Hospital of Invoker"> 'createRec' <recNum> <"Hospital Name"> <IPFSHash>
 ```
 
 Step 7: Query and Invoke with Other Transactions
 ```
 node query.js
-node invoke.js <args>
+node invoke.js <"Hospital of Invoker"> <args>
 ```
 * Use output of requestRec to possibly access file through IPFS
 ```

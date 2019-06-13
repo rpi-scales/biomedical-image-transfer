@@ -19,15 +19,15 @@ class MedRec extends Contract {
         console.info('============= START : Initialize Ledger ===========');
         const recs = [
             {
-                owner: 'Doe, John',
+                owner: 'Albany Medical Center',
                 IPFSHash: ,
-                hashed: true,
+                encrypted: true,
                 
             },
             {
-                owner: 'Derry, Jane',
+                owner: 'Boston Children\'s Hospital',
                 IPFSHash: ,
-                hashed: true,
+                encrypted: true,
             },
         ];
 
@@ -63,7 +63,7 @@ class MedRec extends Contract {
 
         const filehash = rec.IPFSHash;
 
-        if(rec.hashed){
+        if(rec.encrypted){
             throw new Error(`${filename} is not accessable!`)
         }
 
@@ -138,9 +138,9 @@ class MedRec extends Contract {
         
 
         rec.IPFSHash = plaintext;
-        rec.hashed = false;
+        rec.encrypted = false;
 
-        return rec.hashed;
+        return rec.encrypted;
         
     }
 
@@ -178,16 +178,16 @@ class MedRec extends Contract {
 
         var currHash = rec.IPFSHash;
 
-        if(!rec.hashed){
+        if(!rec.encrypted){
             throw new Error(`${recNumber} is already hidden`);
         }
 
         var newHash = CryptoJS.AES.encrypt(currHash, ownerPrivateKey);
 
         rec.IPFSHash = newHash;
-        rec.hashed = true;
+        rec.encrypted = true;
 
-        return rec.hashed;
+        return rec.encrypted;
     }
 
 
