@@ -73,7 +73,7 @@ resource:
         #  e.g. MedicationAdministration, Procedure, Immunization, ImagingStudy   
         type: ImagingStudy
         # display is plain text that describes the event
-        display: 'xray image of patient 33348s chest'
+        display: "xray image of patient 33348's chest"
       # status: registered | preliminary | final | amended | corrected
       #           | cancelled | entered-in-error | unknown
       status: final

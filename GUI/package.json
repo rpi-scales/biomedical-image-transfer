@@ -11,7 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "path": "^0.12.7"
+    "js-yaml": "^3.13.1",
+    "path": "^0.12.7",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

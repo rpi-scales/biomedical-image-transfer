@@ -11,7 +11,7 @@ npm install --save express
 ## Node.js Dependency
 ```
 npm install --save-dev nodemon
-npm install fs path
+npm install fs path yamljs
 ```
 
 ## Now start the dashboard
