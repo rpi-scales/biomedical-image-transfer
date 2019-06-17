@@ -26,7 +26,7 @@ resource:
         system: urn:ietf:rfc:3986
         # value is the portion of the ID relevant to the user
         value: URL
-        # period is the time period during which ID is/was valid
+        # period  is the time period during which ID is/was valid
         period:
           #start is the time at which versionID becomes valid
           start: 2019-01-13
