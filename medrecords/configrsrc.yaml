@@ -1,0 +1,116 @@
+################################################################################
+#
+#   RESOURCE
+#
+#   This section defines the values to encode in 
+#   order to produce a proper resource.
+#
+################################################################################
+
+resource:
+
+    # The Resource id is used for identifying this Resource instance.
+    id: 5246977
+    # Meta is a set of metadata that provides technical and workflow context to the resource
+    meta:
+      # VersionID references data about the current version of the resource
+      versionId:
+        # use is the purpose of the versionID
+        # usual | official | temp | secondary | old
+        use: official
+        # type is a description of the versionID
+        # null when system is known
+        type: null
+        # system is a URL that represents the namespace for the value
+        # if value is full URI, urn:ietf:rfc:3986
+        system: urn:ietf:rfc:3986
+        # value is the portion of the ID relevant to the user
+        value: URL
+        # period is the time period during which ID is/was valid
+        period:
+          #start is the time at which versionID becomes valid
+          start: 2019-01-13
+          # end is the time at which versionID becomes invalid
+          end: 2020-01-13
+        #assigner is the organization that managaes/issued the versionID
+        assigner:
+          #reference is absolute/relative URL to assigner
+          reference: <reference value = "Practitioner/0982"
+          # id is the assigner's identification
+          id: 0982
+          # type is the assigner's type (http://www.hl7.org/fhir/valueset-resource-types.html)
+          type: Practitioner
+          # display is plain text that describes the assigner
+          display: Doctor John Screecham
+      # lastUpdated is the instant (YYYY-MM-DDThh:mm:ss+zz:zz) at which
+      # the resource was last updated
+      lastUpdated: 2019-01-20T14:28:36.442+09:00
+      # source is the URI identifying the source system of resource
+      source: URI
+    # observation holds measurements, assertions, and their associated metadata
+    observation: 
+      # id is an identifier for the observation
+      # would this be the same as the resource id?
+      id: 5246977
+      # basedOn describes the source of the observation
+      basedOn:
+        # reference is absolute/relative URL to the basis of the observation
+        reference: URI
+        # id is the basis' identification
+        id: 670003
+        # type is the basis type (http://www.hl7.org/fhir/valueset-resource-types.html)
+        #  e.g. DeviceRequest, ServiceRequest, MedicationRequest, ImmunizationRecommendation
+        type: ServiceRequest
+        # display is plain text that describes the basis
+        display: 'request for imaging of patient 33348'
+      # partOf describes the event
+      partOf:
+        # reference is absolute/relative URL to the event
+        reference: URI
+        # id is the event's identification
+        id: 3625
+        # type is the event type (http://www.hl7.org/fhir/valueset-resource-types.html)
+        #  e.g. MedicationAdministration, Procedure, Immunization, ImagingStudy   
+        type: ImagingStudy
+        # display is plain text that describes the event
+        display: 'xray image of patient 33348's chest'
+      # status: registered | preliminary | final | amended | corrected
+      #           | cancelled | entered-in-error | unknown
+      status: final
+      # category is the type of observation
+      # http://www.hl7.org/fhir/valueset-observation-category.html
+      category: imaging
+      # subject is a reference to a patient, group, device, or loc.
+      # which the observation is about
+      subject:
+        # reference is absolute/relative URL to the subject
+        reference: <reference value = "Patient/33348">
+        # id is the subject's identification
+        id: 33348
+        # type is the subject type (http://www.hl7.org/fhir/valueset-resource-types.html)
+        #  e.g. patient, group, device
+        type: patient
+        # display is plain text that describes the subject
+        display: Karen Barton
+      # effective is the instant the observation was performed
+      # format: YYYY-MM-DDThh:mm:ss.ss+zz:zz
+      effective: 2019-01-13T00:00:00+09:00
+      # issued is the instant the observation was made available
+      # format: YYYY-MM-DDThh:mm:ss.ss+zz:zz
+      issued: 2019-01-13T00:00:00+09:00
+      # performer is a reference to the person/team responsible for observation
+      performer:
+        # reference is absolute/relative URL to the performer
+        reference: <reference value = "Organization/779">
+        # id is the performer's identification
+        id: 779
+        # type is the performer type (http://www.hl7.org/fhir/valueset-resource-types.html)
+        #  e.g. practitioner, patient, organization, team
+        type: Organization
+        # display is plain text that describes the performer
+        display: "Albany Advanced Imaging"
+      # value is the IPFSHash of the observation
+      value: QmSbVB3XGnksVBzDKT7otes6KfrzHfQJtRTdD7NWwmvGsE
+      # note is a comment about the observation 
+      note: 'xray requires doctor approval'
+

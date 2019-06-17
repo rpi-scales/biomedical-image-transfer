@@ -7,6 +7,8 @@
 # Exit on first error
 set -e
 
+. chainpath.config
+
 # don't rewrite paths for Windows Git Bash users
 export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
@@ -14,13 +16,13 @@ CC_SRC_LANGUAGE=${1:-"go"}
 CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
 if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang"  ]; then
 	CC_RUNTIME_LANGUAGE=golang
-	CC_SRC_PATH=/home/forbug/SCALES:/opt/gopath/src/github.com/biomedical-image-transfer/medrecords/go
+	CC_SRC_PATH="$gopath";
 elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH=file://home/forbug/SCALES/biomedical-image-transfer/fabric-samples/medrecords/javascript
+	CC_SRC_PATH="$jspath";
 elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH=/opt/gopath/src/github.com/rpi-scales/biomedical-image-transfer/medrecords/typescript
+	CC_SRC_PATH="$tspath";
 	echo Compiling TypeScript code into JavaScript ...
 	pushd ../chaincode/medrecords/typescript
 	npm install
@@ -68,17 +70,15 @@ JavaScript:
     npm install
 
   Then run the following applications to enroll the admin user, and register a new user
-  called user1 which will be used by the other applications to interact with the deployed
+  which will be used by the other applications to interact with the deployed
   medrec contract:
     node enrollAdmin
-    node registerUser
+    node registerUser <"Hospital Name">
 
-  You can run the invoke application as follows. By default, the invoke application will
-  create a new car, but you can update the application to submit other transactions:
-    node invoke
+  You can run the invoke application after editing the configrsrc.yaml file.
+    node invoke <"Hospital of Invoker"> 'createRec' <recNum> <"Hospital Name"> configrsrc.yaml
 
-  You can run the query application as follows. By default, the query application will
-  return all cars, but you can update the application to evaluate other transactions:
+  You can run the query application as follows.
     node query
 
 TypeScript:

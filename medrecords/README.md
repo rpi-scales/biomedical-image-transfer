@@ -25,8 +25,6 @@ Inputs: transaction, Record number, owner first and last name, file IPFS hash
 queryAllRecs
 Displays all of the records in the channel.
 
-
-
 ## How to Run
 
 Step 1: Create Required Environment
@@ -39,7 +37,7 @@ cd PATH_TO_FABRIC_FOLDERS/fabric-samples/medrecords
 Load required packages
 ```
 $ npm init -y
-$ npm install fabric-ca-client fabric-network crypto-js jsrasign -S
+$ npm install fabric-ca-client fabric-network crypto-js jsrsasign js-yaml -S
 ```
 
 Step 2: Set Up Network
@@ -50,7 +48,7 @@ $ docker rm -f $(docker ps -aq)
 $ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
 ```
 
-Step 3: Launch the Network
+Step 3: Edit chainpath.config to reflect paths on local machine and launch the Network
 ```
 $./startFabric.sh javascript
 
@@ -73,10 +71,10 @@ $ipfs init
 $ipfs add <filename>
 ```
 
-Step 6: Use IPFSHash to Create New Records
+Step 6: Edit configrsrc.yaml to Create New Records
 
 ```
-$ node invoke.js <"Hospital of Invoker"> 'createRec' <recNum> <"Hospital Name"> <IPFSHash>
+$ node invoke.js <"Hospital of Invoker"> 'createRec' <recNum> <"Hospital Name"> configrsrc.yaml
 ```
 
 Step 7: Query and Invoke with Other Transactions

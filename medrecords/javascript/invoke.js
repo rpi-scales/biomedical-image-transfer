@@ -53,17 +53,11 @@ async function main() {
                 return;
             }
             const recNum = process.argv[4];
-            console.log(recNum);
-            if(typeof recNum != "number"){
+            if(isNaN(recNum)){
                 console.log(`Incorrect format for ${recNum}.`);
                 console.log(`Must be integer between 0 and 999`);
                 return;
             }
-            //else if(recNum < 0 || recNum >999){
-            //    console.log(`Incorrect format for ${recNum}.`);
-            //    console.log(`Must be integer between 0 and 999`);
-            //    return;
-            //}
 
             let reqName, ownName, recipName, hash;
 
