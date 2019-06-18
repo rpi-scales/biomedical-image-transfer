@@ -2,13 +2,10 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
-yaml = require('yamljs');
-fs   = require('fs');
+const app = express();
 
 router.get('/', (req, res) => {
-	nativeObject = yaml.load('./transactions/configrsrc.yaml');
-	console.log(nativeObject);
-	res.sendFile(path.join(__dirname+'/Dashboard.html'));
+	res.sendFile(path.join(__dirname+'/index.html'));
 });
 
 module.exports = router;
