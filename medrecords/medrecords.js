@@ -8,7 +8,6 @@ const { KJUR, KEYUTIL } = require('jsrsasign');
 var CryptoJS = require('crypto-js');
 
 const { FileSystemWallet, Gateway } = require('fabric-network');
-const yaml = require('js-yaml');
 const fs = require('fs');
 const path = require('path');
 
@@ -63,6 +62,7 @@ function Network(address, type){
     this.type = type;
 }
 
+
 //type is how the agent participated
 //  see https://www.hl7.org/fhir/valueset-participation-role-type.html
 //role is the agent role in the event
@@ -93,10 +93,12 @@ function Agent(type, role, who, altId, name, requestor, location,
     this.network = network;
     this.purpose = purpose;
 }
+ 
+
 
 //site is a string that describes the logical source location
 //  within the enterprise
-//observer is a reference to the identity o fsource detecting the event
+//observer is a reference to the identity of source detecting the event
 //  PractitionerRole | Practitioner | Organization | Device | Patient | RelatedPerson
 //type is the type of source where the event originated
 //  see https://www.hl7.org/fhir/valueset-audit-source-type.html
@@ -145,9 +147,8 @@ function Entity(what, type, role, lifecycle, secLabel, name,
 //  see https://www.hl7.org/fhir/valueset-audit-event-sub-type.html
 //action is the type of action performed during the event
 //  see https://www.hl7.org/fhir/valueset-audit-event-action.html
-//period is when the activity occurred
 //recorded is the instant when the event recorded 
-//  format as YYYY-MM-DDThh:mm:ss.sss+zz:zz 
+//  format as YYYY-MM-DD
 //outcome is whether the event succeeded or failed
 //  see https://www.hl7.org/fhir/valueset-audit-event-outcome.html
 //outcomeDesc is a description of the event outcome
@@ -156,12 +157,11 @@ function Entity(what, type, role, lifecycle, secLabel, name,
 //agent is an actor involved in the event
 //source is the event reporter
 //entity is the data or objects used during the event
-function AuditEvent(type, subtype, action, period, recorded, outcome, 
+function AuditEvent(type, subtype, action, recorded, outcome, 
         outcomeDesc, purpose, agent, source, entity){
     this.type = type; 
     this.subtype = subtype;
     this.action = action;
-    this.period = period;
     this.recorded = recorded;
     this.outcome = outcome;
     this.outcomeDesc = outcomeDesc;
@@ -175,15 +175,12 @@ function AuditEvent(type, subtype, action, period, recorded, outcome,
 //lastUpdated is an instant that is changed each time it is changed
 //  in format YYYY-MM-DDThh:mm:ss.sss+zz:zz e.g.  2015-02-07T13:28:17.239+02:00 
 //source is a uri identifying the source system of resource
-//security is an AuditEvent
-//don't really understand profile or tag
+//security is a list of AuditEvents
 function Metadata(versionId, lastUpdated, source){
     this.versionId = versionId;
     this.lastUpdated = lastUpdated;
     this.source = source;
-    //this.profile = profile;
     this.security = security;
-    //this.tag = tag;
 }
 
 //identifier is an identifier for the image
@@ -273,31 +270,13 @@ function Resource(id, meta, observation){
 class MedRec extends Contract {
 
     async initLedger(ctx) {
-        console.info('============= START : Initialize Ledger ===========');
-        const recs = [
-            {
-                owner: 'Albany Medical Center',
-                resource: ,
-                encrypted: true,
-                
-            },
-            {
-                owner: 'Boston Children\'s Hospital',
-                resource: ,
-                encrypted: true,
-            },
-        ];
 
-        for (let i = 0; i < recs.length; i++) {
-            recs[i].docType = 'rec';
-            await ctx.stub.putState('REC' + i, Buffer.from(JSON.stringify(recs[i])));
-            console.info('Added <--> ', recs[i]);
-        }
-        console.info('============= END : Initialize Ledger ===========');
     }
 
     //Returns IPFSHash of file
-    async requestRec(ctx, recNumber, requester){
+    //Purpose describes the requestor's reason for accessing the file
+    //  See https://www.hl7.org/fhir/v3/PurposeOfUse/vs.html
+    async queryRec(ctx, recNumber, requestor, purpose){
         const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
@@ -306,45 +285,70 @@ class MedRec extends Contract {
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
 
-        const requesterExists = await wallet.exists(requester);
-        if (!requesterExists) {
-            throw new Error(`An identity for the user ${requester} does not exist in the wallet.
+        const requestorExists = await wallet.exists(requestor);
+        if (!requestorExists) {
+            throw new Error(`An identity for the user ${requestor} does not exist in the wallet.
                  Run the registerUser.js application before retrying`);
         }
         
 
-        const walletContents = await wallet.export(requester);
-        const requesterPrivateKey = walletContents.privateKey;
+        const walletContents = await wallet.export(requestor);
+        const requestorPrivateKey = walletContents.privateKey;
 
         const rec = JSON.parse(recAsBytes.toString());
 
-        const filehash = rec.resource.observation.value;
+        const filehash = rec.resource.observation.value.content;
+
+        const outcome = 0;
+        const outcomeDesc;
 
         if(rec.encrypted){
-            throw new Error(`${filename} is not accessable!`)
+            outcome = 12;
+            outcomeDesc = "No user has access to the file."
         }
+        else{
+            outcomeDesc = "Success. File was not encrypted."
+            // calculate Hash from the file
+            const fileLoaded = fs.readFileSync(filename, 'utf8');
+            var hashToAction = CryptoJS.SHA256(fileLoaded).toString();
+            console.log("Hash of the file: " + hashToAction);
 
-        // calculate Hash from the file
-        const fileLoaded = fs.readFileSync(filename, 'utf8');
-        var hashToAction = CryptoJS.SHA256(fileLoaded).toString();
-        console.log("Hash of the file: " + hashToAction);
-
-        // get certificate from the certfile
-        const certLoaded = fs.readFileSync(certfile, 'utf8');
+            // get certificate from the certfile
+            const certLoaded = fs.readFileSync(certfile, 'utf8');
 
 
-        var requesterPublicKey = KEYUTIL.getKey(certLoaded);
-        var recover = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
-        recover.init(requesterPublicKey);
-        recover.updateHex(hashToAction);
-        var getBackSigValueHex = new Buffer(resultJSON.signature, 'base64').toString('hex');
-        console.log("Signature verified with certificate provided: " + recover.verify(getBackSigValueHex));
-        /*
-        var bytes = CryptoJS.AES.decrypt(currHash.toString(), userPublicKey);
-        var decryptedFile = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
- 
-        console.log(decryptedFile);
+            var requestorPublicKey = KEYUTIL.getKey(certLoaded);
+            var recover = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
+            recover.init(requestorPublicKey);
+            recover.updateHex(hashToAction);
+            var getBackSigValueHex = new Buffer(resultJSON.signature, 'base64').toString('hex');
+            console.log("Signature verified with certificate provided: " + recover.verify(getBackSigValueHex));
+            /*
+            var bytes = CryptoJS.AES.decrypt(currHash.toString(), userPublicKey);
+            var decryptedFile = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+     
+            console.log(decryptedFile);
         */
+        }
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+
+        const type = "110114"; //Type is "User Authentication has been attempted"
+        const subtype = "read"; //Read the current state of the resource
+        const action = "E"; //Execute - perform a query/search operation
+        const recorded = date;
+        const purpose = purpose;
+
+        //Agent type: healthcare provider, role: healthcare provider, media: film type,
+        const agent = new Agent("PROV", "PROV", null, null, requestor, true, null,
+            null, "110010", null, purpose);
+
+        const newAE = new AuditEvent(type, subtype, action, recorded, outcome, 
+        outcomeDesc, purpose, agent, null, null);
+
+        rec.resource.meta.security.push(newAE);
+
+        //Next step: implement AE addition when file used in IPFS
 
         return filehash;
     
@@ -394,8 +398,26 @@ class MedRec extends Contract {
         var plaintext = bytes.toString(CryptoJS.enc.Utf8);
         
 
-        rec.resource.observation.value = plaintext;
+        rec.resource.observation.value.content = plaintext;
         rec.encrypted = false;
+
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+
+        const type = "decrypt";
+        const subtype = "update"; //Read the current state of the resource
+        const action = "update"; //Execute - perform a query/search operation
+        const recorded = date;
+        const purpose = purpose;
+
+        //Agent type: healthcare provider, role: healthcare provider, media: film type,
+        const agent = new Agent("PROV", "PROV", null, null, owner, true, null,
+            null, "110010", null, purpose);
+
+        const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
+        `Decrypted file IPFSHash for ${recip}`, purpose, agent, null, null);
+
+        rec.resource.meta.security.push(newAE);
 
         return rec.encrypted;
         
@@ -444,6 +466,24 @@ class MedRec extends Contract {
         rec.resource.observation.value = newHash;
         rec.encrypted = true;
 
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+
+        const type = "encrypt";
+        const subtype = "update"; //Read the current state of the resource
+        const action = "update"; //Execute - perform a query/search operation
+        const recorded = date;
+        const purpose = purpose;
+
+        //Agent type: healthcare provider, role: healthcare provider, media: film type,
+        const agent = new Agent("PROV", "PROV", null, null, owner, true, null,
+            null, "110010", null, purpose);
+
+        const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
+        "Encrypted file IPFSHash", purpose, agent, null, null);
+
+        rec.resource.meta.security.push(newAE);
+
         return rec.encrypted;
     }
 
@@ -461,54 +501,140 @@ class MedRec extends Contract {
                  Run the registerUser.js application before retrying`);
         }
 
-        //Read the YAML file and assign appropriate variables
+        //Read the JSON file and assign appropriate variables;
 
-        let config = {};
         try {
-            config = yaml.safeLoad(fs.readFileSync(configFile, 'utf8'));
-        }catch (e) {
-            console.log(e);
+          const jsonString = fs.readFileSync('./configrsrc.json');
+          const config = JSON.parse(jsonString);
+        } catch(err) {
+          console.log(err);
+          return
         }
 
+    
         const refID = config.resource.id;
+
+        //Metadata VersionID
 
         const use = config.resource.meta.versionId.use;
         const verType = config.resource.meta.versionId.type;
         const verSystem = config.resource.meta.versionId.system;
         const verVal = config.resource.meta.versionId.value;
+
         const start = config.resource.meta.versionId.period.start;
         const end = config.resource.meta.versionId.period.end;
+
+        const period = new Period(start,end);
 
         const assignRef = config.resource.meta.versionId.assigner.reference;
         const assignID = config.resource.meta.versionId.assigner.id;
         const assignType = config.resource.meta.versionId.assigner.type;
         const assignDisp = config.resource.meta.versionId.assigner.display;
 
+         const assigner = new Reference(assignRef, assignID, assignType, assignDisp);
+
         const lastUpdated = config.resource.meta.lastUpdated;
         const metaSource = config.resource.meta.source;
-
-        const period = new Period(start,end);
-        const assigner = new Reference(assignRef, assignID, assignType, assignDisp);
 
         const versionID = new Identifier(use, verType, verSystem, verVal,
                     period, assigner);
 
-        const meta = new Metadata(versionID, lastUpdated, metaSource);
+        //AuditEvent Parsing
 
-        const basedOn = new Reference(config.resource.observation.value.basedOn.reference,
-                config.resource.observation.value.basedOn.id, config.resource.observation.value.basedOn.type,
-                config.resource.observation.value.basedOn.display);
-        const partOf = new Reference(config.resource.observation.value.partOf.reference, config.resource.observation.value.partOf.id,
-                    config.resource.observation.value.partOf.type, config.resource.observation.value.partOf.display);
-        const subject = new Reference(config.resource.observation.value.subject.reference, config.resource.observation.value.subject.id,
-                    config.resource.observation.value.subject.type, config.resource.observation.value.subject.display);
-        const operator = new Reference(config.resource.observation.value.operator.reference, config.resource.observation.value.operator.id,
-                    config.resource.observation.value.operator.type, config.resource.observation.value.operator.display);
+        const aeType = config.resource.meta.security.type;
+        const aeSubtype = config.resource.meta.security.subtype;
+        const aeAction = config.resource.meta.security.action;
+        const aeRecorded = config.resource.meta.security.recorded;
+        const aeOutcome = config.resource.meta.security.outcome;
+        const aeOutcomeDesc = config.resource.meta.security.outcomeDesc;
+        const aePurpose = config.resource.meta.security.purpose;
+        const aeAgentType = config.resource.meta.security.agent.type;
+        const aeAgentRole = config.resource.meta.security.agent.role;
+       
+        const aeAgentWhoRef = config.resource.meta.security.agent.who.reference;
+        const aeAgentWhoID = config.resource.meta.security.agent.who.id;
+        const aeAgentWhoType = config.resource.meta.security.agent.who.type;
+        const aeAgentWhoDisplay = config.resource.meta.security.agent.who.display;
+        
+        const aeAgentWho = new Reference(aeAgentWhoRef, aeAgentWhoID, aeAgentWhoType,
+                aeAgentWhoDisplay);
+
+        const aeAgentAltID = config.resource.meta.security.agent.altId;
+        const aeAgentName = config.resource.meta.security.agent.name;
+        const aeAgentRequestor = config.resource.meta.security.agent.requestor;
+        
+        const aeAgentLocRef = config.resource.meta.security.agent.location.reference;
+        const aeAgentLocID = config.resource.meta.security.agent.location.id;
+        const aeAgentLocType = config.resource.meta.security.agent.location.type;
+        const aeAgentLocDisplay = config.resource.meta.security.agent.location.display;
+        
+        const aeAgentLoc = new Reference(aeAgentLocRef, aeAgentLocID, aeAgentLocType,
+                aeAgentLocDisplay);
+
+        const aeAgentPolicy = config.resource.meta.security.agent.policy;
+        const aeAgentMedia = config.resource.meta.security.agent.media;
+        
+        const aeAgentNetworkAddr = config.resource.meta.security.agent.network.address;
+        const aeAgentNetworkType = config.resource.meta.security.agent.network.type;
+        
+        const aeAgentNetwork = new Network(aeAgentNetworkAddr, aeAgentNetworkType);
+
+        const aeAgentPurpose = config.resource.meta.security.agent.purpose;
+        
+        const aeAgent = new Agent(aeAgentType, aeAgentRole, aeAgentWho, aeAgentAltID,
+                aeAgentName, aeAgentRequestor, aeAgentLoc, aeAgentPolicy, aeAgentMedia,
+                aeAgentNetwork, aeAgentPurpose);
+
+        const aeSourceSite = config.resource.meta.security.source.site;
+        const aeSourceObser = config.resource.meta.security.source.observer;
+        const aeSourceType = config.resource.meta.security.source.type;
+        
+        const aeSource = new Source(aeSourceSite, aeSourceObser, aeSourceObser);
+
+        const aeEntityWhatRef = config.resource.meta.security.entity.what.reference;
+        const aeEntityWhatID = config.resource.meta.security.entity.what.id;
+        const aeEntityWhatType = config.resource.meta.security.entity.what.type;
+        const aeEntityWhatDisplay = config.resource.meta.security.entity.what.display;
+       
+        const aeEntityWhat = new Reference(aeEntityWhatRef, aeEntityWhatID, aeEntityWhatType,
+                    aeEntityWhatDisplay);
+
+        const aeEntityType = config.resource.meta.security.entity.type;
+        const aeEntityRole = config.resource.meta.security.entity.role;
+        const aeEntityLifecycle = config.resource.meta.security.entity.lifecycle;
+        const aeEntitySec = config.resource.meta.security.entity.secLabel;
+        const aeEntityName = config.resource.meta.security.entity.name;
+        const aeEntityDesc = config.resource.meta.security.entity.description;
+        const aeEntityQuery = config.resource.meta.security.entity.query;
+        
+        const aeEntityDetailType = config.resource.meta.security.entity.detail.type;
+        const aeEntityDetailVal = config.resource.meta.security.entity.detail.val;
+
+        const aeEntityDetail = new Detail(aeEntityDetailType, aeEntityDetailVal);
+
+        const aeEntity = new Entity(aeEntityWhat, aeEntityType, aeEntityRole, aeEntityLifecycle,
+                aeEntitySec, aeEntityName, aeEntityDesc, aeEntityQuery, aeEntityDetail);
+
+        const security = new AuditEvent(aeType, aeSubtype, aeAction,
+                aeRecorded, aeOutcome, aeOutcomeDesc, aePurpose, aeAgent, aeSource,
+                aeEntity);
+
+        //Create an array to hold multiple Audit Events
+
+        var auditEvents = new Array(security);
+
+        //Create the Metadata Object
+
+        const meta = new Metadata(versionID, lastUpdated, metaSource, auditEvents);
+
+        //Observation parsing
 
         const obID = config.resource.observation.id;
         const status = config.resource.observation.status;
         const category = config.resource.observation.category;
         const effective = config.resource.observation.effective;
+
+        //Media parsing
 
         const valIDUse = config.resource.observation.value.identifier.use;
         const valIDType = config.resource.observation.value.identifier.type;
@@ -522,10 +648,31 @@ class MedRec extends Contract {
         const valID = new Identifier(valIDUse, valIDType, valIDSystem, 
                 valIDValue, valIDPeriod, valIDAssigner);
 
+        const basedOnRef = config.resource.observation.value.basedOn.reference;
+        const basedOnID = config.resource.observation.value.basedOn.id;
+        const basedOnType =  config.resource.observation.value.basedOn.type;
+        const basedOnDisplay = config.resource.observation.value.basedOn.display;
+
+        const basedOn = new Reference(basedOnRef, basedOnID, basedOnType, basedOnDisplay);
+
+        const partOfRef = config.resource.observation.value.partOf.reference;
+        const partOfID = config.resource.observation.value.partOf.id;
+        const partOfType =  config.resource.observation.value.partOf.type;
+        const partOfDisplay = config.resource.observation.value.partOf.display;
+
+        const partOf = new Reference(partOfRef, partOfID, partOfType, partOfDisplay);
+
         const valStatus = config.resource.observation.value.status;
         const valType = config.resource.observation.value.type;
         const valModality = config.resource.observation.value.modality;
         const valView = config.resource.observation.value.view;
+
+        const valSubjRef = config.resource.observation.value.subject.reference;
+        const valSubjID = config.resource.observation.value.subject.id;
+        const valSubjType = config.resource.observation.value.subject.type;
+        const valSubjDisplay = config.resource.observation.value.subject.display;
+
+        const valSubject = new Reference(valSubjRef, valSubjID, valSubjType, valSubjDisplay);
 
         const valEncRef = config.resource.observation.value.encounter.reference;
         const valEncID = config.resource.observation.value.encounter.id;
@@ -536,6 +683,13 @@ class MedRec extends Contract {
 
         const valCreated = config.resource.observation.value.created;
         const valIssued = config.resource.observation.value.issued;
+
+        const valOperRef = config.resource.observation.value.operator.reference;
+        const valOperID = config.resource.observation.value.operator.id;
+        const valOperType = config.resource.observation.value.operator.type;
+        const valOperDisplay = config.resource.observation.value.operator.display;
+
+        const valOperator = new Reference(valOperRef, valOperID, valOperType, valOperDisplay);
 
         const valReason = config.resource.observation.value.reasonCode;
         const valSite = config.resource.observation.value.bodySite;
@@ -558,19 +712,27 @@ class MedRec extends Contract {
 
         const content = config.resource.observation.value.content;
 
+        //Encrypt the IPFSHash with the owner's key.
+
         const walletContents = await wallet.export(owner);
         const ownerPrivateKey = walletContents.privateKey;
 
 
         var IPFSHash = CryptoJS.AES.encrypt(content, ownerPrivateKey);
 
+        //Create a new Media object.
+
         const value = new Media(valID, basedOn, partOf, valStatus, valType,
-            valModality, valView, subject, valEncounter, valCreated, valIssued,
-            operator, valReason, valSite, valDevName, valDevice, valHeight,
+            valModality, valView, valSubject, valEncounter, valCreated, valIssued,
+            valOperator, valReason, valSite, valDevName, valDevice, valHeight,
             valWidth, valFrames, valDuration, content, note);
+
+        //Create a new Observation object.
 
         const observation = new Observation(obID,
                 status, category, effective, value);
+
+        //Create the Resource object.
 
         const resource = new Resource(resID, meta, observation);
 
@@ -584,38 +746,6 @@ class MedRec extends Contract {
 
         await ctx.stub.putState(recNumber, Buffer.from(JSON.stringify(rec)));
         console.info('============= END : Create Record ===========');
-    }
-
-    async queryAllRecs(ctx) {
-        const startKey = 'REC0';
-        const endKey = 'REC999';
-
-        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
-
-        const allResults = [];
-        while (true) {
-            const res = await iterator.next();
-
-            if (res.value && res.value.value.toString()) {
-                console.log(res.value.value.toString('utf8'));
-
-                const Key = res.value.key;
-                let Record;
-                try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                } catch (err) {
-                    console.log(err);
-                    Record = res.value.value.toString('utf8');
-                }
-                allResults.push({ Key, Record });
-            }
-            if (res.done) {
-                console.log('end of data');
-                await iterator.close();
-                console.info(allResults);
-                return JSON.stringify(allResults);
-            }
-        }
     }
 
 }

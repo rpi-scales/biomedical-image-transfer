@@ -24,10 +24,6 @@
             "type": null,
             "subtype": null,
             "action": null,
-            "period": {
-               "start": null,
-               "end": null
-            },
             "recorded": null,
             "outcome": null,
             "outcomeDesc": null,
