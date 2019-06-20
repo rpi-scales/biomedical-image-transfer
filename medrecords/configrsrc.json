@@ -1,0 +1,158 @@
+{
+   "resource": {
+      "id": 5246977,
+      "meta": {
+         "versionId": {
+            "use": "official",
+            "type": null,
+            "system": "urn:ietf:rfc:3986",
+            "value": "URL",
+            "period": {
+               "start": "2019-01-13T00:00:00.000Z",
+               "end": "2020-01-13T00:00:00.000Z"
+            },
+            "assigner": {
+               "reference": "<reference value = \"Practitioner/0982\"",
+               "id": 2,
+               "type": "Practitioner",
+               "display": "Doctor John Screecham"
+            }
+         },
+         "lastUpdated": "2019-01-20T05:28:36.442Z",
+         "source": "URI",
+         "security": {
+            "type": null,
+            "subtype": null,
+            "action": null,
+            "period": {
+               "start": null,
+               "end": null
+            },
+            "recorded": null,
+            "outcome": null,
+            "outcomeDesc": null,
+            "purpose": null,
+            "agent": {
+               "type": null,
+               "role": null,
+               "who": {
+                  "reference": "<reference value = \"Practitioner/0982\"",
+                  "id": null,
+                  "type": null,
+                  "display": null
+               },
+               "altId": null,
+               "name": null,
+               "requestor": null,
+               "location": {
+                  "reference": null,
+                  "id": null,
+                  "type": null,
+                  "display": null
+               },
+               "policy": null,
+               "media": null,
+               "network": {
+                  "address": null,
+                  "type": null
+               },
+               "purpose": null
+            },
+            "source": {
+               "site": null,
+               "observer": null,
+               "type": null
+            },
+            "entity": {
+               "what": {
+                  "reference": null,
+                  "id": null,
+                  "type": null,
+                  "display": null
+               },
+               "type": null,
+               "role": null,
+               "lifecycle": null,
+               "secLabel": null,
+               "name": null,
+               "description": null,
+               "query": null,
+               "detail": {
+                  "type": null,
+                  "value": null
+               }
+            }
+         }
+      },
+      "observation": {
+         "id": 5246977,
+         "status": "final",
+         "category": "imaging",
+         "effective": "2019-01-12T15:00:00.000Z",
+         "value": {
+            "identifier": {
+               "use": null,
+               "type": null,
+               "system": null,
+               "value": null,
+               "period": {
+                  "start": null,
+                  "end": null
+               },
+               "assigner": null
+            },
+            "basedOn": {
+               "reference": "URI",
+               "id": 670003,
+               "type": "ServiceRequest",
+               "display": "request for imaging of patient 33348"
+            },
+            "partOf": {
+               "reference": "URI",
+               "id": 3625,
+               "type": "ImagingStudy",
+               "display": "xray image of patient 33348s chest"
+            },
+            "status": null,
+            "type": null,
+            "modality": null,
+            "view": null,
+            "subject": {
+               "reference": "<reference value = \"Patient/33348\">",
+               "id": 33348,
+               "type": "Patient",
+               "display": "Karen Barton"
+            },
+            "encounter": {
+               "reference": "<reference value = \"Appointment/648\">",
+               "id": 648,
+               "type": "Encounter",
+               "display": "3rd appointment between Ms. Barton and Dr. Reeves"
+            },
+            "created": null,
+            "issued": null,
+            "operator": {
+               "reference": "<reference value = \"Practitioner/992992\">",
+               "id": 992992,
+               "type": "Practitioner",
+               "display": "Nurse Hamilton"
+            },
+            "reasonCode": null,
+            "bodySite": null,
+            "deviceName": null,
+            "device": {
+               "reference": "<reference value = \"Device/112\">",
+               "id": 112,
+               "type": "Device",
+               "display": "1.5 Tesla 70cm Wide Bore MRI Machine"
+            },
+            "height": null,
+            "width": null,
+            "frames": null,
+            "duration": null,
+            "content": "QmSbVB3XGnksVBzDKT7otes6KfrzHfQJtRTdD7NWwmvGsE",
+            "note": "xray requires doctor approval"
+         }
+      }
+   }
+}
