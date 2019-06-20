@@ -110,27 +110,41 @@ class MedRec extends Contract {
                 // Parse the response as JSON
                 .then(res => res.json())
                 .then(res => {
-                    // calculate Hash from the token
-                    var hashToAction = CryptoJS.SHA256(res.megaData).toString();
-                    console.log("Hash of the file: " + hashToAction);
+                    
+                    var ExifImage = require('exif').ExifImage;
+                    
+                    try {
+                        // create img with format of jpg
+                        new ExifImage({ image : res }, function (error, exifData) {
+                            if (error)
+                                console.log('Error: '+error.message);
+                            else
+                                // calculate Hash from the token
+                                var hashToAction = CryptoJS.SHA256(exifData).toString();
+                                console.log("Hash of the file: " + hashToAction);
 
-                    // get certificate from the certfile
-                    const certLoaded = fs.readFileSync(certfile, 'utf8');
+                                // get certificate from the certfile
+                                const certLoaded = fs.readFileSync(certfile, 'utf8');
 
-                    var requesterPublicKey = KEYUTIL.getKey(certLoaded);
-                    var recover = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
-                    recover.init(requesterPublicKey);
-                    recover.updateHex(hashToAction);
-                    var getBackSigValueHex = new Buffer(resultJSON.signature, 'base64').toString('hex');
-                    console.log("Signature verified with certificate provided: " + recover.verify(getBackSigValueHex));
-                    /*
-                    var bytes = CryptoJS.AES.decrypt(currHash.toString(), userPublicKey);
-                    var decryptedFile = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-                     
-                    console.log(decryptedFile);
-                    */
+                                var requesterPublicKey = KEYUTIL.getKey(certLoaded);
+                                var recover = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
+                                recover.init(requesterPublicKey);
+                                recover.updateHex(hashToAction);
+                                var getBackSigValueHex = new Buffer(resultJSON.signature, 'base64').toString('hex');
+                                console.log("Signature verified with certificate provided: " + recover.verify(getBackSigValueHex));
+                                /*
+                                var bytes = CryptoJS.AES.decrypt(currHash.toString(), userPublicKey);
+                                var decryptedFile = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                                 
+                                console.log(decryptedFile);
+                                */
 
-                    return filehash;
+                                return filehash;
+                        });
+                    } catch (error) {
+                        console.log('Error: ' + error.message);
+                    }
+                    
                 })
                 
             })

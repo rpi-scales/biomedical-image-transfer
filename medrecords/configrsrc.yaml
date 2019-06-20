@@ -26,7 +26,7 @@ resource:
         system: urn:ietf:rfc:3986
         # value is the portion of the ID relevant to the user
         value: URL
-        # period is the time period during which ID is/was valid
+        # period  is the time period during which ID is/was valid
         period:
           #start is the time at which versionID becomes valid
           start: 2019-01-13
@@ -231,7 +231,7 @@ resource:
           #  e.g. MedicationAdministration, Procedure, Immunization, ImagingStudy   
           type: ImagingStudy
           # display is plain text that describes the event
-          display: 'xray image of patient 33348's chest'
+          display: 'xray image of patient 33348s chest'
         # status is the status of the image
         # preparation | in-progress | not-done | suspended | aborted | completed | entered-in-error | unknown
         status: 

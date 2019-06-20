@@ -1,0 +1,21 @@
+{
+  "name": "GUI",
+  "version": "1.0.0",
+  "description": "This is the web based GUI for Medical Record Sharing System",
+  "main": "app.js",
+  "scripts": {
+    "watch": "nodemon ./start.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "js-yaml": "^3.13.1",
+    "path": "^0.12.7",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
