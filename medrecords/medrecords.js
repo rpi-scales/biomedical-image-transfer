@@ -332,6 +332,8 @@ class MedRec extends Contract {
         }
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+'T'+time;
 
         const type = "110114"; //Type is "User Authentication has been attempted"
         const subtype = "read"; //Read the current state of the resource
@@ -347,6 +349,7 @@ class MedRec extends Contract {
         outcomeDesc, purpose, agent, null, null);
 
         rec.resource.meta.security.push(newAE);
+        rec.resource.meta.lastUpdated = dateTime;
 
         //Next step: implement AE addition when file used in IPFS
 
@@ -404,6 +407,9 @@ class MedRec extends Contract {
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+'T'+time;
+
         const type = "decrypt";
         const subtype = "update"; //Read the current state of the resource
         const action = "update"; //Execute - perform a query/search operation
@@ -418,6 +424,7 @@ class MedRec extends Contract {
         `Decrypted file IPFSHash for ${recip}`, purpose, agent, null, null);
 
         rec.resource.meta.security.push(newAE);
+        rec.resource.meta.lastUpdated = dateTime;
 
         return rec.encrypted;
         
@@ -468,6 +475,8 @@ class MedRec extends Contract {
 
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+'T'+time;
 
         const type = "encrypt";
         const subtype = "update"; //Read the current state of the resource
@@ -483,6 +492,7 @@ class MedRec extends Contract {
         "Encrypted file IPFSHash", purpose, agent, null, null);
 
         rec.resource.meta.security.push(newAE);
+        rec.resource.meta.lastUpdated = dateTime;
 
         return rec.encrypted;
     }
