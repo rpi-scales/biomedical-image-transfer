@@ -54,48 +54,211 @@ function Reference(ref, type, id, display){
     this.display = display;
 }
 
+//address a string that identifies the network access point of
+//  the user device
+//type is the type of network access point
+//  see https://www.hl7.org/fhir/valueset-network-type.html
+function Network(address, type){
+    this.address = address;
+    this.type = type;
+}
+
+//type is how the agent participated
+//  see https://www.hl7.org/fhir/valueset-participation-role-type.html
+//role is the agent role in the event
+//  see https://www.hl7.org/fhir/valueset-security-role-type.html
+//who is a reference to a practitionerrole | practitioner | 
+//  organization | device | patient | relatedperson
+//altId is an alternative user identity (string)
+//name is a human-friendly name for the agent
+//requestor is a boolean that describes whether the agent is initiator
+//location describes where the event occurred
+//policy is the policy that authorized the event (URI)
+//media is the type of media
+//  see https://www.hl7.org/fhir/valueset-dicm-405-mediatype.html
+//network is the logical network loc. for application activity 
+//purpose is the reason given for the agent
+//  see https://www.hl7.org/fhir/v3/PurposeOfUse/vs.html
+function Agent(type, role, who, altId, name, requestor, location,
+        policy, media, network, purpose){
+    this.type = type;
+    this.role = role;
+    this.who = who;
+    this.altId = altId;
+    this.name = name;
+    this.requestor = requestor;
+    this.location = location;
+    this.policy = policy;
+    this.media = media;
+    this.network = network;
+    this.purpose = purpose;
+}
+
+//site is a string that describes the logical source location
+//  within the enterprise
+//observer is a reference to the identity o fsource detecting the event
+//  PractitionerRole | Practitioner | Organization | Device | Patient | RelatedPerson
+//type is the type of source where the event originated
+//  see https://www.hl7.org/fhir/valueset-audit-source-type.html
+function Source(site, observer, type){
+    this.site = site;
+    this.observer = observer;
+    this.type = type;
+}
+
+//type is the name of the property
+//value is the property value (string or byte stream)
+function Detail(type, value){
+    this.type = type;
+    this.value = value;
+}
+
+//what is a reference to a specific instance of resource
+//type is the type of entity involved
+//  see https://www.hl7.org/fhir/valueset-audit-entity-type.html
+//role is the role of the entity
+//  see https://www.hl7.org/fhir/valueset-object-role.html
+//lifecycle is the stage of the entity 
+//  see https://www.hl7.org/fhir/valueset-object-lifecycle-events.html
+//secLabel describes the security labels on the entity
+//  see https://www.hl7.org/fhir/valueset-security-labels.html
+//name is a string that is a descriptor for the entity
+//description is text describing the entity
+//query is a byte stream of query parameters
+//detail is additional information about the entity
+function Entity(what, type, role, lifecycle, secLabel, name,
+        description, query, detail){
+    this.what = what;
+    this.type = type;
+    this.role = role;
+    this.lifecycle = lifecycle;
+    this.secLabel = secLabel;
+    this.name = name;
+    this.description = description;
+    this.query = query;
+    this.detail = detail;
+}
+
+//type is an identifier of an event
+//  see https://www.hl7.org/fhir/valueset-audit-event-type.html
+//subtype is a more specific identifier
+//  see https://www.hl7.org/fhir/valueset-audit-event-sub-type.html
+//action is the type of action performed during the event
+//  see https://www.hl7.org/fhir/valueset-audit-event-action.html
+//period is when the activity occurred
+//recorded is the instant when the event recorded 
+//  format as YYYY-MM-DDThh:mm:ss.sss+zz:zz 
+//outcome is whether the event succeeded or failed
+//  see https://www.hl7.org/fhir/valueset-audit-event-outcome.html
+//outcomeDesc is a description of the event outcome
+//purpose is the purpose of the event
+//  see https://www.hl7.org/fhir/v3/PurposeOfUse/vs.html
+//agent is an actor involved in the event
+//source is the event reporter
+//entity is the data or objects used during the event
+function AuditEvent(type, subtype, action, period, recorded, outcome, 
+        outcomeDesc, purpose, agent, source, entity){
+    this.type = type; 
+    this.subtype = subtype;
+    this.action = action;
+    this.period = period;
+    this.recorded = recorded;
+    this.outcome = outcome;
+    this.outcomeDesc = outcomeDesc;
+    this.purpose = purpose;
+    this.agent = agent;
+    this.source = source;
+    this.entity = entity;
+}
+
 //versionId is an identifier - changes each time resource changes
 //lastUpdated is an instant that is changed each time it is changed
 //  in format YYYY-MM-DDThh:mm:ss.sss+zz:zz e.g.  2015-02-07T13:28:17.239+02:00 
 //source is a uri identifying the source system of resource
-//don't really understand profile, security or tag
+//security is an AuditEvent
+//don't really understand profile or tag
 function Metadata(versionId, lastUpdated, source){
     this.versionId = versionId;
     this.lastUpdated = lastUpdated;
     this.source = source;
     //this.profile = profile;
-    //this.security = security;
+    this.security = security;
     //this.tag = tag;
 }
 
+//identifier is an identifier for the image
+//basedOn is a reference to the procedure that caused this media to be created
+//  ServiceRequest | CarePlan
+//partOf a reference to the event that the media is a part of
+//  see http://www.hl7.org/fhir/valueset-resource-types.html
+//status is the status of the image
+//  preparation | in-progress | not-done | suspended | aborted | completed | entered-in-error | unknown
+//type is the classification of the media as image | video | audio
+//modality is the type of acquisition equipment/process
+//  see https://www.hl7.org/fhir/valueset-media-modality.html
+//view is the imaging view of the media
+//subject is who/what the media is a record of
+//encounter is the encounter associated with media (i.e. interaction b/w patient and healthcare provider(s))
+//created is the time when the media was collected
+//  in the format YYYY, YYYY-MM, YYYY-MM-DD or YYYY-MM-DDThh:mm:ss+zz:zz
+//issued is the instant this version was made available
+//operator is a reference to the resource who generated the image
+//  Practitioner | PractitionerRole | Organization | CareTeam | Patient | Device | RelatedPerson
+//reasonCode is the reason the event was performed
+//  see https://www.hl7.org/fhir/valueset-procedure-reason.html
+//bodySite is the observed body part
+//  see https://www.hl7.org/fhir/valueset-body-site.html
+//deviceName is a string describing the device/manufacturer
+//device is a reference to the observing device
+//  Device | DeviceMetric
+//height is the height of the image in pixels
+//width is the width of the image in pixels
+//frames is the number of frames in the media
+//duration is the length in seconds of the media
+//content is a hash of the actual media
+//note is a comment about the media
+function Media(identifier, basedOn, partOf, status, type,
+            modality, view, subject, encounter, created, issued,
+            operator, reasonCode, bodySite, deviceName, device, height,
+            width, frames, duration, content, note){
+    this.identifier = identifier;
+    this.basedOn = basedOn;
+    this.partOf = partOf;
+    this.status = status;
+    this.type = type;
+    this.modality = modality;
+    this.view = view;
+    this.subject = subject;
+    this.encounter = encounter;
+    this.created = created;
+    this.issued = issued;
+    this.operator = operator;
+    this.reasonCode = reasonCode;
+    this.bodySite = bodySite;
+    this.deviceName = deviceName;
+    this.device = device;
+    this.height = height;
+    this.width = width;
+    this.frames = frames;
+    this.duration = duration;
+    this.content = content;
+    this.note = note;
+}
+
 //id is a business identifier
-//basedOn is a reference object that describes source of observation
-//  e.g. DeviceRequest, ServiceRequest, MedicationRequest, ImmunizationRecommendation
-//partOf is a reference object that describes event
-//  e.g. MedicationAdministration, Procedure, Immunization, ImagingStudy   
 //status 
 //  http://www.hl7.org/fhir/codesystem-observation-status.html
 //category is type of observation
 //   http://www.hl7.org/fhir/valueset-observation-category.html
-//subject is a reference to a patient | group | device | location which the observation is about
 //effective is a structure of effectiveDateTime, Period, Timing and/or Instant of observation
-//issued is instant the version made available
-//performer is reference to practitioner | Patient | Org | Team responsible for observation
-//value is struct (?) that describes the result - contains hash of actual data file
+//value is media that describes the result - contains hash of actual data file
 //note is comment about observation
-function Observation(id, basedOn, partOf, status, category,
-        subject, effective, issued, performer, value, note){
+function Observation(id, category, status, effective, value){
     this.id = id;
-    this.basedOn = basedOn;
-    this.partOf = partOf;
     this.status = status;
     this.category = category;
-    this.subject = subject;
     this.effective = effective;
-    this.issued = issued;
-    this.performer = performer;
     this.value = value;
-    this.note = note;
 }
 
 //id is a logical id assigned by owner (immutable)
@@ -332,33 +495,82 @@ class MedRec extends Contract {
 
         const meta = new Metadata(versionID, lastUpdated, metaSource);
 
-        const basedOn = new Reference(config.resource.observation.basedOn.reference,
-                config.resource.observation.basedOn.id, config.resource.observation.basedOn.type,
-                config.resource.observation.basedOn.display);
-        const partOf = new Reference(config.resource.observation.partOf.reference, config.resource.observation.partOf.id,
-                    config.resource.observation.partOf.type, config.resource.observation.partOf.display);
-        const subject = new Reference(config.resource.observation.subject.reference, config.resource.observation.subject.id,
-                    config.resource.observation.subject.type, config.resource.observation.subject.display);
-        const performer = new Reference(config.resource.observation.performer.reference, config.resource.observation.performer.id,
-                    config.resource.observation.performer.type, config.resource.observation.performer.display);
+        const basedOn = new Reference(config.resource.observation.value.basedOn.reference,
+                config.resource.observation.value.basedOn.id, config.resource.observation.value.basedOn.type,
+                config.resource.observation.value.basedOn.display);
+        const partOf = new Reference(config.resource.observation.value.partOf.reference, config.resource.observation.value.partOf.id,
+                    config.resource.observation.value.partOf.type, config.resource.observation.value.partOf.display);
+        const subject = new Reference(config.resource.observation.value.subject.reference, config.resource.observation.value.subject.id,
+                    config.resource.observation.value.subject.type, config.resource.observation.value.subject.display);
+        const operator = new Reference(config.resource.observation.value.operator.reference, config.resource.observation.value.operator.id,
+                    config.resource.observation.value.operator.type, config.resource.observation.value.operator.display);
 
         const obID = config.resource.observation.id;
         const status = config.resource.observation.status;
         const category = config.resource.observation.category;
         const effective = config.resource.observation.effective;
-        const issued = config.resource.observation.issued;
-        const value = config.resource.observation.value;
-        const note = config.resource.observation.note;
+
+        const valIDUse = config.resource.observation.value.identifier.use;
+        const valIDType = config.resource.observation.value.identifier.type;
+        const valIDSystem = config.resource.observation.value.identifier.system;
+        const valIDValue = config.resource.observation.value.identifier.value;
+        const valIDPeriodStart = config.resource.observation.value.identifier.period.start;
+        const valIDPeriodEnd = config.resource.observation.value.identifier.period.end;
+        const valIDPeriod = new Period(valIDPeriodStart, valIDPeriodEnd);
+        const valIDAssigner = config.resource.observation.value.identifier.assigner;
+
+        const valID = new Identifier(valIDUse, valIDType, valIDSystem, 
+                valIDValue, valIDPeriod, valIDAssigner);
+
+        const valStatus = config.resource.observation.value.status;
+        const valType = config.resource.observation.value.type;
+        const valModality = config.resource.observation.value.modality;
+        const valView = config.resource.observation.value.view;
+
+        const valEncRef = config.resource.observation.value.encounter.reference;
+        const valEncID = config.resource.observation.value.encounter.id;
+        const valEncType = config.resource.observation.value.encounter.type;
+        const valEncDisplay = config.resource.observation.value.encounter.display;
+        
+        const valEncounter = new Reference(valEncRef, valEncID, valEncType, valEncDisplay);
+
+        const valCreated = config.resource.observation.value.created;
+        const valIssued = config.resource.observation.value.issued;
+
+        const valReason = config.resource.observation.value.reasonCode;
+        const valSite = config.resource.observation.value.bodySite;
+        const valDevName = config.resource.observation.value.deviceName;
+
+        const valDevRef = config.resource.observation.value.device.reference;
+        const valDevID = config.resource.observation.value.device.id;
+        const valDevType = config.resource.observation.value.device.type;
+        const valDevDisplay = config.resource.observation.value.device.display;
+        
+        const valDevice = new Reference(valDevRef, valDevID, valDevType, valDevDisplay);
+
+        const valHeight = config.resource.observation.value.height;
+        const valWidth = config.resource.observation.value.width;
+        const valFrames = config.resource.observation.value.frames;
+        const valDuration = config.resource.observation.value.duration;
+
+
+        const note = config.resource.observation.value.note;
+
+        const content = config.resource.observation.value.content;
 
         const walletContents = await wallet.export(owner);
         const ownerPrivateKey = walletContents.privateKey;
 
 
-        var IPFSHash = CryptoJS.AES.encrypt(value, ownerPrivateKey);
+        var IPFSHash = CryptoJS.AES.encrypt(content, ownerPrivateKey);
 
-        const observation = new Observation(obID, basedOn, partOf,
-                status, category, subject, effective, issued, performer,
-                IPFSHash, note);
+        const value = new Media(valID, basedOn, partOf, valStatus, valType,
+            valModality, valView, subject, valEncounter, valCreated, valIssued,
+            operator, valReason, valSite, valDevName, valDevice, valHeight,
+            valWidth, valFrames, valDuration, content, note);
+
+        const observation = new Observation(obID,
+                status, category, effective, value);
 
         const resource = new Resource(resID, meta, observation);
 
