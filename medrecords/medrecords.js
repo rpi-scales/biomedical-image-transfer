@@ -360,7 +360,7 @@ class MedRec extends Contract {
     }
 
     //Encode IPFSHash w/receiver's key
-    async giveAccess(ctx, recNumber, owner, recip){
+    async giveAccess(ctx, recNumber, recip){
         const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
@@ -810,6 +810,9 @@ class MedRec extends Contract {
 
         rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
+
+
+    }
 
 
 
