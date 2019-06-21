@@ -815,7 +815,6 @@ class MedRec extends Contract {
     }
 
 
-
 }
 
 module.exports = MedRec;

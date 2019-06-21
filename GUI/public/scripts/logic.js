@@ -19,7 +19,7 @@ $(function () {
 		url: '/yaml',
 		success: function(d) {
 			data = d;
-			console.log(data);
+//			console.log(data);
 			for (var i = 0; i < 5; i++) {
 				$('.tbody').append(`<tr>
 					<td>${data.resource.id}</td>
@@ -63,7 +63,20 @@ $(function () {
 	});
 	
 	$('.action-grant-access').click(function () {
-		console.log($(this));
+		console.log(data);
+		$.ajax({
+			type: 'GET',
+			contentType: 'application/json',
+			data: {
+				trans_id : data.resource.id,
+				owner : data.resource.meta.auditLog.agent.name,
+				receptor : "Joe Smith" //TODO: Placeholder right now. This should be the part where the user enters the name
+			},
+			url: '/giveAccess',
+			success: function(d) {
+				
+			}
+		});
 	});
 	
 	$('.action-revoke-access').click(function () {
