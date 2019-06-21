@@ -73,37 +73,14 @@ JavaScript:
   which will be used by the other applications to interact with the deployed
   medrec contract:
     node enrollAdmin
-    node registerUser <"Hospital Name">
+    node registerUser <"Hospital or Organization Name">
 
   You can run the invoke application after editing the configrsrc.yaml file.
-    node invoke <"Hospital of Invoker"> 'createRec' <recNum> <"Hospital Name"> configrsrc.yaml
+    node invoke <"Hospital or Organization of Invoker"> 'createRec' configrsrc.yaml
+    node invoke <"Hospital or Organization of Invoker"> 'createRec' configrsrc.yaml
 
   You can run the query application as follows.
     node query
 
-TypeScript:
-
-  Start by changing into the "typescript" directory:
-    cd typescript
-
-  Next, install all required packages:
-    npm install
-
-  Next, compile the TypeScript code into JavaScript:
-    npm run build
-
-  Then run the following applications to enroll the admin user, and register a new user
-  called user1 which will be used by the other applications to interact with the deployed
-  medrec contract:
-    node dist/enrollAdmin
-    node dist/registerUser
-
-  You can run the invoke application as follows. By default, the invoke application will
-  create a new car, but you can update the application to submit other transactions:
-    node dist/invoke
-
-  You can run the query application as follows. By default, the query application will
-  return all cars, but you can update the application to evaluate other transactions:
-    node dist/query
 
 EOF

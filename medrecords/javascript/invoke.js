@@ -118,7 +118,7 @@ async function main() {
                         console.log(`Must be formatted as \"Hospital Name\"`);
                         return;
                     }
-                    await contract.submitTransaction(txn, recNum, recipName);
+                    await contract.submitTransaction(txn, recNum, user, recipName);
 
                 }
             }

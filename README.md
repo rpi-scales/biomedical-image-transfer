@@ -1,6 +1,6 @@
 # Medical Record Sharing System
 ## Introduction
-The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access.
+The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access. 
 
 ### transactions
 requestRec
@@ -19,40 +19,38 @@ Inputs: transaction, Record number, owner first and last name
 Outputs: boolean filehash hashed or not
 
 createRec
-creates a new record
+creates a new record 
 Inputs: transaction, Record number, owner first and last name, file IPFS hash
 
 queryAllRecs
 Displays all of the records in the channel.
 
-
-
 ## How to Run
 
 Step 1: Create Required Environment
-Set-up Hyperledger Fabric: https://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html
+	Set-up Hyperledger Fabric: https://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html
 
-Pull the "medrecords" folder and place inside fabric-samples
+	Pull the "medrecords" folder and place inside fabric-samples
 ```
 cd PATH_TO_FABRIC_FOLDERS/fabric-samples/medrecords
 ```
-Load required packages
+	Load required packages
 ```
 $ npm init -y
-$ npm install fabric-ca-client fabric-network crypto-js jsrsasign passport-http-bearer exif -S
+$ npm install fabric-ca-client fabric-network crypto-js jsrsasign -S
 ```
 
 Step 2: Set Up Network
 ```
 $ cd ../first-network
 $ ./byfn.sh down
-// The next two commands only need to run once. If you have already run it once before, ignore them
 $ docker rm -f $(docker ps -aq)
 $ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
 ```
 
-Step 3: Launch the Network
+Step 3: Edit chainpath.config to reflect paths on local machine and launch the Network
 ```
+cd ../medrecords
 $./startFabric.sh javascript
 
 $ cd javascript
@@ -63,27 +61,28 @@ Step 4: Enroll!
 ```
 node enrollAdmin.js
 
-node registerUser.js <"Last Name, First Name">
+node registerUser.js <"Hospital or Organization Name">
 ```
 
 Step 5: Upload files to IPFS
-Download and install: https://ipfs.io/docs/install/
+If necessary, download and install: https://ipfs.io/docs/install/
 ```
 $ipfs init
 
 $ipfs add <filename>
 ```
-
-Step 6: Use IPFSHash to Create New Records
+Keep track of the returned hashes!
+Step 6: Edit configrsrc.json to Create New Records
+Look for datatypes and descriptions of each entry in the object definitions at the top of medrecords.js.
 
 ```
-$ node invoke.js 'createRec' <recNum> <"Owner Last Name, Owner First"> <IPFSHash>
+$ node invoke.js <"Hospital or Organization of Invoker"> 'createRec'  configrsrc.json
 ```
 
 Step 7: Query and Invoke with Other Transactions
 ```
-node query.js
-node invoke.js <args>
+node query.js 
+node invoke.js <"Hospital of Invoker"> <args>
 ```
 * Use output of requestRec to possibly access file through IPFS
 ```
