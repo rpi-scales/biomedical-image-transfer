@@ -180,7 +180,7 @@ function Metadata(versionId, lastUpdated, source){
     this.versionId = versionId;
     this.lastUpdated = lastUpdated;
     this.source = source;
-    this.security = security;
+    this.auditLog = auditLog;
 }
 
 //identifier is an identifier for the image
@@ -350,7 +350,7 @@ class MedRec extends Contract {
         const newAE = new AuditEvent(type, subtype, action, recorded, outcome, 
         outcomeDesc, purpose, agent, null, null);
 
-        rec.resource.meta.security.push(newAE);
+        rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
         //Next step: implement AE addition when file used in IPFS
@@ -425,7 +425,7 @@ class MedRec extends Contract {
         const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
         `Decrypted file IPFSHash for ${recip}`, purpose, agent, null, null);
 
-        rec.resource.meta.security.push(newAE);
+        rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
         return rec.encrypted;
@@ -483,7 +483,7 @@ class MedRec extends Contract {
         const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
         "Encrypted file IPFSHash", purpose, agent, null, null);
 
-        rec.resource.meta.security.push(newAE);
+        rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
         return rec.encrypted;
@@ -543,87 +543,87 @@ class MedRec extends Contract {
 
         //AuditEvent Parsing
 
-        const aeType = config.resource.meta.security.type;
-        const aeSubtype = config.resource.meta.security.subtype;
-        const aeAction = config.resource.meta.security.action;
-        const aeRecorded = config.resource.meta.security.recorded;
-        const aeOutcome = config.resource.meta.security.outcome;
-        const aeOutcomeDesc = config.resource.meta.security.outcomeDesc;
-        const aePurpose = config.resource.meta.security.purpose;
-        const aeAgentType = config.resource.meta.security.agent.type;
-        const aeAgentRole = config.resource.meta.security.agent.role;
+        const aeType = config.resource.meta.auditLog.type;
+        const aeSubtype = config.resource.meta.auditLog.subtype;
+        const aeAction = config.resource.meta.auditLog.action;
+        const aeRecorded = config.resource.meta.auditLog.recorded;
+        const aeOutcome = config.resource.meta.auditLog.outcome;
+        const aeOutcomeDesc = config.resource.meta.auditLog.outcomeDesc;
+        const aePurpose = config.resource.meta.auditLog.purpose;
+        const aeAgentType = config.resource.meta.auditLog.agent.type;
+        const aeAgentRole = config.resource.meta.auditLog.agent.role;
        
-        const aeAgentWhoRef = config.resource.meta.security.agent.who.reference;
-        const aeAgentWhoID = config.resource.meta.security.agent.who.id;
-        const aeAgentWhoType = config.resource.meta.security.agent.who.type;
-        const aeAgentWhoDisplay = config.resource.meta.security.agent.who.display;
+        const aeAgentWhoRef = config.resource.meta.auditLog.agent.who.reference;
+        const aeAgentWhoID = config.resource.meta.auditLog.agent.who.id;
+        const aeAgentWhoType = config.resource.meta.auditLog.agent.who.type;
+        const aeAgentWhoDisplay = config.resource.meta.auditLog.agent.who.display;
         
         const aeAgentWho = new Reference(aeAgentWhoRef, aeAgentWhoID, aeAgentWhoType,
                 aeAgentWhoDisplay);
 
-        const aeAgentAltID = config.resource.meta.security.agent.altId;
-        const aeAgentName = config.resource.meta.security.agent.name;
-        const aeAgentRequestor = config.resource.meta.security.agent.requestor;
+        const aeAgentAltID = config.resource.meta.auditLog.agent.altId;
+        const aeAgentName = config.resource.meta.auditLog.agent.name;
+        const aeAgentRequestor = config.resource.meta.auditLog.agent.requestor;
         
-        const aeAgentLocRef = config.resource.meta.security.agent.location.reference;
-        const aeAgentLocID = config.resource.meta.security.agent.location.id;
-        const aeAgentLocType = config.resource.meta.security.agent.location.type;
-        const aeAgentLocDisplay = config.resource.meta.security.agent.location.display;
+        const aeAgentLocRef = config.resource.meta.auditLog.agent.location.reference;
+        const aeAgentLocID = config.resource.meta.auditLog.agent.location.id;
+        const aeAgentLocType = config.resource.meta.auditLog.agent.location.type;
+        const aeAgentLocDisplay = config.resource.meta.auditLog.agent.location.display;
         
         const aeAgentLoc = new Reference(aeAgentLocRef, aeAgentLocID, aeAgentLocType,
                 aeAgentLocDisplay);
 
-        const aeAgentPolicy = config.resource.meta.security.agent.policy;
-        const aeAgentMedia = config.resource.meta.security.agent.media;
+        const aeAgentPolicy = config.resource.meta.auditLog.agent.policy;
+        const aeAgentMedia = config.resource.meta.auditLog.agent.media;
         
-        const aeAgentNetworkAddr = config.resource.meta.security.agent.network.address;
-        const aeAgentNetworkType = config.resource.meta.security.agent.network.type;
+        const aeAgentNetworkAddr = config.resource.meta.auditLog.agent.network.address;
+        const aeAgentNetworkType = config.resource.meta.auditLog.agent.network.type;
         
         const aeAgentNetwork = new Network(aeAgentNetworkAddr, aeAgentNetworkType);
 
-        const aeAgentPurpose = config.resource.meta.security.agent.purpose;
+        const aeAgentPurpose = config.resource.meta.auditLog.agent.purpose;
         
         const aeAgent = new Agent(aeAgentType, aeAgentRole, aeAgentWho, aeAgentAltID,
                 aeAgentName, aeAgentRequestor, aeAgentLoc, aeAgentPolicy, aeAgentMedia,
                 aeAgentNetwork, aeAgentPurpose);
 
-        const aeSourceSite = config.resource.meta.security.source.site;
-        const aeSourceObser = config.resource.meta.security.source.observer;
-        const aeSourceType = config.resource.meta.security.source.type;
+        const aeSourceSite = config.resource.meta.auditLog.source.site;
+        const aeSourceObser = config.resource.meta.auditLog.source.observer;
+        const aeSourceType = config.resource.meta.auditLog.source.type;
         
         const aeSource = new Source(aeSourceSite, aeSourceObser, aeSourceObser);
 
-        const aeEntityWhatRef = config.resource.meta.security.entity.what.reference;
-        const aeEntityWhatID = config.resource.meta.security.entity.what.id;
-        const aeEntityWhatType = config.resource.meta.security.entity.what.type;
-        const aeEntityWhatDisplay = config.resource.meta.security.entity.what.display;
+        const aeEntityWhatRef = config.resource.meta.auditLog.entity.what.reference;
+        const aeEntityWhatID = config.resource.meta.auditLog.entity.what.id;
+        const aeEntityWhatType = config.resource.meta.auditLog.entity.what.type;
+        const aeEntityWhatDisplay = config.resource.meta.auditLog.entity.what.display;
        
         const aeEntityWhat = new Reference(aeEntityWhatRef, aeEntityWhatID, aeEntityWhatType,
                     aeEntityWhatDisplay);
 
-        const aeEntityType = config.resource.meta.security.entity.type;
-        const aeEntityRole = config.resource.meta.security.entity.role;
-        const aeEntityLifecycle = config.resource.meta.security.entity.lifecycle;
-        const aeEntitySec = config.resource.meta.security.entity.secLabel;
-        const aeEntityName = config.resource.meta.security.entity.name;
-        const aeEntityDesc = config.resource.meta.security.entity.description;
-        const aeEntityQuery = config.resource.meta.security.entity.query;
+        const aeEntityType = config.resource.meta.auditLog.entity.type;
+        const aeEntityRole = config.resource.meta.auditLog.entity.role;
+        const aeEntityLifecycle = config.resource.meta.auditLog.entity.lifecycle;
+        const aeEntitySec = config.resource.meta.auditLog.entity.secLabel;
+        const aeEntityName = config.resource.meta.auditLog.entity.name;
+        const aeEntityDesc = config.resource.meta.auditLog.entity.description;
+        const aeEntityQuery = config.resource.meta.auditLog.entity.query;
         
-        const aeEntityDetailType = config.resource.meta.security.entity.detail.type;
-        const aeEntityDetailVal = config.resource.meta.security.entity.detail.val;
+        const aeEntityDetailType = config.resource.meta.auditLog.entity.detail.type;
+        const aeEntityDetailVal = config.resource.meta.auditLog.entity.detail.val;
 
         const aeEntityDetail = new Detail(aeEntityDetailType, aeEntityDetailVal);
 
         const aeEntity = new Entity(aeEntityWhat, aeEntityType, aeEntityRole, aeEntityLifecycle,
                 aeEntitySec, aeEntityName, aeEntityDesc, aeEntityQuery, aeEntityDetail);
 
-        const security = new AuditEvent(aeType, aeSubtype, aeAction,
+        const auditLog = new AuditEvent(aeType, aeSubtype, aeAction,
                 aeRecorded, aeOutcome, aeOutcomeDesc, aePurpose, aeAgent, aeSource,
                 aeEntity);
 
         //Create an array to hold multiple Audit Events
 
-        var auditEvents = new Array(security);
+        var auditEvents = new Array(auditLog);
 
         //Create the Metadata Object
 
@@ -771,7 +771,7 @@ class MedRec extends Contract {
 
         const rec = JSON.parse(recAsBytes.toString());
 
-        const auditEvents = rec.resource.meta.security;
+        const auditEvents = rec.resource.meta.auditLog;
 
         for(let i = 0; i < auditEvents.length; i++){
             console.log(`Audit Event ${i+1}:`);
@@ -806,7 +806,7 @@ class MedRec extends Contract {
         const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
         "Accessed Audit Log", purpose, agent, null, null);
 
-        rec.resource.meta.security.push(newAE);
+        rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
 

@@ -20,7 +20,7 @@
          },
          "lastUpdated": "2019-01-20T05:28:36.442Z",
          "source": "URI",
-         "security": {
+         "auditLog": {
             "type": "110110",
             "subtype": "create",
             "action": "C",
