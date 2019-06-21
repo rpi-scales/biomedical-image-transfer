@@ -258,6 +258,8 @@ function Observation(id, category, status, effective, value){
     this.value = value;
 }
 
+//Resource and its internal attributes are based on the FHIR hl7 standard
+//This version is created to hold 
 //id is a logical id assigned by owner (immutable)
 //meta is a metadata object
 //observation is an observation object
@@ -360,7 +362,7 @@ class MedRec extends Contract {
     }
 
     //Encode IPFSHash w/receiver's key
-    async giveAccess(ctx, recNumber, recip){
+    async giveAccess(ctx, recNumber, owner, recip){
         const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
@@ -389,6 +391,14 @@ class MedRec extends Contract {
         const receiverPublicKey = walletContents2.publicKey;
 
         const rec = JSON.parse(recAsBytes.toString());
+
+        const creationAE = rec.resource.meta.auditLog[0];
+
+        const creator = creationAE.agent.name;
+
+        if(owner !== creator){
+            throw new Error(`You do not own this file.`);
+        }
 
         var sig = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
         sig.init(receiverPublicKey, "");
@@ -454,6 +464,14 @@ class MedRec extends Contract {
 
         const rec = JSON.parse(recAsBytes.toString());
 
+        const creationAE = rec.resource.meta.auditLog[0];
+
+        const creator = creationAE.agent.name;
+
+        if(owner !== creator){
+            throw new Error(`You do not own this file.`);
+        }
+
         var currHash = rec.resource.observation.value;
 
         if(!rec.encrypted){
@@ -491,7 +509,7 @@ class MedRec extends Contract {
 
 
     //Creates a record from a given file and owner.
-    async createRec(ctx, configFile) {
+    async createRec(ctx, owner, configFile) {
         console.info('============= START : Create Record ===========');
 
         const walletPath = path.join(process.cwd(), 'wallet');
