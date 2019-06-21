@@ -1,5 +1,6 @@
 var data;
 
+
 var safe_tags = function (str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 }
@@ -10,6 +11,31 @@ var action = {
 		
 	},
 	
+}
+
+var appendModal = {
+	count : 0,
+	upload : function (loc, str) {
+		$(loc).append(`	<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroupFileAddon0${appendModal.count}">Upload ${str}</span>	
+					</div>
+					<div class="custom-file">
+						<input type="file" class="custom-file-input" id="inputGroupFile0${appendModal.count}" aria-describedby="inputGroupFileAddon0${appendModal.count}">
+						<label class="custom-file-label" for="inputGroupFile0${appendModal.count}">Choose file</label>
+					</div>
+				</div>`);
+		appendModal.count += 1;
+	},
+	query : function (loc, str) {
+		$(loc).append(`	<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<button class="btn btn-outline-secondary" type="button" id="button-addon${appendModal.count}">${str}</button>
+					</div>
+					<input type="text" class="form-control" placeholder="" aria-label="${str}" aria-describedby="button-addon${appendModal.count}">
+				</div>`);
+		appendModal.count += 1;
+	}
 }
 
 $(function () {
@@ -49,21 +75,33 @@ $(function () {
 	});
 	
 	
+	$('.action').click(function () {
+		$('#actionModalLabel').text($(this).text());
+		$('.action-modal-body').empty();
+	})
+	
 	/** 
 	 *	Here go the action listeners
 	 **/
 	
 	$('.action-submit-record').click(function () {
 		console.log($(this));
+		appendModal.upload('.action-modal-body', "Record");
 		
 	});
 	
 	$('.action-request-record').click(function () {
 		console.log($(this));	
+		appendModal.query('.action-modal-body', "recNumber");
+		appendModal.query('.action-modal-body', "requestor");
+		appendModal.query('.action-modal-body', "purpose");
 	});
 	
 	$('.action-grant-access').click(function () {
 		console.log(data);
+		appendModal.query('.action-modal-body', "recNumber");
+		appendModal.query('.action-modal-body', "owner");
+		appendModal.query('.action-modal-body', "recip");
 		$.ajax({
 			type: 'GET',
 			contentType: 'application/json',
@@ -81,6 +119,8 @@ $(function () {
 	
 	$('.action-revoke-access').click(function () {
 		console.log($(this));
+		appendModal.query('.action-modal-body', "recNumber");
+		appendModal.query('.action-modal-body', "owner");
 	});
 	
 });

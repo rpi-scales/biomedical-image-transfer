@@ -27,7 +27,7 @@ app.get('/yaml', function(req, res){
 	console.log("============================ Finish ============================");
 	
 	console.log("Creating record...");
-	medRec.createRec("createRec", );
+	medRec.createRec("createRec", "Albany Medical Center", data);
 	
 //	var nativeObject = yaml.load('./transactions/configrsrc.yaml');
 
