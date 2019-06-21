@@ -4,6 +4,14 @@ var safe_tags = function (str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 }
 
+
+var action = {
+	submit_record : function () {
+		
+	},
+	
+}
+
 $(function () {
 	$.ajax({
 		type: 'GET',
@@ -12,13 +20,13 @@ $(function () {
 		success: function(d) {
 			data = d;
 			console.log(data);
-			for (var i = 0; i < 10; i++) {
+			for (var i = 0; i < 5; i++) {
 				$('.tbody').append(`<tr>
 					<td>${data.resource.id}</td>
-					<td>${data.resource.observation.subject.display} {${safe_tags(data.resource.observation.subject.reference)}}</td>
-					<td>${data.resource.observation.performer.display} {${safe_tags(data.resource.observation.performer.reference)}}</td>
-					<td>${data.resource.observation.issued}</td>
-					<td>${data.resource.observation.value}</td>
+					<td>${data.resource.observation.value.subject.display} {id : ${data.resource.observation.value.subject.id}}</td>
+					<td>${data.resource.observation.value.operator.display} {id : ${data.resource.observation.value.operator.id}}</td>
+					<td>${data.resource.observation.value.issued}</td>
+					<td>${data.resource.observation.value.content}</td>
 					</tr>`);
 			}
 		}
@@ -39,4 +47,27 @@ $(function () {
 		linkElement.setAttribute('download', exportFileDefaultName);
 		linkElement.click();
 	});
+	
+	
+	/** 
+	 *	Here go the action listeners
+	 **/
+	
+	$('.action-submit-record').click(function () {
+		console.log($(this));
+		
+	});
+	
+	$('.action-request-record').click(function () {
+		console.log($(this));	
+	});
+	
+	$('.action-grant-access').click(function () {
+		console.log($(this));
+	});
+	
+	$('.action-revoke-access').click(function () {
+		console.log($(this));
+	});
+	
 });
