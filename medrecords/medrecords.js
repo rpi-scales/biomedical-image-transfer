@@ -305,9 +305,11 @@ class MedRec extends Contract {
         if(rec.encrypted){
             outcome = 12;
             outcomeDesc = "No user has access to the file."
+            console.log(outcomeDesc);
         }
         else{
             outcomeDesc = "Success. File was not encrypted."
+            console.log(outcomeDesc);
             // calculate Hash from the file
             const fileLoaded = fs.readFileSync(filename, 'utf8');
             var hashToAction = CryptoJS.SHA256(fileLoaded).toString();
@@ -411,8 +413,8 @@ class MedRec extends Contract {
         var dateTime = date+'T'+time;
 
         const type = "decrypt";
-        const subtype = "update"; //Read the current state of the resource
-        const action = "update"; //Execute - perform a query/search operation
+        const subtype = "update"; 
+        const action = "update"; 
         const recorded = date;
         const purpose = purpose;
 
@@ -446,20 +448,10 @@ class MedRec extends Contract {
            throw new Error(`An identity for the user ${owner} does not exist in the wallet.
                  Run the registerUser.js application before retrying`);
         }
-        /*
-        const recipExists = await wallet.exists(recip);
-        if (!recipExists) {
-            throw new Error(`An identity for the user ${recip} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
-        }
-    */
+
         const walletContents = await wallet.export(owner);
         const ownerPrivateKey = walletContents.privateKey;
 
-        /*
-        const walletContents = await wallet.export(recip);
-        const receiverPublicKey = walletContents.publicKey;
-*/
         const rec = JSON.parse(recAsBytes.toString());
 
         var currHash = rec.resource.observation.value;
@@ -479,8 +471,8 @@ class MedRec extends Contract {
         var dateTime = date+'T'+time;
 
         const type = "encrypt";
-        const subtype = "update"; //Read the current state of the resource
-        const action = "update"; //Execute - perform a query/search operation
+        const subtype = "update"; 
+        const action = "update"; 
         const recorded = date;
         const purpose = purpose;
 
@@ -757,6 +749,67 @@ class MedRec extends Contract {
         await ctx.stub.putState(recNumber, Buffer.from(JSON.stringify(rec)));
         console.info('============= END : Create Record ===========');
     }
+
+    async listAudits(ctx, recNumber, requestor, purpose){
+        const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
+        if (!recAsBytes || recAsBytes.length === 0) {
+            throw new Error(`${recNumber} does not exist`);
+        }
+        
+        const walletPath = path.join(process.cwd(), 'wallet');
+        const wallet = new FileSystemWallet(walletPath);
+
+        const requestorExists = await wallet.exists(requestor);
+        if (!requestorExists) {
+            throw new Error(`An identity for the user ${requestor} does not exist in the wallet.
+                 Run the registerUser.js application before retrying`);
+        }
+        
+
+        const walletContents = await wallet.export(requestor);
+        const requestorPrivateKey = walletContents.privateKey;
+
+        const rec = JSON.parse(recAsBytes.toString());
+
+        const auditEvents = rec.resource.meta.security;
+
+        for(let i = 0; i < auditEvents.length; i++){
+            console.log(`Audit Event ${i+1}:`);
+            console.log(`   Type: ${auditEvents[i].type}`);
+            console.log(`   Subtype: ${auditEvents[i].subtype}`);
+            console.log(`   Action: ${auditEvents[i].action}`);
+            console.log(`   Recorded: ${auditEvents[i].recorded}`);
+            console.log(`   Outcome: ${auditEvents[i].outcome}`);
+            console.log(`   Outcome Description: ${auditEvents[i].outcomeDesc}`);
+            console.log(`   Purpose: ${auditEvents[i].purpose}`);
+            console.log(`   Agent: ${auditEvents[i].agent.who.id}`);
+            console.log(`   Source: ${auditEvents[i].source.site}`);
+            console.log(`   Entity: ${auditEvents[i].entity.name}`);
+
+        }
+
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+'T'+time;
+
+        const type = "110101";  //Audit Log Used
+        const subtype = "history"; //Read the current state of the resource
+        const action = "R"; //Execute - perform a query/search operation
+        const recorded = date;
+        const purpose = purpose;
+
+        //Agent type: healthcare provider, role: healthcare provider, media: film type,
+        const agent = new Agent("PROV", "PROV", null, null, requestor, true, null,
+            null, "110010", null, purpose);
+
+        const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
+        "Accessed Audit Log", purpose, agent, null, null);
+
+        rec.resource.meta.security.push(newAE);
+        rec.resource.meta.lastUpdated = dateTime;
+
+
 
 }
 
