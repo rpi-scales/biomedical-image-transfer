@@ -523,8 +523,9 @@ class MedRec extends Contract {
 
         //Read the JSON file and assign appropriate variables;
 
+        
         try {
-          const jsonString = fs.readFileSync('./configrsrc.json');
+          const jsonString = fs.readFileSync('../configrsrc.json');
           const config = JSON.parse(jsonString);
         } catch(err) {
           console.log(err);
