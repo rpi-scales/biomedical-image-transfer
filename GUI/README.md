@@ -11,6 +11,7 @@ npm install --save express
 ## Node.js Dependency
 ```
 npm install --save-dev nodemon
+npm install jsrsasign crypto-js fabric-network fabric-contract-api
 npm install fs path yamljs
 ```
 
