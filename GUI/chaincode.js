@@ -25,3 +25,4 @@ const Chaincode = class {
 		return shim.success(Buffer.from(newVal.toString()));
 	}
 }
+module.exports.Chaincode = Chaincode; 

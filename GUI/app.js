@@ -3,20 +3,19 @@
 const express = require('express');
 const path = require('path');
 const routes = require('./routes/index');
+
 const shim = require('fabric-shim');
+const chaincode = require('./chaincode');
 
 const app = express();
-
-yaml = require('yamljs');
 
 const fs = require('fs');
 
 var MedRec = require('./medrecords/medrecords');
 
-
 var medRec = new MedRec();
 
-shim.start(new Chaincode());
+shim.start(new chaincode.Chaincode());
 
 app.use('/', routes);
 app.use(express.static(path.join(__dirname, 'public')));
