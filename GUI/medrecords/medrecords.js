@@ -13,6 +13,8 @@ const path = require('path');
 
 const { Contract } = require('fabric-contract-api');
 
+const util = require('util');
+
 
 //start and end are date-times
 //  in format YYYY,YYYY-MM, YYYY-MM-DD, or YYYY-MM-DDThh:mm:ss+zz:zz
@@ -271,6 +273,10 @@ function Resource(id, meta, observation){
 
 class MedRec extends Contract {
 
+    constructor(){
+        super('MedRec');
+    }
+
     async initLedger(ctx) {
 
     }
@@ -283,6 +289,11 @@ class MedRec extends Contract {
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
         }
+
+        // var rec = ctx.get(recNumber);
+        // if(rec == undefined){
+        //     throw new Error(`${recNumber} does not exist`);
+        // }
         
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -355,6 +366,10 @@ class MedRec extends Contract {
         rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
+        // ctx.delete(recNumber);
+        // ctx.set(recNumber, rec);
+
+
         //Next step: implement AE addition when file used in IPFS
 
         return filehash;
@@ -367,6 +382,13 @@ class MedRec extends Contract {
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
         }
+
+        //  var rec = ctx.get(recNumber);
+        // if(rec == undefined){
+        //     throw new Error(`${recNumber} does not exist`);
+        // }
+
+      
 
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -390,7 +412,7 @@ class MedRec extends Contract {
         const walletContents2 = await wallet.export(recip);
         const receiverPublicKey = walletContents2.publicKey;
 
-        const rec = JSON.parse(recAsBytes.toString());
+        //const rec = JSON.parse(recAsBytes.toString());
 
         const creationAE = rec.resource.meta.auditLog[0];
 
@@ -438,6 +460,10 @@ class MedRec extends Contract {
         rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
+        // ctx.delete(recNumber);
+        // ctx.set(recNumber, rec);
+
+
         return rec.encrypted;
         
     }
@@ -449,6 +475,12 @@ class MedRec extends Contract {
         if (!recAsBytes || recAsBytes.length === 0) {
             throw new Error(`${recNumber} does not exist`);
         }
+        // var rec = ctx.get(recNumber);
+        // if(rec == undefined){
+        //     throw new Error(`${recNumber} does not exist`);
+        // }
+
+        // var rec = ctx[i];
 
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -504,6 +536,10 @@ class MedRec extends Contract {
         rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
+        // ctx.delete(recNumber);
+        // ctx.set(recNumber, rec);
+
+
         return rec.encrypted;
     }
 
@@ -525,7 +561,7 @@ class MedRec extends Contract {
 
         
         try {
-          const jsonString = fs.readFileSync('../configrsrc.json');
+          const jsonString = fs.readFileSync('./configrsrc.json');
           const config = JSON.parse(jsonString);
         } catch(err) {
           console.log(err);
@@ -761,21 +797,31 @@ class MedRec extends Contract {
 
        
         const rec = {
-            owner,
-            docType: 'rec',
-            resource,
-            encrypted,
+            resID: resID,
+            owner: owner,
+            resource: resource,
+            encrypted: encrypted,
         };
+
+
+        // ctx.set(resID, rec);
 
         await ctx.stub.putState(resID, Buffer.from(JSON.stringify(rec)));
         console.info('============= END : Create Record ===========');
+
+        return rec;
     }
 
     async listAudits(ctx, recNumber, requestor, purpose){
-        const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
-        if (!recAsBytes || recAsBytes.length === 0) {
-            throw new Error(`${recNumber} does not exist`);
-        }
+        // const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
+        // if (!recAsBytes || recAsBytes.length === 0) {
+        //     throw new Error(`${recNumber} does not exist`);
+        // }
+        // var rec = ctx.get(recNumber);
+        // if(rec == undefined){
+        //     throw new Error(`${recNumber} does not exist`);
+        // }
+
         
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -830,10 +876,14 @@ class MedRec extends Contract {
         rec.resource.meta.auditLog.push(newAE);
         rec.resource.meta.lastUpdated = dateTime;
 
+        // ctx.delete(recNumber);
+        // ctx.set(recNumber, rec);
+
 
     }
 
 
-}
+};
+
 
 module.exports = MedRec;
