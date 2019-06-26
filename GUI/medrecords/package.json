@@ -5,6 +5,7 @@
   "main": "medrecords.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "fabric-chaincode-node start"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +14,9 @@
     "crypto-js": "^3.1.9-1",
     "fabric-ca-client": "^1.4.1",
     "fabric-network": "^1.4.1",
-    "jsrsasign": "^8.0.12"
+    "jsrsasign": "^8.0.12",
+    "fabric-chaincode-api": "^1.4.0",
+    "fabric-shim": "^1.4.0"
   },
   "devDependencies": {}
 }
