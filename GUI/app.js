@@ -6,6 +6,8 @@ const routes = require('./routes/index');
 
 const shim = require('fabric-shim');
 const chaincode = require('./chaincode');
+const registerUser = require('./medrecords/javascript/registerUser.js')
+const invoke = require('./medrecords/javascript/invoke.js')
 
 const app = express();
 
@@ -15,7 +17,7 @@ var MedRec = require('./medrecords/medrecords');
 
 var medRec = new MedRec();
 
-shim.start(new chaincode.Chaincode());
+//shim.start(new chaincode.Chaincode());
 
 app.use('/', routes);
 app.use(express.static(path.join(__dirname, 'public')));
