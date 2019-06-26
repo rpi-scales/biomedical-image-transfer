@@ -15,6 +15,7 @@
     "fabric-contract-api": "^1.4.1",
     "fabric-network": "^1.4.2",
     "firebase-admin": "^8.2.0",
+    "fabric-shim": "^1.4.1",
     "firebase-functions": "^3.0.1",
     "fs": "0.0.1-security",
     "js-yaml": "^3.13.1",
