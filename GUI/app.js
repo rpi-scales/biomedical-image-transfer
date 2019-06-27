@@ -17,7 +17,7 @@ var MedRec = require('./medrecords/medrecords');
 
 var medRec = new MedRec();
 
-//shim.start(new chaincode.Chaincode());
+shim.start(new chaincode.Chaincode());
 
 app.use('/', routes);
 app.use(express.static(path.join(__dirname, 'public')));
@@ -33,7 +33,7 @@ app.get('/yaml', function(req, res){
 	console.log(data);
 	console.log("============================ Finish ============================");
 	console.log("Creating record...");
-	var newRec = medRec.createRec(ctx, "Albany Medical Center", data);
+//	var newRec = medRec.createRec(ctx, "Albany Medical Center", data);
 	//ctx.set(newRec.resID, newRec);
 	
 //	var nativeObject = yaml.load('./transactions/configrsrc.yaml');
@@ -46,7 +46,7 @@ app.get('/giveAccess', function(req, res) {
 	console.log("Transaction Id: " + req.query.trans_id);
 	console.log("Owner's Name: " + req.query.owner);
 	console.log("Recipient's Name: " + req.query.receptor);
-	medRec.giveAccess(ctx, req.query.trans_id, req.query.owner, req.query.receptor);
+	medRec.giveAccess("giveAccess", req.query.trans_id, req.query.owner, req.query.receptor);
 
 })
 
