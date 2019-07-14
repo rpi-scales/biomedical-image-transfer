@@ -42,10 +42,10 @@ app.set('appName', 'global-financing');
 process.title = 'Z2B-C12';
 app.set('port', appEnv.port);
 
-app.set('views', path.join(__dirname + '/HTML'));
+app.set('views', path.join(__dirname + '/view'));
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/HTML'));
+app.use(express.static(__dirname + '/view'));
 app.use(bodyParser.json());
 
 // Define your own router file in controller folder, export the router, add it into the index.js.
