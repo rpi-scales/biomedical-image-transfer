@@ -18,13 +18,27 @@ let express = require('express');
 let router = express.Router();
 let format = require('date-format');
 
+
+// --- sample requires ---
 let multi_lingual = require('./features/multi_lingual');
+
 let resources = require('./features/resources');
 
 let hlcAdmin = require('./features/fabric/hlcAdmin');
 let hlcClient = require('./features/fabric/hlcClient');
 let setup = require('./features/fabric/autoLoad');
 let blockchain = require('./features/fabric/getBlockchain');
+// --- sample requires ---
+
+// --- medrecords requires ---
+let medrecords = require('./medrecords');
+let enrollAdmin = require('./javascript/enrollAdmin');
+let invoke = require('./javascript/invoke');
+let query = require('./javascript/query');
+let registerUser = require('./javascript/registerUser');
+// --- medrecords requires ---
+
+
 
 router.post('/setup/autoLoad*', setup.autoLoad);
 

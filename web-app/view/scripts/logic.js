@@ -42,19 +42,19 @@ $(function () {
 	$.ajax({
 		type: 'GET',
 		contentType: 'application/json',
-		url: '/yaml',
+		url: '/api/getSupportedLanguages*',
 		success: function(d) {
 			data = d;
-//			console.log(data);
-			for (var i = 0; i < 5; i++) {
-				$('.tbody').append(`<tr>
-					<td>${data.resource.id}</td>
-					<td>${data.resource.observation.value.subject.display} {id : ${data.resource.observation.value.subject.id}}</td>
-					<td>${data.resource.observation.value.operator.display} {id : ${data.resource.observation.value.operator.id}}</td>
-					<td>${data.resource.observation.value.issued}</td>
-					<td>${data.resource.observation.value.content}</td>
-					</tr>`);
-			}
+			console.log(data);
+//			for (var i = 0; i < 5; i++) {
+//				$('.tbody').append(`<tr>
+//					<td>${data.resource.id}</td>
+//					<td>${data.resource.observation.value.subject.display} {id : ${data.resource.observation.value.subject.id}}</td>
+//					<td>${data.resource.observation.value.operator.display} {id : ${data.resource.observation.value.operator.id}}</td>
+//					<td>${data.resource.observation.value.issued}</td>
+//					<td>${data.resource.observation.value.content}</td>
+//					</tr>`);
+//			}
 		}
 	});
 
