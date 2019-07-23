@@ -12,7 +12,7 @@ const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
-async function main() {
+exports.main = async function main() {
     try {
 
         if(process.argv.length != 3){
@@ -62,4 +62,4 @@ async function main() {
     }
 }
 
-main();
+//main();
