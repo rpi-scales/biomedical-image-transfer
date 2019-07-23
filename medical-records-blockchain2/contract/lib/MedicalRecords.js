@@ -271,27 +271,297 @@ function Resource(id, meta, observation){
     this.observation = observation;
 }
 
-class MedRec extends Contract {
+// predefined request states
+const requestStatus = {
+    Created: {code: 1, text: 'Request Created'},
+    Denied: {code: 2, text: 'Request Denied'},
+    Granted: {code: 3, text: 'Access Granted'},
+    Revoked: {code: 13, text: 'Access Revoked'}
+};
 
-    constructor(){
-        super('MedRec');
+class MedicalRecords extends Contract {
+
+    // instantiate with keys to collect participant ids
+    async instantiate(ctx) {
+
+        let emptyList = [];
+        await ctx.stub.putState('owners', Buffer.from(JSON.stringify(emptyList)));
+        await ctx.stub.putState('requestors', Buffer.from(JSON.stringify(emptyList)));
     }
 
-    async initLedger(ctx) {
+    // add an owner object to the blockchain state identifited by the ownerId
+    async RegisterOwner(ctx, ownerId, companyName) {
 
+        let owner = {
+            id: ownerId,
+            companyName: companyName,
+            type: 'owner',
+            requests: []
+            records: []
+        };
+        await ctx.stub.putState(ownerId, Buffer.from(JSON.stringify(owner)));
+
+        //add buyerId to 'buyers' key
+        let data = await ctx.stub.getState('owners');
+        if (data) {
+            let owners = JSON.parse(data.toString());
+            owners.push(ownerId);
+            await ctx.stub.putState('owners', Buffer.from(JSON.stringify(owners)));
+        } else {
+            throw new Error('owners not found');
+        }
+
+        // return owner object
+        return JSON.stringify(owner);
+    }
+
+    // add a requestor object to the blockchain state identifited by the requestorId
+    async RegisterRequestor(ctx, requestorId, companyName) {
+
+        let requestor = {
+            id: requestorId,
+            companyName: companyName,
+            type: 'requestor',
+            requests: []
+            records: []
+        };
+        await ctx.stub.putState(requestorId, Buffer.from(JSON.stringify(requestor)));
+
+        //add buyerId to 'buyers' key
+        let data = await ctx.stub.getState('requestors');
+        if (data) {
+            let requestors = JSON.parse(data.toString());
+            requestors.push(requestorId);
+            await ctx.stub.putState('requestors', Buffer.from(JSON.stringify(requestors)));
+        } else {
+            throw new Error('requestors not found');
+        }
+
+        // return requestor object
+        return JSON.stringify(requestor);
+    }
+
+
+     // add a request object to the blockchain state identifited by the requestNumber
+    async CreateRequest(ctx, requestorId, ownerId, requestNumber, recordId) {
+
+        // verify requestorId
+        let requestorData = await ctx.stub.getState(requestorId);
+        let requestor;
+        if (requestorData) {
+            requestor = JSON.parse(requestorData.toString());
+            if (requestor.type !== 'requestor') {
+                throw new Error('requestor not identified');
+            }
+        } else {
+            throw new Error('requestor not found');
+        }
+
+        // verify ownerId
+        let ownerData = await ctx.stub.getState(ownerId);
+        let owner;
+        if (ownerData) {
+            owner = JSON.parse(ownerData.toString());
+            if (owner.type !== 'owner') {
+                throw new Error('owner not identified');
+            }
+        } else {
+            throw new Error('owner not found');
+        }
+
+        let request = {
+            requestNumber: requestNumber,
+            status: JSON.stringify(requestStatus.Created),
+            requestorId: requestorId,
+            ownerId: ownerId,
+            recordId: recordId
+        };
+
+        //add request to requestor
+        requestor.requests.push(requestNumber);
+        await ctx.stub.putState(requestorId, Buffer.from(JSON.stringify(requestor)));
+
+        //store request identified by requestNumber
+        await ctx.stub.putState(requestNumber, Buffer.from(JSON.stringify(request)));
+
+        return JSON.stringify(request);
+    }
+
+    async RequestDeny(ctx, requestNumber, requestorId, ownerId) {
+
+        // get request json
+        let data = await ctx.stub.getState(requestNumber);
+        let request;
+        if (data) {
+            request = JSON.parse(data.toString());
+        } else {
+            throw new Error('request not found');
+        }
+
+        // verify requestorId
+        let requestorData = await ctx.stub.getState(requestorId);
+        let requestor;
+        if (requestorData) {
+            requestor = JSON.parse(requestorData.toString());
+            if (requestor.type !== 'requestor') {
+                throw new Error('requestor not identified');
+            }
+        } else {
+            throw new Error('requestor not found');
+        }
+
+        // verify sellerId
+        let ownerData = await ctx.stub.getState(ownerId);
+        let owner;
+        if (ownerData) {
+            owner = JSON.parse(ownerData.toString());
+            if (owner.type !== 'owner') {
+                throw new Error('owner not identified');
+            }
+        } else {
+            throw new Error('owner not found');
+        }
+
+        int outcome = 0;
+
+        //update request
+        if (request.status == JSON.stringify(requestStatus.Created)) {
+            request.status = JSON.stringify(requestStatus.Denied);
+            await ctx.stub.putState(requestNumber, Buffer.from(JSON.stringify(request)));
+            return JSON.stringify(request);
+        } else {
+            throw new Error('request not created');
+            outcome = 12;
+        }
+        addAudit(requestor.records[i], 110113, null, "E", outcome, `Denied Request of requestor ${requestorId}`,
+                "TREAT", owner, null, null);
+    }
+
+    async AccessGrant(ctx, requestNumber, requestorId, ownerId) {
+
+        // get request json
+        let data = await ctx.stub.getState(requestNumber);
+        let request;
+        if (data) {
+            request = JSON.parse(data.toString());
+        } else {
+            throw new Error('request not found');
+        }
+
+        // verify requestorId
+        let requestorData = await ctx.stub.getState(requestorId);
+        let requestor;
+        if (requestorData) {
+            requestor = JSON.parse(requestorData.toString());
+            if (requestor.type !== 'requestor') {
+                throw new Error('requestor not identified');
+            }
+        } else {
+            throw new Error('requestor not found');
+        }
+
+        // verify sellerId
+        let ownerData = await ctx.stub.getState(ownerId);
+        let owner;
+        if (ownerData) {
+            owner = JSON.parse(ownerData.toString());
+            if (owner.type !== 'owner') {
+                throw new Error('owner not identified');
+            }
+        } else {
+            throw new Error('owner not found');
+        }
+
+        int outcome = 0;
+
+        //update request
+        if (request.status == JSON.stringify(requestStatus.Created) ) {
+            request.status = JSON.stringify(requestStatus.Granted);
+            for(var i = 0; i < owner.records.length; i++){
+                if(owner.records[i].recordId == request.recordId){
+                    requestor.records.push(owner.records[i]);
+                    break;
+                }
+            }
+            await ctx.stub.putState(requestNumber, Buffer.from(JSON.stringify(request)));
+            return JSON.stringify(request);
+        } else {
+            throw new Error('request not created');
+            outcome = 12;
+        }
+        addAudit(requestor.records[i], "decrypt", 110137, "E", outcome, `Granted Access of requestor ${requestorId}`,
+                "TREAT", owner, null, null);
+    }
+
+    async AccessRevoke(ctx, requestNumber, requestorId, ownerId) {
+
+        // get request json
+        let data = await ctx.stub.getState(requestNumber);
+        let request;
+        if (data) {
+            request = JSON.parse(data.toString());
+        } else {
+            throw new Error('request not found');
+        }
+
+        // verify requestorId
+        let requestorData = await ctx.stub.getState(requestorId);
+        let requestor;
+        if (requestorData) {
+            requestor = JSON.parse(requestorData.toString());
+            if (requestor.type !== 'requestor') {
+                throw new Error('requestor not identified');
+            }
+        } else {
+            throw new Error('requestor not found');
+        }
+
+        // verify sellerId
+        let ownerData = await ctx.stub.getState(ownerId);
+        let owner;
+        if (ownerData) {
+            owner = JSON.parse(ownerData.toString());
+            if (owner.type !== 'owner') {
+                throw new Error('owner not identified');
+            }
+        } else {
+            throw new Error('owner not found');
+        }
+
+        int outcome = 0;
+
+        //update request
+        if (request.status == JSON.stringify(requestStatus.Created) || request.status == JSON.stringify(requestStatus.Granted) ) {
+            request.status = JSON.stringify(requestStatus.Revoked);
+            for(var i = 0; i < requestor.records.length; i++){
+                if(requestor.records[i].recordId == request.recordId){
+                    requestor.records.splice(i,1);
+                    break;
+                }
+            }
+
+            await ctx.stub.putState(requestNumber, Buffer.from(JSON.stringify(request)));
+            return JSON.stringify(request);
+        } else {
+            throw new Error('request not created');
+            outcome = 12;
+        }
+        addAudit(requestor.records[i], "encrypt", 110137, "E", outcome, `Revoked Access of requestor ${requestorId}`,
+                "TREAT", owner, null, null);
     }
 
     //Creates a record from a given file and owner.
-    async createRec(ctx, owner, configFile) {
-        console.info('============= START : Create Record ===========');
-
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-
-        const ownerExists = await wallet.exists(owner);
-        if (!ownerExists) {
-            throw new Error(`An identity for the user ${owner} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
+    async createRec(ctx, ownerId, configFile) {
+        
+        let ownerData = await ctx.stub.getState(ownerId);
+        let owner;
+        if (ownerData) {
+            owner = JSON.parse(ownerData.toString());
+            if (owner.type !== 'owner') {
+                throw new Error('owner not identified');
+            }
+        } else {
+            throw new Error('owner not found');
         }
 
         //Read the JSON file and assign appropriate variables;
@@ -306,7 +576,7 @@ class MedRec extends Contract {
         }
 
     
-        const resID = config.resource.id;
+        const recordId = config.resource.id;
 
         //Metadata VersionID
 
@@ -506,16 +776,6 @@ class MedRec extends Contract {
 
         const content = config.resource.observation.value.content;
 
-        //Encrypt the IPFSHash with the owner's key.
-
-        const walletContents = await wallet.export(owner);
-        const ownerPrivateKey = walletContents.privateKey;
-
-
-        var IPFSHash = CryptoJS.AES.encrypt(content, ownerPrivateKey);
-
-        //Create a new Media object.
-
         const value = new Media(valID, basedOn, partOf, valStatus, valType,
             valModality, valView, valSubject, valEncounter, valCreated, valIssued,
             valOperator, valReason, valSite, valDevName, valDevice, valHeight,
@@ -528,315 +788,85 @@ class MedRec extends Contract {
 
         //Create the Resource object.
 
-        const resource = new Resource(resID, meta, observation);
+        const resource = new Resource(recordId, meta, observation);
 
         let encrypted = true;
 
        
-        const rec = {
-            resID: resID,
+        const record = {
+            recordId: recordId,
             owner: owner,
             resource: resource,
             encrypted: encrypted,
         };
 
 
-        await ctx.stub.putState(resID, Buffer.from(JSON.stringify(rec)));
-        console.info('============= END : Create Record ===========');
+        owner.records.push(recordId);
+        await ctx.stub.putState(ownerId, Buffer.from(JSON.stringify(owner)));
 
-        return rec;
+        await ctx.stub.putState(recordId, Buffer.from(JSON.stringify(record)));
+
+        return JSON.stringify(record);
     }
 
-    //Returns IPFSHash of file
-    //Purpose describes the requestor's reason for accessing the file
-    //  See https://www.hl7.org/fhir/v3/PurposeOfUse/vs.html
-    async queryRec(ctx, recNumber, requestor, purpose){
-        const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
-        if (!recAsBytes || recAsBytes.length === 0) {
-            throw new Error(`${recNumber} does not exist`);
-        }
+    async addAudit(ctx, record, auditType, auditSubtype, auditAction, 
+            auditOutcome, auditOutcomeDesc, auditPurpose, auditAgent, auditSource,
+            auditEntity){
 
-        // var rec = ctx.get(recNumber);
-        // if(rec == undefined){
-        //     throw new Error(`${recNumber} does not exist`);
-        // }
-        
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-
-        const requestorExists = await wallet.exists(requestor);
-        if (!requestorExists) {
-            throw new Error(`An identity for the user ${requestor} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
-        }
-        
-
-        const walletContents = await wallet.export(requestor);
-        const requestorPrivateKey = walletContents.privateKey;
-
-        const rec = JSON.parse(recAsBytes.toString());
-
-        const filehash = rec.resource.observation.value.content;
-
-        let outcome = 0;
-        let outcomeDesc;
-
-        if(rec.encrypted){
-            outcome = 12;
-            outcomeDesc = "No user has access to the file."
-            console.log(outcomeDesc);
-        }
-        else{
-            outcomeDesc = "Success. File was not encrypted."
-            console.log(outcomeDesc);
-            // calculate Hash from the file
-            const fileLoaded = fs.readFileSync(filename, 'utf8');
-            var hashToAction = CryptoJS.SHA256(fileLoaded).toString();
-            console.log("Hash of the file: " + hashToAction);
-
-            // get certificate from the certfile
-            const certLoaded = fs.readFileSync(certfile, 'utf8');
-
-
-            var requestorPublicKey = KEYUTIL.getKey(certLoaded);
-            var recover = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
-            recover.init(requestorPublicKey);
-            recover.updateHex(hashToAction);
-            var getBackSigValueHex = new Buffer(resultJSON.signature, 'base64').toString('hex');
-            console.log("Signature verified with certificate provided: " + recover.verify(getBackSigValueHex));
-            /*
-            var bytes = CryptoJS.AES.decrypt(currHash.toString(), userPublicKey);
-            var decryptedFile = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-     
-            console.log(decryptedFile);
-        */
-        }
-        var today = new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        var dateTime = date+'T'+time;
-
-        const type = "110114"; //Type is "User Authentication has been attempted"
-        const subtype = "read"; //Read the current state of the resource
-        const action = "E"; //Execute - perform a query/search operation
-        const recorded = date;
-        const purpose = purpose;
-
-        //Agent type: healthcare provider, role: healthcare provider, media: film type,
-        const agent = new Agent("PROV", "PROV", null, null, requestor, true, null,
-            null, "110010", null, purpose);
-
-        const newAE = new AuditEvent(type, subtype, action, recorded, outcome, 
-        outcomeDesc, purpose, agent, null, null);
-
-        rec.resource.meta.auditLog.push(newAE);
-        rec.resource.meta.lastUpdated = dateTime;
-
-        // ctx.delete(recNumber);
-        // ctx.set(recNumber, rec);
-
-
-        //Next step: implement AE addition when file used in IPFS
-
-        return filehash;
-    
-    }
-
-    //Encode IPFSHash w/receiver's key
-    async giveAccess(ctx, recNumber, owner, recip){
-        const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
-        if (!recAsBytes || recAsBytes.length === 0) {
-            throw new Error(`${recNumber} does not exist`);
-        }
-
-        //  var rec = ctx.get(recNumber);
-        // if(rec == undefined){
-        //     throw new Error(`${recNumber} does not exist`);
-        // }
-
-      
-
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-
-        const ownerExists = await wallet.exists(owner);
-        if (!ownerExists) {
-            throw new Error(`An identity for the user ${owner} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
-        }
-
-        const recipExists = await wallet.exists(recip);
-        if (!recipExists) {
-            throw new Error(`An identity for the user ${recip} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
-        }
-
-        const walletContents1 = await wallet.export(owner);
-        const ownerPrivateKey = walletContents1.privateKey;
-
-
-        const walletContents2 = await wallet.export(recip);
-        const receiverPublicKey = walletContents2.publicKey;
-
-        //const rec = JSON.parse(recAsBytes.toString());
-
-        const creationAE = rec.resource.meta.auditLog[0];
-
-        const creator = creationAE.agent.name;
-
-        if(owner !== creator){
-            throw new Error(`You do not own this file.`);
-        }
-
-        var sig = new KJUR.crypto.Signature({"alg": "SHA256withECDSA"});
-        sig.init(receiverPublicKey, "");
-        sig.updateHex(hashToAction);
-        var sigValueHex = sig.sign();
-        var sigValueBase64 = new Buffer(sigValueHex, 'hex').toString('base64');
-        console.log("Signature: " + sigValueBase64);
-
-        
-        var currHash = rec.resource.observation.value;
-        var bytes = CryptoJS.AES.decrypt(currHash.toString(), ownerPrivateKey);
-        var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-        
-
-        rec.resource.observation.value.content = plaintext;
-        rec.encrypted = false;
-
-        var today = new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        var dateTime = date+'T'+time;
-
-        const type = "decrypt";
-        const subtype = "update"; 
-        const action = "update"; 
-        const recorded = date;
-        const purpose = purpose;
-
-        //Agent type: healthcare provider, role: healthcare provider, media: film type,
-        const agent = new Agent("PROV", "PROV", null, null, owner, true, null,
-            null, "110010", null, purpose);
-
-        const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
-        `Decrypted file IPFSHash for ${recip}`, purpose, agent, null, null);
-
-        rec.resource.meta.auditLog.push(newAE);
-        rec.resource.meta.lastUpdated = dateTime;
-
-        // ctx.delete(recNumber);
-        // ctx.set(recNumber, rec);
-
-
-        return rec.encrypted;
-        
-    }
-
-    //Encode IPFSHash w/owner's key to abstract knowledge from receiver
-    //Unable to remove 
-    async revokeAccess(ctx, recNumber, owner){
-        const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
-        if (!recAsBytes || recAsBytes.length === 0) {
-            throw new Error(`${recNumber} does not exist`);
-        }
-        // var rec = ctx.get(recNumber);
-        // if(rec == undefined){
-        //     throw new Error(`${recNumber} does not exist`);
-        // }
-
-        // var rec = ctx[i];
-
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-
-        const ownerExists = await wallet.exists(owner);
-        if (!ownerExists) {
-           throw new Error(`An identity for the user ${owner} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
-        }
-
-        const walletContents = await wallet.export(owner);
-        const ownerPrivateKey = walletContents.privateKey;
-
-        const rec = JSON.parse(recAsBytes.toString());
-
-        const creationAE = rec.resource.meta.auditLog[0];
-
-        const creator = creationAE.agent.name;
-
-        if(owner !== creator){
-            throw new Error(`You do not own this file.`);
-        }
-
-        var currHash = rec.resource.observation.value;
-
-        if(!rec.encrypted){
-            throw new Error(`${recNumber} is already hidden`);
-        }
-
-        var newHash = CryptoJS.AES.encrypt(currHash, ownerPrivateKey);
-
-        rec.resource.observation.value = newHash;
-        rec.encrypted = true;
 
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         var dateTime = date+'T'+time;
 
-        const type = "encrypt";
-        const subtype = "update"; 
-        const action = "update"; 
-        const recorded = date;
-        const purpose = purpose;
+        const recorded = dateTime;
 
-        //Agent type: healthcare provider, role: healthcare provider, media: film type,
-        const agent = new Agent("PROV", "PROV", null, null, owner, true, null,
-            null, "110010", null, purpose);
+        const agent = new Agent("PROV", "PROV", auditAgent.ownerId, null, null, false, null,
+            null, "110010", null, auditPurpose);
 
-        const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
-        "Encrypted file IPFSHash", purpose, agent, null, null);
+        const newAE = new AuditEvent(auditType, auditSubtype, auditAction, recorded, auditOutcome, 
+        auditOutcomeDesc, auditPurpose, agent, auditSource, auditEntity);
 
-        rec.resource.meta.auditLog.push(newAE);
-        rec.resource.meta.lastUpdated = dateTime;
-
-        // ctx.delete(recNumber);
-        // ctx.set(recNumber, rec);
-
-
-        return rec.encrypted;
     }
 
-
-    async listAudits(ctx, recNumber, requestor, purpose){
-        // const recAsBytes = await ctx.stub.getState(recNumber); // get the record from chaincode state
-        // if (!recAsBytes || recAsBytes.length === 0) {
-        //     throw new Error(`${recNumber} does not exist`);
-        // }
-        // var rec = ctx.get(recNumber);
-        // if(rec == undefined){
-        //     throw new Error(`${recNumber} does not exist`);
-        // }
-
-        
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-
-        const requestorExists = await wallet.exists(requestor);
-        if (!requestorExists) {
-            throw new Error(`An identity for the user ${requestor} does not exist in the wallet.
-                 Run the registerUser.js application before retrying`);
+   
+    async listAudits(ctx, requestId, participantId){
+        // get request json
+        let data = await ctx.stub.getState(requestNumber);
+        let request;
+        if (data) {
+            request = JSON.parse(data.toString());
+        } else {
+            throw new Error('request not found');
         }
-        
 
-        const walletContents = await wallet.export(requestor);
-        const requestorPrivateKey = walletContents.privateKey;
+        let participantData = await ctx.stub.getState(participantId);
+        let participant;
+        if (participantData) {
+            participant = JSON.parse(participantData.toString());
+        } else {
+            throw new Error('participant not found');
+        }
 
-        const rec = JSON.parse(recAsBytes.toString());
+        var record;
 
-        const auditEvents = rec.resource.meta.auditLog;
+        var found = false;
+
+        for(var i = 0; i < participant.records.length; i++){
+            if(participant.records[i].recordId == request.recordId){
+                record = participant.records[i];
+                found = true;
+                break;
+            }
+        }
+
+        if(!found){
+            throw new Error('record not found');
+        }
+
+        const recordString = JSON.parse(record.toString());
+
+        const auditEvents = recordString.resource.meta.auditLog;
 
         for(let i = 0; i < auditEvents.length; i++){
             console.log(`Audit Event ${i+1}:`);
@@ -861,7 +891,7 @@ class MedRec extends Contract {
         const type = "110101";  //Audit Log Used
         const subtype = "history"; //Read the current state of the resource
         const action = "R"; //Execute - perform a query/search operation
-        const recorded = date;
+        const recorded = dateTime;
         const purpose = purpose;
 
         //Agent type: healthcare provider, role: healthcare provider, media: film type,
@@ -871,11 +901,10 @@ class MedRec extends Contract {
         const newAE = new AuditEvent(type, subtype, action, recorded, 0, 
         "Accessed Audit Log", purpose, agent, null, null);
 
-        rec.resource.meta.auditLog.push(newAE);
-        rec.resource.meta.lastUpdated = dateTime;
+        recordString.resource.meta.auditLog.push(newAE);
+        recordString.resource.meta.lastUpdated = dateTime;
 
-        // ctx.delete(recNumber);
-        // ctx.set(recNumber, rec);
+
 
 
     }
@@ -884,4 +913,4 @@ class MedRec extends Contract {
 };
 
 
-module.exports = MedRec;
+module.exports = MedicalRecords;

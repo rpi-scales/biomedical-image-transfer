@@ -1,0 +1,69 @@
+{
+  "index": {"language": "US English",
+    "title": "Medical Records",
+    "header": "Medical Records with Blockchain",
+    "titleBar": "Medical Records Code Pattern",
+    "idx_unified": "load Unified User Experience",
+    "idx_requestor": "load Requestor User Experience",
+    "idx_owner": "load Owner User Experience",
+    "idx_roles": "Roles",
+    "idx_admin": "Admin",
+    "idx_adminUX": "load Admin User Experience",
+    "idx_preload": "Preload Network",
+    "idx_blockchain": "Show Blockchain"
+  },
+  "admin": {
+    "title": "Medical Records with Blockchain",
+    "rm": "Resource Management",
+    "rm_api": "API",
+    "rm_param": "Parameters",
+    "rm_lr_api": "list members of a registry",
+    "rm_la_api": "List Requests",
+    "rm_la_param": "(none)",
+    "rm_am_api": "Add Member",
+    "rm_am_param": "Co Name, id, Type" 
+  },
+  "requestor": {
+    "title": "Select Requestor to see their view: ",
+    "newRequest": "Create New Request",
+    "requestStatus": "Display Request Status"
+  },
+  "createMember": {
+    "cd_type": "Type",
+    "cd_requestor": "Requestor",
+    "cd_owner": "Owner",
+    "cd_cn": "Company Name",
+    "cd_e": "email Address",
+    "cancel": "Cancel",
+    "submit": "Submit"
+  },
+  "createRequest": {
+    "title": "Create New Request",
+    "selectPractitioner": "Select Practitioner: ",
+    "cn_rn": "Request Number",
+    "cn_status": "Status",
+    "submitNewOrder": "Submit"
+  },  
+  "owner": {
+    "title": "Select Owner to see their view: ",
+    "owner_clear": "Clear Window",
+    "ownerRequestStatus": "Display Request Status"
+  },
+  "singleUX": {},
+  "requestProcess": {
+    "Grant": {"select": "Grant", "message": "Grant Access"},
+    "Deny": {"select": "Deny", "message": "Deny"},
+    "Revoke": {"select": "Revoke", "message": "Revoke"},
+    "NoAction": {"select": "NoAction", "message": "Take No Action"},
+    "ex_button": "Execute",
+    "ca_button": "Cancel",
+    "requestno": "Request #",
+    "status": "Status",
+    "owner": "Owner: ",
+    "processing_msg": "Processing {0} request for request number: {1}",
+    "r_no_order_msg": "No orders for this requestor: ",
+    "o_no_order_msg": "No orders for this owner: ",
+    "create_msg": "Processing Create Request request",
+    "requestor": "Requestor: "
+  }
+}

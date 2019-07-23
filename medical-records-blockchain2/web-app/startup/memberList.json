@@ -1,0 +1,31 @@
+{ "members":
+    [
+        {"type": "Owner", "pw": "bob", "companyName": "PC Hardware, Inc", "id": "bob@pchardwareinc.com"},
+        {"type": "Owner", "pw": "jojo", "companyName": "Inovative Solutions, Inc", "id": "jojo@innovativesolutionsinc.com"},
+        {"type": "Owner", "pw": "mary", "companyName": "The i-Series Experts, Inc", "id": "mary@iseriesexpertsinc.com"},
+        {"type": "Owner", "pw": "wilber", "companyName": "Cooling Systems R Us, Inc", "id": "wilber@coolingsystemsrusinc.com"},
+        {"type": "Owner", "pw": "erin", "companyName": "2nd Life Systems, Inc", "id": "Erin@2ndlifesystemsinc.com"},
+        {"type": "Owner", "pw": "abdul", "companyName": "The Cognitive Advantage, Inc", "id": "abdul@cognitiveadvantageinc.com"},
+        {"type": "Owner", "pw": "aiesha", "companyName": "Cloud Nine Software, Inc", "id": "aiesha@cloudninesoftwareinc.com"},
+        {"type": "Owner", "pw": "joshua", "companyName": "Office Experts, Inc", "id": "joshua@officeexpertsinc.com"},
+        {"type": "Owner", "pw": "alwayson", "companyName": "NonStop, Inc", "id": "alwayson@nonstopinc.com"},
+        {"type": "Owner", "pw": "anytime", "companyName": "Virtual Paper, Inc", "id": "anytime@virtualpaperinc.com"},
+        {"type": "Requestor", "pw": "yes", "companyName": "Software Solutions, Inc", "id": "yes@softwaresolutionsinc.com"},
+        {"type": "Requestor", "pw": "buyer1", "companyName": "Hybrid Cloud Designs, Inc", "id": "buyer1@hybridclouddesignsinc.com"},
+        {"type": "Requestor", "pw": "eric", "companyName": "Born On The Cloud, Inc", "id": "eric@bornonthecloudinc.com"},
+        {"type": "Requestor", "pw": "abby", "companyName": "Kid Friendly Learning, Inc", "id": "abby@kidfriendlyinc.com"},
+        {"type": "Requestor", "pw": "kristen", "companyName": "The Education Game, Inc", "id": "kristen@gameify.com"}
+    ],
+    "assets":
+    [   
+        {"type": "Request", "id": "001", "requestor": "yes@softwaresolutionsinc.com", "owner": "bob@pchardwareinc.com"},
+        {"type": "Request", "id": "002", "requestor": "yes@softwaresolutionsinc.com", "owner": "jojo@innovativesolutionsinc.com"},
+        {"type": "Request", "id": "003", "requestor": "yes@softwaresolutionsinc.com", "owner": "Erin@2ndlifesystemsinc.com"},
+        {"type": "Request", "id": "004", "requestor": "yes@softwaresolutionsinc.com", "owner": "aiesha@cloudninesoftwareinc.com"},
+        {"type": "Request", "id": "005", "requestor": "yes@softwaresolutionsinc.com", "owner": "joshua@officeexpertsinc.com"},
+        {"type": "Request", "id": "006", "requestor": "eric@bornonthecloudinc.com", "owner": "Erin@2ndlifesystemsinc.com"},
+        {"type": "Request", "id": "007", "requestor": "eric@bornonthecloudinc.com", "owner": "bob@pchardwareinc.com"},
+        {"type": "Request", "id": "008", "requestor": "eric@bornonthecloudinc.com", "owner": "jojo@innovativesolutionsinc.com"},
+        {"type": "Request", "id": "009", "requestor": "eric@bornonthecloudinc.com", "owner": "Erin@2ndlifesystemsinc.com"}
+    ]
+}
