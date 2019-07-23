@@ -89,3 +89,6 @@ router.use(function(req, res, next) {
 
 
 router.post('/fabric/enrollAdmin*', enrollAdmin.main);
+router.post('/fabric/registerUser*', registerUser.main);
+router.post('/fabric/invoke*', invoke.main);
+router.post('/fabric/query*', query.main);

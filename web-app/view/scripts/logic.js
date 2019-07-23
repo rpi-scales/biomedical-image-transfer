@@ -1,4 +1,5 @@
 var data;
+var port = '6001';
 
 
 var safe_tags = function (str) {
@@ -35,31 +36,40 @@ var appendModal = {
 					<input type="text" class="form-control" placeholder="" aria-label="${str}" aria-describedby="button-addon${appendModal.count}">
 				</div>`);
 		appendModal.count += 1;
+	},
+	message : function (loc, str) {
+		$(loc).append(`	<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<button class="btn btn-outline-secondary" type="button" id="button-addon${appendModal.count}">${str}</button>
+					</div>
+					${str}
+					<input type="text" class="form-control" placeholder="${str}" aria-label="${str}" aria-describedby="button-addon${appendModal.count}">
+				</div>`);
 	}
 }
 
 $(function () {
+	
+	$('.action-Initialization').click(function () {
+		$.ajax({
+			type: 'POST',
+			contentType: 'application/json',
+			url: '/fabric/enrollAdmin*',
+			success: function() {
+				console.log("Admin successfully enrolled!");
+				appendModal.message('.action-modal-body', "Admin successfully enrolled!");
+			}
+		});
+	})
+	
 	$.ajax({
 		type: 'GET',
 		contentType: 'application/json',
 		url: '/api/getSupportedLanguages*',
 		success: function(d) {
-			data = d;
-			console.log(data);
-//			for (var i = 0; i < 5; i++) {
-//				$('.tbody').append(`<tr>
-//					<td>${data.resource.id}</td>
-//					<td>${data.resource.observation.value.subject.display} {id : ${data.resource.observation.value.subject.id}}</td>
-//					<td>${data.resource.observation.value.operator.display} {id : ${data.resource.observation.value.operator.id}}</td>
-//					<td>${data.resource.observation.value.issued}</td>
-//					<td>${data.resource.observation.value.content}</td>
-//					</tr>`);
-//			}
+			
 		}
 	});
-
-
-
 
 
 	$('.export').click(function () {
