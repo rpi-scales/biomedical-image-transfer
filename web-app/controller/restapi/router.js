@@ -20,27 +20,27 @@ let format = require('date-format');
 
 
 // --- sample requires ---
-let multi_lingual = require('./features/multi_lingual');
-
-let resources = require('./features/resources');
-
-let hlcAdmin = require('./features/fabric/hlcAdmin');
-let hlcClient = require('./features/fabric/hlcClient');
-let setup = require('./features/fabric/autoLoad');
-let blockchain = require('./features/fabric/getBlockchain');
+//let multi_lingual = require('./features/multi_lingual');
+//
+//let resources = require('./features/resources');
+//
+//let hlcAdmin = require('./features/fabric/hlcAdmin');
+//let hlcClient = require('./features/fabric/hlcClient');
+//let setup = require('./features/fabric/autoLoad');
+//let blockchain = require('./features/fabric/getBlockchain');
 // --- sample requires ---
 
 // --- medrecords requires ---
-let medrecords = require('./medrecords');
-let enrollAdmin = require('./javascript/enrollAdmin');
-let invoke = require('./javascript/invoke');
-let query = require('./javascript/query');
-let registerUser = require('./javascript/registerUser');
+let medrecords = require('./features/medrecords');
+let enrollAdmin = require('./features/javascript/enrollAdmin');
+let invoke = require('./features/javascript/invoke');
+let query = require('./features/javascript/query');
+let registerUser = require('./features/javascript/registerUser');
 // --- medrecords requires ---
 
 
 
-router.post('/setup/autoLoad*', setup.autoLoad);
+//router.post('/setup/autoLoad*', setup.autoLoad);
 
 module.exports = router;
 let count = 0;
@@ -67,22 +67,25 @@ router.use(function(req, res, next) {
 // The asterisk (*) means 'ignore anything following this point'
 // which means we have to be careful about ordering these statements.
 //
-router.get('/api/getSupportedLanguages*',multi_lingual.languages);
-router.get('/api/getTextLocations*',multi_lingual.locations);
-router.post('/api/selectedPrompts*',multi_lingual.prompts);
+//router.get('/api/getSupportedLanguages*',multi_lingual.languages);
+//router.get('/api/getTextLocations*',multi_lingual.locations);
+//router.post('/api/selectedPrompts*',multi_lingual.prompts);
+//
+//router.get('/resources/getDocs*',resources.getDocs);
+//router.get('/resources/getEducation*',resources.getEducation);
+//
+//router.post('/fabric/getBlockchain', blockchain.getBlockchain);
+//
+//router.get('/fabric/admin/getRegistries*', hlcAdmin.getRegistries);
+//router.post('/fabric/admin/getMembers*', hlcAdmin.getMembers);
+//router.post('/fabric/admin/getAssets*', hlcAdmin.getAssets);
+//router.post('/fabric/admin/addMember*', hlcAdmin.addMember);
+//
+//// router requests specific to the participant
+//router.get('/fabric/client/getItemTable*', hlcClient.getItemTable);
+//router.post('/fabric/client/getMyOrders*', hlcClient.getMyOrders);
+//router.post('/fabric/client/addOrder*', hlcClient.addOrder);
+//router.post('/fabric/client/orderAction*', hlcClient.orderAction);
 
-router.get('/resources/getDocs*',resources.getDocs);
-router.get('/resources/getEducation*',resources.getEducation);
 
-router.post('/fabric/getBlockchain', blockchain.getBlockchain);
-
-router.get('/fabric/admin/getRegistries*', hlcAdmin.getRegistries);
-router.post('/fabric/admin/getMembers*', hlcAdmin.getMembers);
-router.post('/fabric/admin/getAssets*', hlcAdmin.getAssets);
-router.post('/fabric/admin/addMember*', hlcAdmin.addMember);
-
-// router requests specific to the participant
-router.get('/fabric/client/getItemTable*', hlcClient.getItemTable);
-router.post('/fabric/client/getMyOrders*', hlcClient.getMyOrders);
-router.post('/fabric/client/addOrder*', hlcClient.addOrder);
-router.post('/fabric/client/orderAction*', hlcClient.orderAction);
+router.post('/fabric/enrollAdmin*', enrollAdmin.main);

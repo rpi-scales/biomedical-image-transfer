@@ -8,11 +8,11 @@ const { FileSystemWallet, Gateway } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
-const ccpPath = path.resolve(__dirname, '..', '..', '..', 'basic-network', 'connection.json');
+const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
-async function main() {
+exports.main = async function main() {
     try {
         //Name of invoker.
         const user = process.argv[2];
@@ -161,4 +161,4 @@ async function main() {
     }
 }
 
-main();
+//main();
