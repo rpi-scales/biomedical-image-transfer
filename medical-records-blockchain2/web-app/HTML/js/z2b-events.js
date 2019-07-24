@@ -64,7 +64,7 @@ function memberLoad ()
         {
         requestors = dropDummy(_requestors[0].members);
         owners = dropDummy(_owners[0].members);
-        s_string = _getMembers(owners);
+        let s_string = _getMembers(owners);
         hideLoad();
 
         });
