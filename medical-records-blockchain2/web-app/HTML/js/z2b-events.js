@@ -64,7 +64,7 @@ function memberLoad ()
         {
         requestors = dropDummy(_requestors[0].members);
         owners = dropDummy(_owners[0].members);
-        let s_string = _getMembers(owners);
+        let o_string = _getMembers(owners);
         hideLoad();
 
         });
@@ -94,7 +94,7 @@ function deferredMemberLoad()
         {
             requestors = dropDummy(_requestors[0].members);
             owners = dropDummy(_owners[0].members);
-            s_string = _getMembers(owners);
+            let o_string = _getMembers(owners);
             d_prompts.resolve();
         }).fail(d_prompts.reject);
     return d_prompts.promise();
