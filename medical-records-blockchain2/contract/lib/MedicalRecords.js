@@ -905,8 +905,6 @@ class MedicalRecords extends Contract {
         recordString.resource.meta.lastUpdated = dateTime;
 
 
-
-
     }
 
 

@@ -18,6 +18,7 @@ async function main() {
         if(process.argv.length != 3){
            console.log(`Incorrect number of arguments. Must be 3.`);
            console.log(process.argv.length);
+           console.log('query');
             return; 
         }
 
