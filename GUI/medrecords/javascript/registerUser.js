@@ -16,6 +16,10 @@ async function main() {
     try {
         if(process.argv.length != 3){
            console.log(`Incorrect number of arguments. Must be 3.`);
+           console.log(process.argv.length);
+           console.log('registerUser');
+           console.log(process.argv[0]);
+           console.log(process.argv[1]);
             return; 
         }
         // Create a new file system based wallet for managing identities.

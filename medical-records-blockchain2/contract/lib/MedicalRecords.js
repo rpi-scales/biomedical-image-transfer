@@ -296,7 +296,7 @@ class MedicalRecords extends Contract {
             id: ownerId,
             companyName: companyName,
             type: 'owner',
-            requests: []
+            requests: [],
             records: []
         };
         await ctx.stub.putState(ownerId, Buffer.from(JSON.stringify(owner)));
@@ -322,7 +322,7 @@ class MedicalRecords extends Contract {
             id: requestorId,
             companyName: companyName,
             type: 'requestor',
-            requests: []
+            requests: [],
             records: []
         };
         await ctx.stub.putState(requestorId, Buffer.from(JSON.stringify(requestor)));
@@ -422,7 +422,7 @@ class MedicalRecords extends Contract {
             throw new Error('owner not found');
         }
 
-        int outcome = 0;
+        let outcome = 0;
 
         //update request
         if (request.status == JSON.stringify(requestStatus.Created)) {
@@ -472,7 +472,7 @@ class MedicalRecords extends Contract {
             throw new Error('owner not found');
         }
 
-        int outcome = 0;
+        let outcome = 0;
 
         //update request
         if (request.status == JSON.stringify(requestStatus.Created) ) {
@@ -528,7 +528,7 @@ class MedicalRecords extends Contract {
             throw new Error('owner not found');
         }
 
-        int outcome = 0;
+        let outcome = 0;
 
         //update request
         if (request.status == JSON.stringify(requestStatus.Created) || request.status == JSON.stringify(requestStatus.Granted) ) {

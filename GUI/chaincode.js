@@ -1,28 +1,36 @@
 
-
 const shim = require('fabric-shim');
+const util = require('util');
 
-const Chaincode = class {
+var Chaincode = class {
+        Init(stub) {
+                return stub.putState('dummyKey', Buffer.from('dummyValue'))
+                        .then(() => {
+                                console.info('Chaincode instantiation is successful');
+                                return shim.success();
+                        }, () => {
+                                return shim.error();
+                        });
+        }
 
-	async Init(stub) {
-		//use the instantiate input arguments to decide init chaincode state vals
+        Invoke(stub) {
+                console.info('Transaction ID: ' + stub.getTxID());
+                console.info(util.format('Args: %j', stub.getArgs()));
 
-		//save initial state
-		await stub.putState(key, Buffer.from(aStringValue));
-		return shim.success(Buffer.from('Initialized Successfully!'));
-	}
+                let ret = stub.getFunctionAndParameters();
+                console.info('Calling function: ' + ret.fcn);
 
-	async Invoke(stub) {
-		//use invoke input args to decide intended changes
+                return stub.getState('dummyKey')
+                .then((value) => {
+                        if (value.toString() === 'dummyValue') {
+                                console.info(util.format('successfully retrieved value "%j" for the key "dummyKey"', value ));
+                                return shim.success();
+                        } else {
+                                console.error('Failed to retrieve dummyKey or the retrieved value is not expected: ' + value);
+                                return shim.error();
+                        }
+                });
+        }
+};
 
-		//retrieve existing chaincode states
-		let oldVal = await stub.getState(key);
-
-		//calculate new state values and save them
-		let newVal = oldVal + delta;
-		await stub.putState(key, Buffer.from(newValue));
-
-		return shim.success(Buffer.from(newVal.toString()));
-	}
-}
-module.exports.Chaincode = Chaincode; 
+shim.start(new Chaincode());

@@ -41,7 +41,10 @@ async function main() {
         const contract = network.getContract('medrec');
 
         if(process.argv.length < 3){
-           console.log(`Incorrect number of arguments. Must be 3.`);
+           console.log(`Incorrect number of arguments. Must be 3 arguments.`);
+           console.log(process.argv.length);
+           console.log(argv[0]);
+           //console.log()
             return; 
         }
         else{
