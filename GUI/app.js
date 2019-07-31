@@ -5,7 +5,7 @@ const path = require('path');
 const routes = require('./routes/index');
 
 const shim = require('fabric-shim');
-const chaincode = require('./chaincode');
+const Chaincode = require('./chaincode');
 //const invoke = require('./medrecords/javascript/invoke.js');
 //const registerUser = require('./medrecords/javascript/registerUser.js');
 
@@ -17,12 +17,10 @@ var MedRec = require('./medrecords/medrecords');
 
 var medRec = new MedRec();
 
-
-
 app.use('/', routes);
 app.use(express.static(path.join(__dirname, 'public')));
 
-shim.start(new chaincode.Chaincode());
+//shim.start(new Chaincode());
 
 app.get('/yaml', function(req, res){
 	
@@ -38,7 +36,7 @@ app.get('/yaml', function(req, res){
 var newRec = medRec.createRec(ctx, "Albany Medical Center", data);
 	ctx.set(newRec.resID, newRec);
 	
-var nativeObject = yaml.load('./transactions/configrsrc.yaml');
+//var nativeObject = yaml.load('./transactions/configrsrc.yaml');
 
 	res.send(data);
 });
