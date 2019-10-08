@@ -94,7 +94,7 @@ ipfs get <IPFSHash>
 1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
 2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
 3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
-4. If you have run the application(i.e. run `./startFabric.sh javascript` before) before, be sure to run the following steps:
+4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
 ```bash
 # Switch to first-sample folder and run
 ./byfn.sh down 
