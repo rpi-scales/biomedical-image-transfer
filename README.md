@@ -2,27 +2,27 @@
 ## Introduction
 The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access. 
 
-### transactions
-requestRec
+### Transactions
+**requestRec**:
 Attempt to access a file on the ledger
 Inputs: transaction, Record number, requester name (last, first)
 Outputs: string filehash
 
-giveAccess
+**giveAccess**:
 Decrypts a given record's hash of a file IPFS hash to enable sharing.
 Inputs: transaction, Record number, owner name (last, first), recipient name
 Outputs: boolean filehash hashed or not
 
-revokeAccess
+**revokeAccess**:
 Encrypts filename with owner's private key to disable access
 Inputs: transaction, Record number, owner first and last name
 Outputs: boolean filehash hashed or not
 
-createRec
-creates a new record 
+**createRec**:
+Creates a new record 
 Inputs: transaction, Record number, owner first and last name, file IPFS hash
 
-queryAllRecs
+**queryAllRecs**:
 Displays all of the records in the channel.
 
 ## How to Run
@@ -89,6 +89,32 @@ node invoke.js <"Hospital of Invoker"> <args>
 ipfs get <IPFSHash>
 ```
 
+## Setting up (macOS)
+*It is easier to use [Homebrew](http://osxdaily.com/2018/03/07/how-install-homebrew-mac-os/) to install prerequisites for Mac Users*
+1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
+2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
+3. If you have run the application(i.e. run `./startFabric.sh javascript` before) before, be sure to run the following steps:
+```bash
+# Switch to first-sample folder and run
+./byfn.sh down 
+# Clear docker images and containers
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
+```
+4. If you want to test whether you have set up the environment, try running following commands. 
+```bash
+# Go to fabcar directory and run
+./startFabric.sh javascript
+# Install application
+cd javascript
+npm install
+# Register
+node enrollAdmin.js
+node registerUser.js
+# Query and Invoke with Other Transactions
+node query.js
+node invoke.js
+```
 
 ## Current difficulties
 How do we store medical records securely? Is an encrypted link a proper method? If so, what should determine the key for a file and how/where should the key be stored?
@@ -100,3 +126,6 @@ Can we only share with one person at a time since the hash can only be encrypted
 Should we make giveAccess function, or can we just use gpg?
 
 Current implementation: gives complete access to file w/giveAccess function and can revokeAccess if file believed to be tampered with. However, user will still be able to decode it if they have the hash, because they have signature access. What is a better way to do this?
+
+## Useful Links
+1. Hyperledger Fabric presentations and exercises https://github.com/LennartFr/2019-current-blockchain-apps
