@@ -90,10 +90,11 @@ ipfs get <IPFSHash>
 ```
 
 ## Setting up (macOS)
-*It is easier to use [Homebrew](http://osxdaily.com/2018/03/07/how-install-homebrew-mac-os/) to install prerequisites for Mac Users*
+*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
 1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
 2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
-3. If you have run the application(i.e. run `./startFabric.sh javascript` before) before, be sure to run the following steps:
+3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
+4. If you have run the application(i.e. run `./startFabric.sh javascript` before) before, be sure to run the following steps:
 ```bash
 # Switch to first-sample folder and run
 ./byfn.sh down 
@@ -101,7 +102,7 @@ ipfs get <IPFSHash>
 docker rm -f $(docker ps -aq)
 docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
 ```
-4. If you want to test whether you have set up the environment, try running following commands. 
+5. If you want to test whether you have set up the environment, try running following commands. Reference: https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html. 
 ```bash
 # Go to fabcar directory and run
 ./startFabric.sh javascript
@@ -129,3 +130,4 @@ Current implementation: gives complete access to file w/giveAccess function and 
 
 ## Useful Links
 1. Hyperledger Fabric presentations and exercises https://github.com/LennartFr/2019-current-blockchain-apps
+2. Hyperledger tutorials https://hyperledger-fabric.readthedocs.io/en/latest/tutorials.html
