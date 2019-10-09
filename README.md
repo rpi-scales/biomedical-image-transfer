@@ -50,7 +50,7 @@ $ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
 
 Step 3: Edit chainpath.config to reflect paths on local machine and launch the Network
 ```
-cd ../medrecords
+cd medrecords/GUI/
 $./startFabric.sh javascript
 
 $ cd javascript
