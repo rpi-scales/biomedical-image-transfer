@@ -25,7 +25,78 @@ Inputs: transaction, Record number, owner first and last name, file IPFS hash
 **queryAllRecs**:
 Displays all of the records in the channel.
 
-## How to Run
+## Setting up (Version 2)
+*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users. Windows and Linux users can follow directions in the link in step 1. *
+1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
+2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
+3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
+4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
+```bash
+# Switch to first-sample folder and run
+$ ./byfn.sh down 
+# Clear docker images and containers
+$ docker rm -f $(docker ps -aq)
+$ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
+```
+- If you want to test whether you have set up the environment, try running following commands. Reference: https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html. 
+```bash
+# Go to fabcar directory and run
+$ ./startFabric.sh javascript
+# Install application
+$ cd javascript
+$ npm install
+# Register
+$ node enrollAdmin.js
+$ node registerUser.js
+# Query and Invoke with Other Transactions
+$ node query.js
+$ node invoke.js
+```
+5. Go to medrecords directory using `cd GUI/medrecords` and run `./startFabric.sh javascript`.
+6. Install npm for medrecords. 
+```bash
+$ cd javascript
+$ npm install
+```
+7. Install related packages for GUI. 
+```bash
+# Go back to GUI directory
+$ cd ..
+# Install Node.js dependencies
+$ npm init -y
+$ npm install --save express
+
+$ npm install --save-dev nodemon
+$ npm install jsrsasign crypto-js fabric-network fabric-contract-api fabric-shim
+$ npm install fs path yamljs
+# Install npm watch
+$ npm install npm-watch
+
+# You can lanch the dashboard using the following command
+$ npm run watch
+```
+8. Switch back to medrecords directory using `cd medrecords` and enroll.
+```bash
+$ node enrollAdmin.js
+$ node registerUser.js <"Hospital or Organization Name">
+``` 
+9. Upload files to [IPFS](https://ipfs.io/docs/install/). Keep track of the returned hashes!
+```bash
+$ ipfs init
+$ ipfs add <filename>
+```
+10. Edit configrsrc.json to Create New Records. Look for datatypes and descriptions of each entry in the object definitions at the top of medrecords.js.
+```bash
+$ node invoke.js <"Hospital or Organization of Invoker"> 'createRec'  configrsrc.json
+```
+11. Query and Invoke with Other Transactions. 
+```bash
+$ node query.js 
+$ node invoke.js <"Hospital of Invoker"> <args>
+```
+12. * Use output of requestRec to possibly access file through IPFS `ipfs get <IPFSHash>`. 
+
+## How to Run (Version 1)
 
 Step 1: Create Required Environment
 	Set-up Hyperledger Fabric: https://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html
@@ -89,33 +160,7 @@ node invoke.js <"Hospital of Invoker"> <args>
 ipfs get <IPFSHash>
 ```
 
-## Setting up (macOS)
-*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
-1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
-2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
-3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
-4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
-```bash
-# Switch to first-sample folder and run
-./byfn.sh down 
-# Clear docker images and containers
-docker rm -f $(docker ps -aq)
-docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
-```
-5. If you want to test whether you have set up the environment, try running following commands. Reference: https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html. 
-```bash
-# Go to fabcar directory and run
-./startFabric.sh javascript
-# Install application
-cd javascript
-npm install
-# Register
-node enrollAdmin.js
-node registerUser.js
-# Query and Invoke with Other Transactions
-node query.js
-node invoke.js
-```
+
 
 ## Current difficulties
 How do we store medical records securely? Is an encrypted link a proper method? If so, what should determine the key for a file and how/where should the key be stored?
