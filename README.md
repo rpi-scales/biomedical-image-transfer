@@ -26,7 +26,7 @@ Inputs: transaction, Record number, owner first and last name, file IPFS hash
 Displays all of the records in the channel.
 
 ## Setting up (Version 2)
-*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users. Windows and Linux users can follow directions in the link in step 1. *
+*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
 1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
 2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
 3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
