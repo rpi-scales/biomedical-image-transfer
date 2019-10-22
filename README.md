@@ -28,8 +28,8 @@ Displays all of the records in the channel.
 ## Setting up (Version 2)
 *It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
 1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
-2. Pull biomedical-image-transter using `git clone https://github.com/rpi-scales/biomedical-image-transfer.git`. 
-3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/biomedical-image-transfer`. 
+2. Pull biomedical-image-transfer using `git clone https://github.com/rpi-scales/biomedical-image-transfer.git`. 
+3. Go to biomedical-image-transfer directory using `cd PATH_TO_FABRIC_FOLDERS/biomedical-image-transfer`. 
 4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
 ```bash
 # Switch to first-sample folder and run
