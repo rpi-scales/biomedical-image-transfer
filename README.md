@@ -28,8 +28,8 @@ Displays all of the records in the channel.
 ## Setting up (Version 2)
 *It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
 1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
-2. Clone fabric-sample. This can be done with `curl -sSL http://bit.ly/2ysbOFE | bash -s`. 
-3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/fabric-samples`. 
+2. Pull biomedical-image-transter using `git clone https://github.com/rpi-scales/biomedical-image-transfer.git`. 
+3. Go to fabric-sample directory using `cd PATH_TO_FABRIC_FOLDERS/biomedical-image-transfer`. 
 4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
 ```bash
 # Switch to first-sample folder and run
@@ -37,20 +37,6 @@ $ ./byfn.sh down
 # Clear docker images and containers
 $ docker rm -f $(docker ps -aq)
 $ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
-```
-- If you want to test whether you have set up the environment, try running following commands. Reference: https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html. 
-```bash
-# Go to fabcar directory and run
-$ ./startFabric.sh javascript
-# Install application
-$ cd javascript
-$ npm install
-# Register
-$ node enrollAdmin.js
-$ node registerUser.js
-# Query and Invoke with Other Transactions
-$ node query.js
-$ node invoke.js
 ```
 5. Go to medrecords directory using `cd GUI/medrecords` and run `./startFabric.sh javascript`.
 6. Install npm for medrecords. 
@@ -75,7 +61,7 @@ $ npm install npm-watch
 # You can lanch the dashboard using the following command
 $ npm run watch
 ```
-8. Switch back to medrecords directory using `cd medrecords` and enroll.
+8. Switch back to medrecords directory using `cd medrecords/javascript` and enroll. If you are getting errors in the following steps, please try `npm rebuild`. 
 ```bash
 $ node enrollAdmin.js
 $ node registerUser.js <"Hospital or Organization Name">
@@ -94,7 +80,7 @@ $ node invoke.js <"Hospital or Organization of Invoker"> 'createRec'  configrsrc
 $ node query.js 
 $ node invoke.js <"Hospital of Invoker"> <args>
 ```
-12. * Use output of requestRec to possibly access file through IPFS `ipfs get <IPFSHash>`. 
+12. Use output of requestRec to possibly access file through IPFS `ipfs get <IPFSHash>`. 
 
 ## How to Run (Version 1)
 
