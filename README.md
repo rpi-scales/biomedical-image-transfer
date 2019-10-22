@@ -96,3 +96,4 @@ Current implementation: gives complete access to file w/giveAccess function and 
 ## Useful Links
 1. Hyperledger Fabric presentations and exercises https://github.com/LennartFr/2019-current-blockchain-apps
 2. Hyperledger tutorials https://hyperledger-fabric.readthedocs.io/en/latest/tutorials.html
+3. Hyperledger fabric SDK doc https://fabric-sdk-node.github.io/release-1.4/index.html
