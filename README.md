@@ -1,99 +1,41 @@
-# Medical Record Sharing System
-## Introduction
-The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access. 
+[//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-### Transactions
-**requestRec**:
-Attempt to access a file on the ledger
-Inputs: transaction, Record number, requester name (last, first)
-Outputs: string filehash
+## Hyperledger Fabric Samples
 
-**giveAccess**:
-Decrypts a given record's hash of a file IPFS hash to enable sharing.
-Inputs: transaction, Record number, owner name (last, first), recipient name
-Outputs: boolean filehash hashed or not
+Please visit the [installation instructions](http://hyperledger-fabric.readthedocs.io/en/latest/install.html)
+to ensure you have the correct prerequisites installed. Please use the
+version of the documentation that matches the version of the software you
+intend to use to ensure alignment.
 
-**revokeAccess**:
-Encrypts filename with owner's private key to disable access
-Inputs: transaction, Record number, owner first and last name
-Outputs: boolean filehash hashed or not
+## Download Binaries and Docker Images
 
-**createRec**:
-Creates a new record 
-Inputs: transaction, Record number, owner first and last name, file IPFS hash
+The installation instructions will utilize `scripts/bootstrap.sh` (available in the fabric repository)
+script to download all of the requisite Hyperledger Fabric binaries and docker
+images, and tag the images with the 'latest' tag. Optionally,
+specify a version for fabric, fabric-ca and thirdparty images. If versions
+are not passed, the latest available versions will be downloaded.
 
-**queryAllRecs**:
-Displays all of the records in the channel.
+The script will also clone fabric-samples repository using the version tag that
+is aligned with the Fabric version.
 
-## Setting up (Version 2)
-*It is easier to use [Homebrew](https://brew.sh/) to install prerequisites for Mac Users*
-1. Install [required environment](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). 
-2. Pull biomedical-image-transfer using `git clone https://github.com/rpi-scales/biomedical-image-transfer.git`. 
-3. Go to biomedical-image-transfer directory using `cd PATH_TO_FABRIC_FOLDERS/biomedical-image-transfer`. 
-4. If you have run the application(i.e. `./startFabric.sh javascript`) before, make sure to execute the following steps:
+You can also download the script and execute locally:
+
 ```bash
-# Switch to first-sample folder and run
-$ ./byfn.sh down 
-# Clear docker images and containers
-$ docker rm -f $(docker ps -aq)
-$ docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
+# Fetch bootstrap.sh from fabric repository using
+curl -sS https://raw.githubusercontent.com/hyperledger/fabric/master/scripts/bootstrap.sh -o ./scripts/bootstrap.sh
+# Change file mode to executable
+chmod +x ./scripts/bootstrap.sh
+# Download binaries and docker images
+./scripts/bootstrap.sh [version] [ca version] [thirdparty_version]
 ```
-5. Go to medrecords directory using `cd GUI/medrecords` and run `./startFabric.sh javascript`.
-6. Install npm for medrecords. 
-```bash
-$ cd javascript
-$ npm install
-```
-7. Install related packages for GUI. 
-```bash
-# Go back to GUI directory
-$ cd ..
-# Install Node.js dependencies
-$ npm init -y
-$ npm install --save express
 
-$ npm install --save-dev nodemon
-$ npm install jsrsasign crypto-js fabric-network fabric-contract-api fabric-shim
-$ npm install fs path yamljs
-# Install npm watch
-$ npm install npm-watch
+### Continuous Integration
 
-# You can lanch the dashboard using the following command
-$ npm run watch
-```
-8. Switch back to medrecords directory using `cd medrecords/javascript` and enroll. If you are getting errors in the following steps, please try `npm rebuild`. 
-```bash
-$ node enrollAdmin.js
-$ node registerUser.js <"Hospital or Organization Name">
-``` 
-9. Upload files to [IPFS](https://ipfs.io/docs/install/). Keep track of the returned hashes!
-```bash
-$ ipfs init
-$ ipfs add <filename>
-```
-10. Edit configrsrc.json to Create New Records. Look for datatypes and descriptions of each entry in the object definitions at the top of medrecords.js.
-```bash
-$ node invoke.js <"Hospital or Organization of Invoker"> 'createRec'  configrsrc.json
-```
-11. Query and Invoke with Other Transactions. 
-```bash
-$ node query.js 
-$ node invoke.js <"Hospital of Invoker"> <args>
-```
-12. Use output of requestRec to possibly access file through IPFS `ipfs get <IPFSHash>`. 
+Please have a look at [Continuous Integration Process](docs/fabric-samples-ci.md)
 
-## Current difficulties
-How do we store medical records securely? Is an encrypted link a proper method? If so, what should determine the key for a file and how/where should the key be stored?
+## License <a name="license"></a>
 
-Can we store a list of owners so that a subsequent owner after the original owner can give access to others that it distributes the file to? Is this smart?
-
-Can we only share with one person at a time since the hash can only be encrypted for a single recipient? Or can this recipient re-hash the original?
-
-Should we make giveAccess function, or can we just use gpg?
-
-Current implementation: gives complete access to file w/giveAccess function and can revokeAccess if file believed to be tampered with. However, user will still be able to decode it if they have the hash, because they have signature access. What is a better way to do this?
-
-## Useful Links
-1. Hyperledger Fabric presentations and exercises https://github.com/LennartFr/2019-current-blockchain-apps
-2. Hyperledger tutorials https://hyperledger-fabric.readthedocs.io/en/latest/tutorials.html
-3. Hyperledger fabric SDK doc https://fabric-sdk-node.github.io/release-1.4/index.html
+Hyperledger Project source code files are made available under the Apache
+License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
+Hyperledger Project documentation files are made available under the Creative
+Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
