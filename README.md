@@ -3,9 +3,11 @@
 The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access. 
 
 ## Run application
-1. Go to ImageTransfer folder, run `./startFabric.sh`. 
+1. Go to ImageTransfer folder, run `./startFabric.sh`. <br/>
+   1. Creates a channel called ‘myChannel’, two organizations ‘org0.example.com’ and ‘org1.example.com’. Each organization has two peers, for example, ‘peer0.org0.example.com’. 
 2. Go to javascript folder inside ImageTransfer. Run `npm install`. 
 3. Run `node enrollAdmin.js`. 
+   1. This step enrolls an admin (in ImageTransfer/web-app/server/wallet); otherwise you won’t be able to register user without an admin. 
 4. Go to web-app folder inside ImageTransfer. 
 5. Open two terminals, one goes to server folder, one goes to client folder. Run `npm install` in both folders to install necessary node_modules. Run `npm audit fix` if necessary. 
 6. In server terminal, run `node start`. 
@@ -40,6 +42,7 @@ The healthcare data is stored on a secure, permissioned chain which greatly incr
 
 ## Use Cases
 **Case 1: Information transfer between providers to treat a patient**
+
 Parties involved: A patient, Mike; his primary care physician, Dr. A, working in Practice Alpha; a pulmonologist, Dr. B, working in Practice Beta; a radiologist, Dr. C, working in Practice Zeta affiliated with Beta; and a hospital where Dr. B has a privilege.
 Case: Mike is 55 years old, working in a maintenance contractor for a university. He is covered by employer-sponsored insurance. 
 
@@ -49,6 +52,7 @@ Information storage and flow: (1) Dr. A has most of the medical records related 
 
 
 **Case 2: Data transfer from medical device to providers and researchers**
+
 Parties involved: A company that sells a heart rate tracker; a payer (i.e. an insurance company) that purchases the device; physicians who distribute the device to patients; patients who use the device; research community that collects the data in the device for research
 
 Case: A company has designed a heart rate tracker that can monitor patients’ heart rate, (store and) send the data to a central server, and alert patients/providers in case of irregular heartbeat. A payer that believes the tracker can help preventing severe adverse events and improve enrollees’ long-term health purchases the device and encourages affiliated physicians to distribute it to related patients. The company is also working with a university to improve the design of the device, so the data will be shared with the researchers for research purpose. 
