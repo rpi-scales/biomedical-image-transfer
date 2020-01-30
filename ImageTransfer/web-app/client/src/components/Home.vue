@@ -24,10 +24,20 @@
       <br>
       <input type="text" v-model="registerData.lastName" placeholder="Enter last name">
       <br>
-      <input type="text" v-model="registerData.type" placeholder="Enter Patient/Doctor">
+      <!--<input type="text" v-model="registerData.type" placeholder="Enter Patient/Doctor">-->
+      <input type="radio" id="one" value="Patient" v-model="registerData.type">
+      <label for="one">Patient</label>
+      <br>
+      <input type="radio" id="two" value="Doctor" v-model="registerData.type">
+      <label for="two">Doctor</label>
       <br>
       <input type="submit" value="Register">
     </form>
+    <br>
+    <span v-if="registerData.type">
+      Picked:
+      <b>{{ registerData.type }}</b>
+    </span>
     <br>
     <span v-if="registerResponse">
       <b>{{ registerResponse.data }}</b>

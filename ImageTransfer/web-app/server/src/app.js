@@ -78,13 +78,15 @@ app.post('/registerUser', async (req, res) => {
     //connect to network and update the state with voterId  
 
     let invokeResponse = await network.invoke(networkObj, false, 'createUser', args);
-    console.log(typeof invokeResponse);
-    console.log(invokeResponse);
     if (invokeResponse.error) {
       res.send(invokeResponse.error);
     } else {
-      let parsedResponse = JSON.parse(invokeResponse);
-      parsedResponse += '. UseuserId to login above.';
+      console.log('hello');
+      console.log(typeof invokeResponse);
+      console.log(invokeResponse);
+      //let parsedResponse = JSON.parse(invokeResponse);
+      let parsedResponse = invokeResponse;
+      parsedResponse += '. Use userId to login above.';
       res.send(parsedResponse);
     }
   }
