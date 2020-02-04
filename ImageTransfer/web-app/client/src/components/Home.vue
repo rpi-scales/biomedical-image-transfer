@@ -78,7 +78,6 @@ export default {
         this.registerData.lastName,
         this.registerData.type
       );
-      console.log(apiResponse);
       this.registerResponse = apiResponse;
       await this.hideSpinner();
     },
@@ -87,7 +86,6 @@ export default {
       await this.runSpinner();
 
       if (!this.loginData.userId) {
-        console.log("!thislogin");
         let response = 'Please enter a userId';
         this.loginResponse.data = response;
         await this.hideSpinner();
