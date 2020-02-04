@@ -1,20 +1,11 @@
 <template>
   <div class="posts">
     <h1>Select Doctor</h1>
-    <input type="radio" id="one" value="A" v-model="picked">
-    <label for="one">A</label>
+    <input type="radio" id="one" value="doctor1" v-model="picked">
+    <label for="one">Doctor 1</label>
     <br>
-    <input type="radio" id="two" value="B" v-model="picked">
-    <label for="two">B</label>
-    <br>
-    <input type="radio" id="two" value="C" v-model="picked">
-    <label for="two">C</label>
-    <br>
-    <input type="radio" id="two" value="D" v-model="picked">
-    <label for="two">D</label>
-    <br>
-    <input type="radio" id="two" value="E" v-model="picked">
-    <label for="two">E</label>
+    <input type="radio" id="two" value="doctor2" v-model="picked">
+    <label for="two">Doctor 2</label>
     <br>
     <br>
     <span v-if="picked">
@@ -25,14 +16,14 @@
     <br>
     <!--span><b>{{ response }}</b></span><br /-->
     <form v-on:submit="selectDoctor">
-      <!-- <input type="text" value="2sww593dc034wb2twdk91r" v-model="input.electionId"  >
-      <br>-->
       <input type="text" v-model="input.userId" placeholder="Enter userId">
       <br>
       <input type="submit" value="Select Doctor">
       <br>
     </form>
-
+    <br>
+    <a :href="publicPath + 'uploadFile.html'">Upload File</a>
+    <br>
     <br>
     <span v-if="response">
       <b>{{ response }}</b>
@@ -52,7 +43,8 @@ export default {
     return {
       input: {},
       picked: null,
-      response: null
+      response: null,
+      publicPath: process.env.BASE_URL
     };
   },
   components: {
