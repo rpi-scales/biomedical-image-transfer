@@ -24,7 +24,6 @@
       <br>
       <input type="text" v-model="registerData.lastName" placeholder="Enter last name">
       <br>
-      <!--<input type="text" v-model="registerData.type" placeholder="Enter Patient/Doctor">-->
       <input type="radio" id="one" value="Patient" v-model="registerData.type">
       <label for="one">Patient</label>
       <br>
@@ -93,20 +92,19 @@ export default {
         const apiResponse = await PostsService.validateUser(
           this.loginData.userId
         );
-        console.log("apiResponse");
-        console.log(apiResponse.data);
+        let apiData = JSON.parse(JSON.stringify(apiResponse.data));
 
         if (apiResponse.data.error) {
           // console.log(apiResponse);
-          console.log(apiResponse.data.error);
           this.loginResponse = apiResponse.data.error;
         } else {
-          this.$router.push("SelectDoctor");
+          if(apiData.type === "Patient"){
+            this.$router.push("SelectDoctor");
+          } else {
+            this.$router.push("DisplayImage");
+          }
         }
-
-        console.log(apiResponse);
         this.loginResponse = apiResponse;
-        // this.$router.push('castBallot')
         await this.hideSpinner();
       }
     },

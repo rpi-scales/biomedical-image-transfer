@@ -7,17 +7,12 @@
 const { Contract } = require('fabric-contract-api');
 let Patient = require('./Patient.js');
 let Doctor = require('./Doctor.js');
+let Transaction = require('./Transaction.js');
 
 class ImageTransfer extends Contract {
 
     async initLedger(ctx) {
-        console.info('============= START : Initialize Ledger ===========');
-        let p1 = await new Patient("P1", "A", "B");
-        await ctx.stub.putState(p1.userId, Buffer.from(JSON.stringify(p1)));
-
-        let d1 = await new Doctor("D1", "E", "F");
-        await ctx.stub.putState(d1.userId, Buffer.from(JSON.stringify(d1)));
-        console.info('============= END : Initialize Ledger ===========');
+        
     }
 
     async queryAll(ctx) {
@@ -92,7 +87,24 @@ class ImageTransfer extends Contract {
     }
 
     async selectDoctor(ctx, args) {
+        args = JSON.parse(args);
+
+        let patientId = args.userId;
+        let doctorId = args.picked;
+        let imgKey = args.imgKey;
         
+        // Update doctor side
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        doctor.imgKey = imgKey;
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        
+        // Update transaction
+        let newtransac = await new Transaction(doctorId, patientId, imgKey, "Transaction1");
+        await ctx.stub.putState("Transaction1", Buffer.from(JSON.stringify(newtransac)));     
+        
+        let response = `Transaction between ${patientId} and ${doctorId} succeeded`;
+        return response;
     }
 
     async readMyAsset(ctx, myAssetId) {
