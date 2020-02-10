@@ -9,6 +9,7 @@ const util = require('util');
 let network = require('./fabric/network.js');
 
 const app = express();
+
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(cors());

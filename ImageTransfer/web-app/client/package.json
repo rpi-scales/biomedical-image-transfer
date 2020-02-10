@@ -18,10 +18,12 @@
     "vue-echarts": "^4.0.3",
     "vue-instant-loading-spinner": "^1.0.0",
     "vue-router": "^3.0.7",
+    "vue-session": "^1.0.0",
     "web3": "^1.2.6"
   },
   "devDependencies": {
     "@vue/cli-service": "^4.1.2",
+    "karma": "^4.4.1",
     "vue-template-compiler": "^2.6.10"
   },
   "postcss": {

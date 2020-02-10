@@ -2,20 +2,26 @@
 <template>
     <div>
         <h1>Doctor Page</h1>
-        <h3>Enter user id</h3>
-        <form v-on:submit = "checkStatus">
-            <input type="text" v-model="input.userId" placeholder="Enter userId">
-            <input type="submit" value="Check Status">
-        </form>
 
-        <span v-if="checkResponse">
-            <b>{{ checkResponse.data }}</b>
+        <form v-on:submit = "checkStatus">
+            <input type="submit" value="Check Status">
+        </form> 
+
+        <br>
+        <br>
+
+        <span v-if="imgKey">
+            <h3>Please go to the following address:</h3>
+            <b>http://localhost:8080/ipfs/{{imgKey}}</b>
         </span>
-        
+
+        <span v-if="this.checkResponse.msg">
+            <b>{{this.checkResponse.msg}}</b>
+        </span>
+
         <br>
+        <button @click="logout">Log Out</button>
         <br>
-        <h3>Please go to the following address:</h3>
-        <h4>http://localhost:8080/ipfs/{{imgKey}}</h4>
     </div>
 </template>
 
@@ -28,27 +34,36 @@ export default {
         return {
             input: {},
             checkResponse: {
-                data:""
+                data:"",
+                msg:""
             },
             imgKey: ""
         };
     },
+    beforeCreate: function () {
+        if (!this.$session.exists()) {
+        this.$router.push('/')
+        }
+    },
     methods: {
         async checkStatus() {
-            if (!this.input.userId) {
-                let response = 'Please enter a userid';
-                this.checkResponse.data = response;
+            const apiResponse = await PostsService.validateUser(this.$session.get("userId"));
+            let apiData = JSON.parse(JSON.stringify(apiResponse.data));
+            if(apiResponse.data.error){
+                this.checkResponse = apiResponse.data.error;
             } else {
-                const apiResponse = await PostsService.validateUser(this.input.userId);
-                let apiData = JSON.parse(JSON.stringify(apiResponse.data));
-                if(apiResponse.data.error){
-                    this.checkResponse = apiResponse.data.error;
-                } else {
+                if(apiData.imgKey === ""){
+                    this.checkResponse.msg = "You don't have any message from patient. ";
+                }else{
                     this.imgKey = apiData.imgKey;
                     this.checkResponse.data = JSON.stringify(apiData);
-                } 
-            }
-                
+                }
+            } 
+        },
+
+        logout: function () {
+            this.$session.destroy();
+            this.$router.push('/');
         }
     }
 }

@@ -2,13 +2,9 @@
   <div class="posts">
     <h1>Patient Page</h1>
     <h4>Select a doctor and upload image</h4>
+    <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
-    <br>
-    <h3>1. Enter user id</h3>
-    <input type="text" v-model="input.userId" placeholder="Enter userId">
-    <br>
-
-    <h3>2. Select Doctor</h3>
+    <h3>1. Select Doctor</h3>
     <input type="radio" id="one" value="B" v-model="picked">
     <label for="one">Doctor 1</label>
     <br>
@@ -21,7 +17,7 @@
     </span>
     <br>
 
-    <h3>3. Upload File</h3>
+    <h3>2. Upload File</h3>
     <input type="file" @change="captureFile">
     <button @click="upload">Upload Image</button>
 
@@ -32,6 +28,10 @@
 
     <h3>{{this.ipfsHash}}</h3>
     <h3>{{this.response}}</h3>
+
+    <br>
+    <button @click="logout">Log Out</button>
+    <br>
 
     <br>
     <vue-instant-loading-spinner id="loader" ref="Spinner"></vue-instant-loading-spinner>
@@ -57,6 +57,11 @@ export default {
   },
   components: {
     VueInstantLoadingSpinner
+  },
+  beforeCreate: function () {
+    if (!this.$session.exists()) {
+      this.$router.push('/')
+    }
   },
   methods: {
     async runSpinner() {
@@ -94,12 +99,17 @@ export default {
 
     async submit() {
       console.log(this.ipfsHash);
-      const apiResponse = await PostsService.selectDoctor(this.input.userId, this.picked, this.ipfsHash);
+      const apiResponse = await PostsService.selectDoctor(this.$session.get("userId"), this.picked, this.ipfsHash);
       if (apiResponse.data.error){
         this.response = apiResponse.data.error;
       } else {
         this.response = "Succeed :)";
       }
+    },
+
+    logout: function () {
+      this.$session.destroy();
+      this.$router.push('/');
     }
   }
 };

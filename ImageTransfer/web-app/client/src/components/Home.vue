@@ -18,7 +18,7 @@
     <br>
     <h3>Otherwise, fill out the form below to register!</h3>
     <form v-on:submit="registerUser">
-      <input type="text" v-model="registerData.userId" placeholder="Enter User ID/Drivers License">
+      <input type="text" v-model="registerData.userId" placeholder="Enter User ID">
       <br>
       <input type="text" v-model="registerData.firstName" placeholder="Enter first name">
       <br>
@@ -98,6 +98,8 @@ export default {
           // console.log(apiResponse);
           this.loginResponse = apiResponse.data.error;
         } else {
+          this.$session.start();
+          this.$session.set('userId', this.loginData.userId);
           if(apiData.type === "Patient"){
             this.$router.push("SelectDoctor");
           } else {
