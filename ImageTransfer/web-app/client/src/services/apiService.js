@@ -1,10 +1,11 @@
 import Api from '@/services/api'
 
 export default {
-  selectDoctor(userId, picked) {
+  selectDoctor(userId, picked, imgKey) {
     return Api().post('selectDoctor', {       
-     userId:userId,
-      picked: picked
+      userId: userId,
+      picked: picked,
+      imgKey: imgKey
     })
   },
   queryAll() {

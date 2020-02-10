@@ -16,6 +16,7 @@
     "fabric-ca-client": "~1.4.2",
     "fabric-client": "^1.4.3",
     "fabric-network": "~1.4.2",
+    "ipfs": "^0.40.0",
     "morgan": "^1.9.1",
     "nodemon": "^1.19.1"
   }

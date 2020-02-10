@@ -1,50 +1,48 @@
 <template>
   <div class="posts">
-    <h1>Select Doctor</h1>
-    <input type="radio" id="one" value="A" v-model="picked">
-    <label for="one">A</label>
-    <br>
-    <input type="radio" id="two" value="B" v-model="picked">
-    <label for="two">B</label>
+    <h1>Patient Page</h1>
+    <h4>Select a doctor and upload image</h4>
+    <h3>Logged in as {{this.$session.get("userId")}}</h3>
+
+    <h3>1. Select Doctor</h3>
+    <input type="radio" id="one" value="B" v-model="picked">
+    <label for="one">Doctor 1</label>
     <br>
     <input type="radio" id="two" value="C" v-model="picked">
-    <label for="two">C</label>
-    <br>
-    <input type="radio" id="two" value="D" v-model="picked">
-    <label for="two">D</label>
-    <br>
-    <input type="radio" id="two" value="E" v-model="picked">
-    <label for="two">E</label>
-    <br>
+    <label for="two">Doctor 2</label>
     <br>
     <span v-if="picked">
       Picked:
       <b>{{ picked }}</b>
     </span>
     <br>
-    <br>
-    <!--span><b>{{ response }}</b></span><br /-->
-    <form v-on:submit="selectDoctor">
-      <!-- <input type="text" value="2sww593dc034wb2twdk91r" v-model="input.electionId"  >
-      <br>-->
-      <input type="text" v-model="input.userId" placeholder="Enter userId">
-      <br>
-      <input type="submit" value="Select Doctor">
-      <br>
-    </form>
+
+    <h3>2. Upload File</h3>
+    <input type="file" @change="captureFile">
+    <button @click="upload">Upload Image</button>
 
     <br>
-    <span v-if="response">
-      <b>{{ response }}</b>
-    </span>
+    <br>
+    <button @click="submit">Submit</button>
+    <br>    
+
+    <h3>{{this.ipfsHash}}</h3>
+    <h3>{{this.response}}</h3>
+
+    <br>
+    <button @click="logout">Log Out</button>
+    <br>
+
     <br>
     <vue-instant-loading-spinner id="loader" ref="Spinner"></vue-instant-loading-spinner>
   </div>
 </template>
 
+
 <script>
 import PostsService from "@/services/apiService";
 import VueInstantLoadingSpinner from "vue-instant-loading-spinner/src/components/VueInstantLoadingSpinner.vue";
+import ipfs from "../util/ipfs.js";
 
 export default {
   name: "response",
@@ -52,70 +50,66 @@ export default {
     return {
       input: {},
       picked: null,
-      response: null
+      response: null,
+      ipfsHash: "",
+      buffer: ""
     };
   },
   components: {
     VueInstantLoadingSpinner
   },
+  beforeCreate: function () {
+    if (!this.$session.exists()) {
+      this.$router.push('/')
+    }
+  },
   methods: {
-    async selectDoctor() {
-      await this.runSpinner();
-
-      const electionRes = await PostsService.queryWithQueryString('election');
-
-      let electionId = electionRes.data[0].Key;
-
-      console.log("picked: ");
-      console.log(this.picked);
-      console.log("voterId: ");
-      console.log(this.input.userId);
-      this.response = null;
-      //error checking for making sure to vote for a valid party
-      if (this.picked === null ) {
-        let response = "You have to pick a doctor!";
-        this.response = response;
-        await this.hideSpinner();
-      } else if (this.input.userId === undefined) {
-        console.log('this.userId === undefined')
-        let response = "You have to enter your userId to cast a vote!";
-        this.response = response;
-        await this.hideSpinner();
-      } else {
-        const apiResponse = await PostsService.castBallot(
-          electionId,
-          this.input.voterId,
-          this.picked
-        );
-        console.log('apiResponse: &&&&&&&&&&&&&&&&&&&&&&&');
-        console.log(apiResponse);
-
-        if (apiResponse.data.error) {
-          this.response= apiResponse.data.error;
-          await this.hideSpinner();
-        } else if (apiResponse.data.message) {
-          this.response= `Could not find voter with voterId ${this.input.voterId}
-            in the state. Make sure you are entering a valid voterId`;
-          await this.hideSpinner();
-        } 
-        else {
-          let response = `Successfully recorded vote for ${this.picked} party 
-            for voter with voterId ${apiResponse.data.voterId}. Thanks for 
-            doing your part and voting!`;
-
-          this.response = response;
-
-          console.log("cast ballot");
-          console.log(this.input);
-          await this.hideSpinner();
-        }
-      }
-    },
     async runSpinner() {
       this.$refs.Spinner.show();
     },
     async hideSpinner() {
       this.$refs.Spinner.hide();
+    },
+    
+    captureFile(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      const file = event.target.files[0];
+      let reader = new window.FileReader();
+      reader.readAsArrayBuffer(file);
+      reader.onloadend = () => this.convertToBuffer(reader);
+    },
+
+    async convertToBuffer(reader) {
+      //file is converted to a buffer for upload to IPFS
+      const Bufferdata = await Buffer.from(reader.result);
+      //set this buffer -using es6 syntax
+      this.buffer = Bufferdata;
+      console.log("BUF " + this.buffer);
+    },
+
+    async upload() {
+      event.preventDefault();
+      await ipfs.files.add(this.buffer, (err, IpfsHash) => {
+        this.ipfsHash = IpfsHash[0].hash;
+        console.log(this.ipfsHash);
+      }); 
+      //http://localhost:8080/ipfs/<this.ipfsHash>
+    },
+
+    async submit() {
+      console.log(this.ipfsHash);
+      const apiResponse = await PostsService.selectDoctor(this.$session.get("userId"), this.picked, this.ipfsHash);
+      if (apiResponse.data.error){
+        this.response = apiResponse.data.error;
+      } else {
+        this.response = "Succeed :)";
+      }
+    },
+
+    logout: function () {
+      this.$session.destroy();
+      this.$router.push('/');
     }
   }
 };

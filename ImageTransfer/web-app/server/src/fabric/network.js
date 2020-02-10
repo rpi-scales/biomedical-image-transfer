@@ -70,7 +70,7 @@ exports.invoke = async function (networkObj, isQuery, func, args) {
         let response = await networkObj.contract.submitTransaction(func, args);
         console.log(`Transaction ${func} with args ${args} has been submitted`);
         await networkObj.gateway.disconnect();
-        return response;
+        return `Transaction ${func} with args ${args} has been submitted`;
       } else {
         let response = await networkObj.contract.submitTransaction(func);
         console.log(`Transaction ${func} with args has been submitted`);
@@ -126,8 +126,8 @@ exports.registerUser = async function (userId, firstName, lastName, type) {
     const enrollment = await ca.enroll({ enrollmentID:userId, enrollmentSecret: secret });
     const userIdentity = await X509WalletMixin.createIdentity('Org1MSP', enrollment.certificate, enrollment.key.toBytes());
     await wallet.import(userId, userIdentity);
-    console.log(`Successfully registered voter ${firstName} ${lastName}. UseuserId ${userId} to login above.`);
-    let response = `Successfully registered voter ${firstName} ${lastName}. UseuserId ${userId} to login above.`;
+    console.log(`Successfully registered user ${firstName} ${lastName}. Use userId ${userId} to login above.`);
+    let response = `Successfully registered user ${firstName} ${lastName}. Use userId ${userId} to login above.`;
     return response;
   } catch(error){
     console.error(`Failed to register user + ${userId} + : ${error}`);

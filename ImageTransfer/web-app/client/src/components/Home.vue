@@ -18,16 +18,25 @@
     <br>
     <h3>Otherwise, fill out the form below to register!</h3>
     <form v-on:submit="registerUser">
-      <input type="text" v-model="registerData.userId" placeholder="Enter User ID/Drivers License">
+      <input type="text" v-model="registerData.userId" placeholder="Enter User ID">
       <br>
       <input type="text" v-model="registerData.firstName" placeholder="Enter first name">
       <br>
       <input type="text" v-model="registerData.lastName" placeholder="Enter last name">
       <br>
-      <input type="text" v-model="registerData.type" placeholder="Enter Patient/Doctor">
+      <input type="radio" id="one" value="Patient" v-model="registerData.type">
+      <label for="one">Patient</label>
+      <br>
+      <input type="radio" id="two" value="Doctor" v-model="registerData.type">
+      <label for="two">Doctor</label>
       <br>
       <input type="submit" value="Register">
     </form>
+    <br>
+    <span v-if="registerData.type">
+      Picked:
+      <b>{{ registerData.type }}</b>
+    </span>
     <br>
     <span v-if="registerResponse">
       <b>{{ registerResponse.data }}</b>
@@ -68,7 +77,6 @@ export default {
         this.registerData.lastName,
         this.registerData.type
       );
-      console.log(apiResponse);
       this.registerResponse = apiResponse;
       await this.hideSpinner();
     },
@@ -77,7 +85,6 @@ export default {
       await this.runSpinner();
 
       if (!this.loginData.userId) {
-        console.log("!thislogin");
         let response = 'Please enter a userId';
         this.loginResponse.data = response;
         await this.hideSpinner();
@@ -85,20 +92,21 @@ export default {
         const apiResponse = await PostsService.validateUser(
           this.loginData.userId
         );
-        console.log("apiResponse");
-        console.log(apiResponse.data);
+        let apiData = JSON.parse(JSON.stringify(apiResponse.data));
 
         if (apiResponse.data.error) {
           // console.log(apiResponse);
-          console.log(apiResponse.data.error);
           this.loginResponse = apiResponse.data.error;
         } else {
-          this.$router.push("SelectDoctor");
+          this.$session.start();
+          this.$session.set('userId', this.loginData.userId);
+          if(apiData.type === "Patient"){
+            this.$router.push("SelectDoctor");
+          } else {
+            this.$router.push("DisplayImage");
+          }
         }
-
-        console.log(apiResponse);
         this.loginResponse = apiResponse;
-        // this.$router.push('castBallot')
         await this.hideSpinner();
       }
     },

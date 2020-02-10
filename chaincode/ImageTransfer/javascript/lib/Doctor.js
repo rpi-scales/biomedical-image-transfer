@@ -6,6 +6,7 @@ class Doctor {
         this.firstName = firstName;
         this.lastName = lastName;
         this.type = "Doctor";
+        this.imgKey = "";
     }
 }
 

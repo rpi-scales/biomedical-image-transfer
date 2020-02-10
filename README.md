@@ -3,16 +3,19 @@
 The healthcare data is stored on a secure, permissioned chain which greatly increase the ease of access to information from different hospitals. For example, if a user is visiting the hospital for the first time, then the doctor can quickly obtain user's medical histories after a previous practitioner gives access. 
 
 ## Run application
-1. Go to ImageTransfer folder, run `./startFabric.sh`. <br/>
+*Make sure you've installed `ipfs` and `docker`*
+1. Run docker. 
+2. Go to ImageTransfer folder, run `./startFabric.sh`. <br/>
    1. Creates a channel called ‘myChannel’, two organizations ‘org0.example.com’ and ‘org1.example.com’. Each organization has two peers, for example, ‘peer0.org0.example.com’. 
-2. Go to javascript folder inside ImageTransfer. Run `npm install`. 
-3. Run `node enrollAdmin.js`. 
+3. Go to javascript folder inside ImageTransfer. Run `npm install`. 
+4. Run `node enrollAdmin.js`. 
    1. This step enrolls an admin (in ImageTransfer/web-app/server/wallet); otherwise you won’t be able to register user without an admin. 
-4. Go to web-app folder inside ImageTransfer. 
-5. Open two terminals, one goes to server folder, one goes to client folder. Run `npm install` in both folders to install necessary node_modules. Run `npm audit fix` if necessary. 
-6. In server terminal, run `node start`. 
-7. In client terminal, run `node run serve`. 
-8. Go to localhost 8080. 
+5. Go to web-app folder inside ImageTransfer. 
+6. Open two terminals, one goes to server folder, one goes to client folder. Run `npm install` in both folders to install necessary node_modules. Run `npm audit fix` if necessary. 
+7. In server terminal, run `node start`. 
+8. In client terminal, run `node run serve`. 
+9. Go to localhost 8080. 
+10. Run `ipfs daemon` if you want to test upload image feature. 
 
 ## Data Structure
 ### Components
@@ -58,3 +61,8 @@ Parties involved: A company that sells a heart rate tracker; a payer (i.e. an in
 Case: A company has designed a heart rate tracker that can monitor patients’ heart rate, (store and) send the data to a central server, and alert patients/providers in case of irregular heartbeat. A payer that believes the tracker can help preventing severe adverse events and improve enrollees’ long-term health purchases the device and encourages affiliated physicians to distribute it to related patients. The company is also working with a university to improve the design of the device, so the data will be shared with the researchers for research purpose. 
 
 Information storage and flow: (1) The firm owns and stores data on heart rates, patient behavior, and location. (2) Physicians might access those data for diagnosis when patients visit. (3) Physicians or payers also have access to patient’s complete health records. (4) Researchers access data on the device and some health outcomes for the patients. 
+
+## Notes
+1. Useful links (ipfs)
+   1. https://www.youtube.com/watch?v=jONZtXMu03w
+   2. https://medium.com/@angellopozo/uploading-an-image-to-ipfs-e1f65f039da4
