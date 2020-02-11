@@ -2,6 +2,7 @@
 <template>
     <div>
         <h1>Doctor Page</h1>
+        <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
         <form v-on:submit = "checkStatus">
             <input type="submit" value="Check Status">

@@ -1,9 +1,9 @@
 <template>
   <div class="posts">
     <h1>Patient Page</h1>
-    <h4>Select a doctor and upload image</h4>
     <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
+    <h4>Select a doctor and upload image</h4>
     <h3>1. Select Doctor</h3>
     <input type="radio" id="one" value="B" v-model="picked">
     <label for="one">Doctor 1</label>
