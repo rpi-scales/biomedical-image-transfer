@@ -41,6 +41,8 @@ app.get('/queryByDoctor', async (req, res) => {
 
   let networkObj = await network.connectToNetwork(appAdmin);
   let response = await network.invoke(networkObj, true, 'queryByObjectType', 'Doctor');
+  console.log("queryByDoctor!!!!");
+  console.log(response);
   let parsedResponse = await JSON.parse(response);
   console.log(parsedResponse);
   res.send(parsedResponse);

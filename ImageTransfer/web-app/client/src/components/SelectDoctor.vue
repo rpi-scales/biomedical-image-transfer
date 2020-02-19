@@ -5,12 +5,20 @@
 
     <h4>Select a doctor and upload image</h4>
     <h3>1. Select Doctor</h3>
+
+    <!--
     <input type="radio" id="one" value="B" v-model="picked">
     <label for="one">Doctor 1</label>
     <br>
     <input type="radio" id="two" value="C" v-model="picked">
     <label for="two">Doctor 2</label>
-    <br>
+    <br>-->
+
+    <label v-for="item in doctors"> 
+        <input type="radio" v-model="picked" :value="item.Key"> {{ item.Key }}
+        <br>
+    </label>
+
     <span v-if="picked">
       Picked:
       <b>{{ picked }}</b>
@@ -46,29 +54,45 @@ import ipfs from "../util/ipfs.js";
 
 export default {
   name: "response",
+  
   data() {
     return {
       input: {},
       picked: null,
       response: null,
       ipfsHash: "",
-      buffer: ""
+      buffer: "",
+      doctors: null
     };
   },
+  
+  mounted: function() {
+    this.fetchData() // Calls the method before page loads
+  },
+  
   components: {
     VueInstantLoadingSpinner
   },
+
   beforeCreate: function () {
     if (!this.$session.exists()) {
-      this.$router.push('/')
-    }
+      this.$router.push('/');
+    } 
   },
+
   methods: {
     async runSpinner() {
       this.$refs.Spinner.show();
     },
     async hideSpinner() {
       this.$refs.Spinner.hide();
+    },
+
+    async fetchData () {
+      const apiResponse = await PostsService.queryByDoctor();
+      this.doctors = JSON.parse(JSON.stringify(apiResponse.data));
+      console.log(this.doctors);
+
     },
     
     captureFile(event) {
