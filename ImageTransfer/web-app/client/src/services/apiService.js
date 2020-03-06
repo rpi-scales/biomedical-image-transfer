@@ -29,5 +29,11 @@ export default {
     return Api().post('validateUser', {
      userId:userId
     })
+  },
+  queryDocRecord(userId, imgKey) { // doctor; encrypted imgKey
+    return Api().post('queryDocRecord', {
+      userId:userId,
+      imgKey:imgKey
+    })
   }
 }

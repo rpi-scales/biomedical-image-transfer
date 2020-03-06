@@ -6,14 +6,6 @@
     <h4>Select a doctor and upload image</h4>
     <h3>1. Select Doctor</h3>
 
-    <!--
-    <input type="radio" id="one" value="B" v-model="picked">
-    <label for="one">Doctor 1</label>
-    <br>
-    <input type="radio" id="two" value="C" v-model="picked">
-    <label for="two">Doctor 2</label>
-    <br>-->
-
     <label v-for="item in doctors"> 
         <input type="radio" v-model="picked" :value="item.Key"> {{ item.Key }}
         <br>
@@ -34,8 +26,8 @@
     <button @click="submit">Submit</button>
     <br>    
 
-    <h3>{{this.ipfsHash}}</h3>
     <h3>{{this.response}}</h3>
+    <h3>The encrypted hash is: {{this.encryptedHash}}</h3>
 
     <br>
     <button @click="logout">Log Out</button>
@@ -62,7 +54,8 @@ export default {
       response: null,
       ipfsHash: "",
       buffer: "",
-      doctors: null
+      doctors: null,
+      encryptedHash: ""
     };
   },
   
@@ -116,17 +109,19 @@ export default {
       event.preventDefault();
       await ipfs.files.add(this.buffer, (err, IpfsHash) => {
         this.ipfsHash = IpfsHash[0].hash;
-        console.log(this.ipfsHash);
       }); 
       //http://localhost:8080/ipfs/<this.ipfsHash>
     },
 
     async submit() {
-      console.log(this.ipfsHash);
+      console.log("Submitted");
       const apiResponse = await PostsService.selectDoctor(this.$session.get("userId"), this.picked, this.ipfsHash);
+      console.log("Select doctor response");
+      console.log(apiResponse);
       if (apiResponse.data.error){
         this.response = apiResponse.data.error;
       } else {
+        this.encryptedHash = JSON.stringify(apiResponse.data);
         this.response = "Succeed :)";
       }
     },

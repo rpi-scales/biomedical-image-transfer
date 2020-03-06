@@ -7,6 +7,8 @@ const morgan = require('morgan');
 const util = require('util');
 
 let network = require('./fabric/network.js');
+const QuickEncrypt = require('quick-encrypt');
+const fs = require('fs');
 
 const app = express();
 
@@ -62,7 +64,16 @@ app.post('/registerUser', async (req, res) => {
     }
     req.body = JSON.stringify(req.body);
     let args = [req.body];
-    let invokeResponse = await network.invoke(networkObj, false, 'createUser', args);
+    let invokeResponse = await network.invoke(networkObj, false, 'createUser', args); // Alternative way is to just upload public key in the world state
+
+    let keys = QuickEncrypt.generate(2048);
+    var keypair = {
+      "userId" : userId,
+      "public" : keys.public,
+      "private" : keys.private
+    };
+    fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keypair));
+    
     if (invokeResponse.error) {
       res.send(invokeResponse.error);
     } else {
@@ -99,16 +110,39 @@ app.post('/selectDoctor', async(req, res) => {
   if (networkObj.error) {
     res.send(networkObj.error);
   }
+
+  let rawdata = fs.readFileSync('keys/'+req.body.picked + '.json'); 
+  let user = JSON.parse(rawdata);
+  let encryptedText = QuickEncrypt.encrypt(req.body.imgKey, user.public);
+  req.body.imgKey = encryptedText;
+
   req.body = JSON.stringify(req.body);
-  console.log(req.body);
   let args = [req.body];
-  let invokeResponse = await network.invoke(networkObj, false, 'selectDoctor', args);
-    if (invokeResponse.error) {
+  let invokeResponse = await network.invoke(networkObj, false, 'createDocRecord', args);
+  if (invokeResponse.error) {
       res.send(invokeResponse.error);
     } else {
-      let parsedResponse = invokeResponse;
-      res.send(parsedResponse);
+      let parsedResponse = invokeResponse.toString();
+      res.send(encryptedText);
     }
+});
+
+app.post('/queryDocRecord', async(req, res) => {
+  console.log("Query document record function");
+  let userId = req.body.userId;
+  let networkObj = await network.connectToNetwork(userId);
+  if (networkObj.error) {
+    res.send(networkObj.error);
+  }
+  let rawdata = fs.readFileSync('keys/'+ userId + '.json');
+  let user = JSON.parse(rawdata);
+  
+  console.log("Encrypted Img Key");
+  console.log(req.body.imgKey);
+
+  let decryptedText = QuickEncrypt.decrypt( req.body.imgKey, user.private);
+  console.log(decryptedText);
+  res.send(decryptedText);
 });
 
 

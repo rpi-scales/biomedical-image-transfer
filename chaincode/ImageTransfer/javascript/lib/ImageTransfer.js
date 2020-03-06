@@ -7,7 +7,7 @@
 const { Contract } = require('fabric-contract-api');
 let Patient = require('./Patient.js');
 let Doctor = require('./Doctor.js');
-let Transaction = require('./Transaction.js');
+let DocRecord = require('./DocRecord.js'); // Document Record
 
 class ImageTransfer extends Contract {
 
@@ -86,7 +86,7 @@ class ImageTransfer extends Contract {
         return (!!buffer && buffer.length > 0);
     }
 
-    async selectDoctor(ctx, args) {
+    async createDocRecord(ctx, args) {
         args = JSON.parse(args);
 
         let patientId = args.userId;
@@ -98,10 +98,9 @@ class ImageTransfer extends Contract {
         let doctor = await JSON.parse(doctorAsBytes.toString());
         doctor.imgKey = imgKey;
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
-        
-        // Update transaction
-        let newtransac = await new Transaction(doctorId, patientId, imgKey, "Transaction1");
-        await ctx.stub.putState("Transaction1", Buffer.from(JSON.stringify(newtransac)));     
+
+        // let record = await new DocRecord(imgKey, userId, picked);
+        // await ctx.stub.putState(record.key, Buffer.from(JSON.stringify(record)));
         
         let response = `Transaction between ${patientId} and ${doctorId} succeeded`;
         return response;
@@ -113,7 +112,7 @@ class ImageTransfer extends Contract {
             throw new Error(`The my asset ${myAssetId} does not exist`);
         }
         const buffer = await ctx.stub.getState(myAssetId);
-        const asset = JSON.parse(buffer.toString());
+        const asset = buffer.toString();
         return asset;
     }
 }

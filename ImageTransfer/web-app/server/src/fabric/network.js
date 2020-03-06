@@ -70,7 +70,7 @@ exports.invoke = async function (networkObj, isQuery, func, args) {
         let response = await networkObj.contract.submitTransaction(func, args);
         console.log(`Transaction ${func} with args ${args} has been submitted`);
         await networkObj.gateway.disconnect();
-        return `Transaction ${func} with args ${args} has been submitted`;
+        return response;
       } else {
         let response = await networkObj.contract.submitTransaction(func);
         console.log(`Transaction ${func} with args has been submitted`);
@@ -112,7 +112,7 @@ exports.registerUser = async function (userId, firstName, lastName, type) {
       response.error = 'An identity for the admin user "admin" does not exist in the wallet.'
       return response;
     }
-
+  
     // Create a new gateway for connecting to our peer node.
     const gateway = new Gateway();
     await gateway.connect(ccpPath, { wallet, identity: 'admin', discovery: { enabled: true, asLocalhost: true } });
@@ -127,6 +127,7 @@ exports.registerUser = async function (userId, firstName, lastName, type) {
     const userIdentity = await X509WalletMixin.createIdentity('Org1MSP', enrollment.certificate, enrollment.key.toBytes());
     await wallet.import(userId, userIdentity);
     console.log(`Successfully registered user ${firstName} ${lastName}. Use userId ${userId} to login above.`);
+
     let response = `Successfully registered user ${firstName} ${lastName}. Use userId ${userId} to login above.`;
     return response;
   } catch(error){
@@ -135,4 +136,6 @@ exports.registerUser = async function (userId, firstName, lastName, type) {
     response.error = error;
     return response;
   }
-};
+}
+
+;
