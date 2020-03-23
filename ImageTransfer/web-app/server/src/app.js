@@ -62,9 +62,6 @@ app.post('/registerUser', async (req, res) => {
     if (networkObj.error) {
       res.send(networkObj.error);
     }
-    req.body = JSON.stringify(req.body);
-    let args = [req.body];
-    let invokeResponse = await network.invoke(networkObj, false, 'createUser', args); // Alternative way is to just upload public key in the world state
 
     let keys = QuickEncrypt.generate(2048);
     var keypair = {
@@ -72,8 +69,14 @@ app.post('/registerUser', async (req, res) => {
       "public" : keys.public,
       "private" : keys.private
     };
-    fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keypair));
     
+    req.body.publicKey = keys.public;
+    req.body = JSON.stringify(req.body);
+    let args = [req.body];
+    let invokeResponse = await network.invoke(networkObj, false, 'createUser', args); // Alternative way is to just upload public key in the world state
+    
+    fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keypair));
+
     if (invokeResponse.error) {
       res.send(invokeResponse.error);
     } else {
@@ -110,7 +113,7 @@ app.post('/selectDoctor', async(req, res) => {
   if (networkObj.error) {
     res.send(networkObj.error);
   }
-
+  //TODO: change this part to "Fetching public keys from user, not from file system"
   let rawdata = fs.readFileSync('keys/'+req.body.picked + '.json'); 
   let user = JSON.parse(rawdata);
   let encryptedText = QuickEncrypt.encrypt(req.body.imgKey, user.public);

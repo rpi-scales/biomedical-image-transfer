@@ -67,13 +67,14 @@ class ImageTransfer extends Contract {
         let firstName = args.firstName;
         let lastName = args.lastName;
         let type = args.type;
+        let publicKey = args.publicKey;
 
         if (type == "Patient") {
-            let newp = await new Patient(userId, firstName, lastName);
+            let newp = await new Patient(userId, firstName, lastName, publicKey);
             await ctx.stub.putState(newp.userId, Buffer.from(JSON.stringify(newp)));
         } else{
             if (type == "Doctor"){
-                let newd = await new Doctor(userId, firstName, lastName);
+                let newd = await new Doctor(userId, firstName, lastName, publicKey);
                 await ctx.stub.putState(newd.userId, Buffer.from(JSON.stringify(newd)));
             }
         }
@@ -99,8 +100,6 @@ class ImageTransfer extends Contract {
         doctor.imgKey = imgKey;
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
 
-        // let record = await new DocRecord(imgKey, userId, picked);
-        // await ctx.stub.putState(record.key, Buffer.from(JSON.stringify(record)));
         
         let response = `Transaction between ${patientId} and ${doctorId} succeeded`;
         return response;
