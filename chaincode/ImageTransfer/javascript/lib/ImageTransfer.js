@@ -122,14 +122,16 @@ class ImageTransfer extends Contract {
         } else {
             patient.specialist.push(doctorId);
         }
-        doctor.patientRecords.push({
-            UserId: patientId,
-            Name: patient.firstName,
-            ImageKeys: "",
-            Notes: "",
-            Role: role
-        });
-
+        if (this.findPatient(doctor, patientId)==null) {
+            doctor.patientRecords.push({
+                UserId: patientId,
+                Name: patient.firstName,
+                ImageKeys: "",
+                Notes: "",
+                Role: role
+            });
+        }
+        
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
         
@@ -169,6 +171,17 @@ class ImageTransfer extends Contract {
         const buffer = await ctx.stub.getState(myAssetId);
         const asset = buffer.toString();
         return asset;
+    }
+
+    //helper
+    findPatient(doctor, patientId) {
+        var i;
+        for (i = 0; i < doctor.patientRecords.length; i++) {
+            if (doctor.patientRecords[i].UserId == patientId) {
+                return doctor.patientRecords[i];
+            }
+        }
+        return;
     }
 }
 

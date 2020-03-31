@@ -111,9 +111,9 @@ export default {
       //set this buffer -using es6 syntax
       this.buffer = Bufferdata;
       console.log("BUF " + this.buffer);
-      const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.buffer);
+      const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer);
       this.encryptedBuffer = JSON.stringify(apiResponse.data);
-      console.log(apiResponse);
+      console.log("ENCRYPTED " + this.encryptedBuffer);
     },
 
     async upload() {

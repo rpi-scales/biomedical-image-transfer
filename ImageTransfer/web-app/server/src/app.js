@@ -131,16 +131,16 @@ app.post('/encryptContent', async(req, res) => {
 
 // Use doctor's private key to decrypt the content
 // private key can be fetched from local directories
-// It should take in doctor id, encrypted
+// It should take in doctor id, picked user
 app.post('/decryptContent', async(req, res) => {
   console.log("Query document record function");
-  let doctorId = req.body.doctorId;
-  let networkObj = await network.connectToNetwork(doctorId);
+  let userId = req.body.userId;
+  let networkObj = await network.connectToNetwork(userId);
   if (networkObj.error) {
     res.send(networkObj.error);
   }
 
-  let rawdata = fs.readFileSync('keys/'+ doctorId + '.json');
+  let rawdata = fs.readFileSync('keys/'+ userId + '.json');
   let user = JSON.parse(rawdata);
 
   let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
@@ -205,6 +205,27 @@ app.post('/queryPatients', async(req, res) => {
   console.log(patients);
   res.send(patients); //Not sure if this is possible
 });
+
+app.post('/fetchRecord', async(req, res) => {
+  console.log("Fetching patient record");
+  let doctorId = req.body.doctorId;
+  let networkObj = await network.connectToNetwork(doctorId);
+  if(networkObj.error) {
+    res.send(networkObj.error);
+  }
+  let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', doctorId);
+  let doctor = JSON.parse(invokeResponse);
+  let patient;
+  var i;
+  for (i = 0; i < doctor.patientRecords.length; i++) {
+      if(doctor.patientRecords[i].UserId == req.body.patientId) {
+        patient = doctor.patientRecords[i];
+        break;
+      }
+  }
+  console.log(patient);
+  res.send(patient)
+})
 
 
 app.listen(process.env.PORT || 8081);

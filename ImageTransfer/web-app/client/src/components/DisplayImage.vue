@@ -4,30 +4,25 @@
         <h1>Doctor Page</h1>
         <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
-        <form v-on:submit = "checkStatus">
-            <input type="submit" value="Check your patients">
-        </form> 
-
+        <h4>You currently have following patients:</h4>
+        <br>
         <label v-for="item in patients"> 
             <input type="radio" v-model="picked" :value="item"> {{ item }}
             <br>
         </label>
         <span v-if="picked">
             Picked:
-        <b>{{ picked }}</b>
-        </span>
-        <br>
-
-        <br>
-        <br>
-
-        <span v-if="this.checkResponse.msg">
-            <b>{{this.checkResponse.msg}} </b>
+            <b>{{ picked }}</b>
             <br>
+            <p>Do you want to check patient {{picked}}'s records?</p>
+            <button @click="checkPatientRecord"> Yes </button> 
         </span>
+        <br>
 
-        <span v-if="this.checkResponse.data">
-            <b> Encrypted image key: {{this.checkResponse.data}}</b>
+        <span v-if = "patientImageHash">
+            Patient Note: <b>{{patientNote}}</b>
+            <br>
+            Patient Image Hash: <b>{{patientImageHash}}</b>
         </span>
 
         <br>
@@ -55,38 +50,63 @@
 
 <script>
 import PostsService from "@/services/apiService";
+import ipfs from "../util/ipfs.js";
 
 export default {
     name: "response",
     data() {
         return {
             input: {},
-            checkResponse: {
-                data:"",
-                msg:""
-            },
             imgKey: "",
             url:"",
-            patients: null,
-            picked: null
+            patients: null,    // Patient list
+            picked: null,        // picked patient
+            patientNote: null,
+            patientImageHash: null
         };
     },
+
+    mounted: function() {
+        this.fetchData() // Calls the method before page loads
+    },
+
     beforeCreate: function () {
         if (!this.$session.exists()) {
         this.$router.push('/')
         }
     },
+    
     methods: {
-        async checkStatus() {
+        async fetchData() {
             // Should do querying all patients the doctor has
             const apiResponse = await PostsService.queryPatients(this.$session.get("userId"));
             console.log(apiResponse);
             this.patients = apiResponse.data;
         },
 
+        async checkPatientRecord() {
+            const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.picked);
+            console.log(apiResponse);
+            let patientRec = apiResponse.data;
+            this.patientNote = patientRec.Notes;
+            this.patientImageHash = patientRec.ImageKeys;
+        },
+
         async decrypt() {
-            // decrypt based on selected patient
+            const BufferList = require('bl/BufferList');
+            const file = await ipfs.get(this.patientImageHash);
+            console.log(file);
+            console.log(file[0]);
             
+            const content = new BufferList();
+            for await (const chunk of file[0].content) {
+                content.append(chunk);
+            }
+            console.log(content.toString("base64"));    // Need to change this part
+            
+            // decrypt based on selected patient
+            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked);
+            console.log(apiResponse);
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 
