@@ -30,15 +30,16 @@ export default {
      userId:userId
     })
   },
-  queryDocRecord(userId, imgKey) { // doctor; encrypted imgKey
-    return Api().post('queryDocRecord', {
-      userId:userId,
-      imgKey:imgKey
+  decryptContent(patientId, encrypted) { // doctor; encrypted imgKey
+    return Api().post('decryptContent', {
+      patientId: patientId,
+      encrypted: encrypted
     })
   },
-  encryptContent(userId, buffer) {
+  encryptContent(userId, picked, buffer) {
     return Api().post('encryptContent', {
       userId: userId,
+      picked: picked, 
       buffer: buffer
     })
   },
@@ -46,6 +47,11 @@ export default {
     return Api().post('giveAccessTo', {
       userId: userId,
       picked: picked
+    })
+  },
+  queryPatients(doctorId) {
+    return Api().post('queryPatients', {
+      doctorId: doctorId
     })
   }
 }

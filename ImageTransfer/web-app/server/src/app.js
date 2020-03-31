@@ -114,6 +114,8 @@ app.post('/validateUser', async (req, res) => {
 
 });
 
+// Use doctor's public key to encrypt the content
+// public key is fetched from database
 app.post('/encryptContent', async(req, res) => {
   console.log("Encrypt File Content Function");
   let userId = req.body.userId;
@@ -121,10 +123,29 @@ app.post('/encryptContent', async(req, res) => {
   if (networkObj.error) {
     res.send(networkObj.error);
   }
-  let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', userId);
+  let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', req.body.picked);
   let response = JSON.parse(invokeResponse);
   var encrypted = crypto.publicEncrypt(response.publicKey, Buffer.from(req.body.buffer));
   res.send(encrypted.toString("base64"));
+});
+
+// Use doctor's private key to decrypt the content
+// private key can be fetched from local directories
+// It should take in doctor id, encrypted
+app.post('/decryptContent', async(req, res) => {
+  console.log("Query document record function");
+  let doctorId = req.body.doctorId;
+  let networkObj = await network.connectToNetwork(doctorId);
+  if (networkObj.error) {
+    res.send(networkObj.error);
+  }
+
+  let rawdata = fs.readFileSync('keys/'+ doctorId + '.json');
+  let user = JSON.parse(rawdata);
+
+  let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
+  console.log(decrypted.toString("base64"));
+  res.send(decrypted.toString("base64"));
 });
 
 app.post('/selectDoctor', async(req, res) => {
@@ -148,24 +169,6 @@ app.post('/selectDoctor', async(req, res) => {
     }
 });
 
-app.post('/queryDocRecord', async(req, res) => {
-  console.log("Query document record function");
-  let userId = req.body.userId;
-  let networkObj = await network.connectToNetwork(userId);
-  if (networkObj.error) {
-    res.send(networkObj.error);
-  }
-  let rawdata = fs.readFileSync('keys/'+ userId + '.json');
-  let user = JSON.parse(rawdata);
-  
-  console.log("Encrypted Img Key");
-  console.log(req.body.imgKey);
-
-  let decryptedText = QuickEncrypt.decrypt( req.body.imgKey, user.private);
-  console.log(decryptedText);
-  res.send(decryptedText);
-});
-
 app.post('/giveAccessTo', async(req, res) => {
   console.log("Give Access To function");
   let userId = req.body.userId;
@@ -183,6 +186,24 @@ app.post('/giveAccessTo', async(req, res) => {
     console.log(invokeResponse);
     res.send(parsedResponse);
   }
+});
+
+app.post('/queryPatients', async(req, res) => {
+  console.log("Query all patients a doctor has");
+  let doctorId = req.body.doctorId;
+  let networkObj = await network.connectToNetwork(doctorId);
+  if(networkObj.error) {
+    res.send(networkObj.error);
+  }
+  let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', doctorId);
+  let doctor = JSON.parse(invokeResponse);
+  let patients = [];
+  var i;
+  for (i = 0; i < doctor.patientRecords.length; i++) {
+      patients.push(doctor.patientRecords[i].UserId);
+  }
+  console.log(patients);
+  res.send(patients); //Not sure if this is possible
 });
 
 

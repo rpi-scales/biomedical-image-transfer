@@ -5,8 +5,18 @@
         <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
         <form v-on:submit = "checkStatus">
-            <input type="submit" value="Check Status">
+            <input type="submit" value="Check your patients">
         </form> 
+
+        <label v-for="item in patients"> 
+            <input type="radio" v-model="picked" :value="item"> {{ item }}
+            <br>
+        </label>
+        <span v-if="picked">
+            Picked:
+        <b>{{ picked }}</b>
+        </span>
+        <br>
 
         <br>
         <br>
@@ -56,7 +66,9 @@ export default {
                 msg:""
             },
             imgKey: "",
-            url:""
+            url:"",
+            patients: null,
+            picked: null
         };
     },
     beforeCreate: function () {
@@ -66,26 +78,16 @@ export default {
     },
     methods: {
         async checkStatus() {
-            const apiResponse = await PostsService.validateUser(this.$session.get("userId"));
-            let apiData = JSON.parse(JSON.stringify(apiResponse.data));
-            if(apiResponse.data.error){
-                this.checkResponse = apiResponse.data.error;
-            } else {
-                if(apiData.imgKey === ""){
-                    this.checkResponse.msg = "You don't have any message from patient. ";
-                }else{
-                    this.checkResponse.msg = "You have received message from patient. ";
-                    this.checkResponse.data = apiData.imgKey;
-                    
-                }
-            } 
+            // Should do querying all patients the doctor has
+            const apiResponse = await PostsService.queryPatients(this.$session.get("userId"));
+            console.log(apiResponse);
+            this.patients = apiResponse.data;
         },
 
         async decrypt() {
-            const apiResponse = await PostsService.queryDocRecord(this.$session.get("userId"), this.checkResponse.data);
-            let apiData = JSON.parse(JSON.stringify(apiResponse.data));
-            this.imgKey = apiData;
-            this.url = "http://localhost:8080/ipfs/" + this.imgKey;
+            // decrypt based on selected patient
+            
+            //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 
         logout: function () {
