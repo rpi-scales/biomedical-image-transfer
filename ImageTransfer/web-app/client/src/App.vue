@@ -2,9 +2,9 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">    
       
-        <p><router-link to="/">Home</router-link>&nbsp;          
-        <router-link to="/QueryAll">QueryAll</router-link></p>
-      
+        <p><router-link to="/">Home</router-link>&nbsp;</p>
+            <h1>BioMed Image Transfer System</h1>
+
       <router-view></router-view>
     </div>
 </template>

@@ -84,9 +84,9 @@ exports.invoke = async function (networkObj, isQuery, func, args) {
   }
 }
 
-exports.registerUser = async function (userId, firstName, lastName, type) {
+exports.registerUser = async function (userId, firstName, lastName) {
   let response = {};
-  if(!userId || !firstName || !lastName || !type) {
+  if(!userId || !firstName || !lastName) {
     response.error = 'Error! You need to fill all fields before you can register!';
     return response;
   }

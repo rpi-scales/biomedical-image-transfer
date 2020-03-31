@@ -4,7 +4,7 @@
     <h3>Logged in as {{this.$session.get("userId")}}</h3>
 
     <h4>Select a doctor and upload image</h4>
-    <h3>1. Select Doctor</h3>
+    <h3>1. Select Your Primary Doctor</h3>
 
     <label v-for="item in doctors"> 
         <input type="radio" v-model="picked" :value="item.Key"> {{ item.Key }}
@@ -16,6 +16,8 @@
       <b>{{ picked }}</b>
     </span>
     <br>
+
+    <button @click="giveAccess">Submit</button>
 
     <h3>2. Upload File</h3>
     <input type="file" @change="captureFile">
@@ -55,7 +57,8 @@ export default {
       ipfsHash: "",
       buffer: "",
       doctors: null,
-      encryptedHash: ""
+      encryptedHash: "",
+      encryptedBuffer: ""
     };
   },
   
@@ -87,6 +90,11 @@ export default {
       console.log(this.doctors);
 
     },
+
+    async giveAccess () {
+      const apiResponse = await PostsService.giveAccessTo(this.$session.get("userId"), this.picked);
+      console.log(apiResponse);
+    },
     
     captureFile(event) {
       event.stopPropagation();
@@ -103,11 +111,14 @@ export default {
       //set this buffer -using es6 syntax
       this.buffer = Bufferdata;
       console.log("BUF " + this.buffer);
+      const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.buffer);
+      this.encryptedBuffer = JSON.stringify(apiResponse.data);
+      console.log(apiResponse);
     },
 
     async upload() {
       event.preventDefault();
-      await ipfs.files.add(this.buffer, (err, IpfsHash) => {
+      await ipfs.files.add(Buffer.from(this.encryptedBuffer, 'utf8'), (err, IpfsHash) => {
         this.ipfsHash = IpfsHash[0].hash;
       }); 
       //http://localhost:8080/ipfs/<this.ipfsHash>

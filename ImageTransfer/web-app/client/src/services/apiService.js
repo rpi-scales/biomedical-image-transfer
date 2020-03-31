@@ -35,5 +35,17 @@ export default {
       userId:userId,
       imgKey:imgKey
     })
+  },
+  encryptContent(userId, buffer) {
+    return Api().post('encryptContent', {
+      userId: userId,
+      buffer: buffer
+    })
+  },
+  giveAccessTo(userId, picked) {
+    return Api().post('giveAccessTo', {
+      userId: userId,
+      picked: picked
+    })
   }
 }

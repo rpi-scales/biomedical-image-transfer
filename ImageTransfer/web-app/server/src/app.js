@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const util = require('util');
+var crypto = require("crypto");
 
 let network = require('./fabric/network.js');
 const QuickEncrypt = require('quick-encrypt');
@@ -53,7 +54,8 @@ app.get('/queryByDoctor', async (req, res) => {
 
 app.post('/registerUser', async (req, res) => {
   let userId = req.body.userId;
-  let response = await network.registerUser(userId, req.body.firstName, req.body.lastName, req.body.type);
+  let type = req.body.type;
+  let response = await network.registerUser(userId, req.body.firstName, req.body.lastName);
   console.log(response);
   if (response.error) {
     res.send(response.error);
@@ -73,7 +75,13 @@ app.post('/registerUser', async (req, res) => {
     req.body.publicKey = keys.public;
     req.body = JSON.stringify(req.body);
     let args = [req.body];
-    let invokeResponse = await network.invoke(networkObj, false, 'createUser', args); // Alternative way is to just upload public key in the world state
+    let invokeResponse;
+    
+    if (type == "patient") {
+      invokeResponse = await network.invoke(networkObj, false, 'createPatient', args); 
+    } else {
+      invokeResponse = await network.invoke(networkObj, false, 'createDoctor', args); 
+    }
     
     fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keypair));
 
@@ -106,6 +114,19 @@ app.post('/validateUser', async (req, res) => {
 
 });
 
+app.post('/encryptContent', async(req, res) => {
+  console.log("Encrypt File Content Function");
+  let userId = req.body.userId;
+  let networkObj = await network.connectToNetwork(userId);
+  if (networkObj.error) {
+    res.send(networkObj.error);
+  }
+  let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', userId);
+  let response = JSON.parse(invokeResponse);
+  var encrypted = crypto.publicEncrypt(response.publicKey, Buffer.from(req.body.buffer));
+  res.send(encrypted.toString("base64"));
+});
+
 app.post('/selectDoctor', async(req, res) => {
   console.log("Select doctor function");
   let userId = req.body.userId;
@@ -113,20 +134,17 @@ app.post('/selectDoctor', async(req, res) => {
   if (networkObj.error) {
     res.send(networkObj.error);
   }
-  //TODO: change this part to "Fetching public keys from user, not from file system"
-  let rawdata = fs.readFileSync('keys/'+req.body.picked + '.json'); 
-  let user = JSON.parse(rawdata);
-  let encryptedText = QuickEncrypt.encrypt(req.body.imgKey, user.public);
-  req.body.imgKey = encryptedText;
 
   req.body = JSON.stringify(req.body);
   let args = [req.body];
   let invokeResponse = await network.invoke(networkObj, false, 'createDocRecord', args);
+
   if (invokeResponse.error) {
       res.send(invokeResponse.error);
     } else {
-      let parsedResponse = invokeResponse.toString();
-      res.send(encryptedText);
+      let parsedResponse = invokeResponse;
+      console.log(invokeResponse);
+      res.send(parsedResponse);
     }
 });
 
@@ -146,6 +164,25 @@ app.post('/queryDocRecord', async(req, res) => {
   let decryptedText = QuickEncrypt.decrypt( req.body.imgKey, user.private);
   console.log(decryptedText);
   res.send(decryptedText);
+});
+
+app.post('/giveAccessTo', async(req, res) => {
+  console.log("Give Access To function");
+  let userId = req.body.userId;
+  let networkObj = await network.connectToNetwork(userId);
+  if (networkObj.error) {
+    res.send(networkObj.error);
+  }
+
+  let args = [JSON.stringify(req.body)];
+  let invokeResponse = await network.invoke(networkObj, false, 'giveAccessTo', args);
+  if (invokeResponse.error) {
+    res.send(invokeResponse.error);
+  } else {
+    let parsedResponse = invokeResponse;
+    console.log(invokeResponse);
+    res.send(parsedResponse);
+  }
 });
 
 

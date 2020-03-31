@@ -7,7 +7,6 @@
 const { Contract } = require('fabric-contract-api');
 let Patient = require('./Patient.js');
 let Doctor = require('./Doctor.js');
-let DocRecord = require('./DocRecord.js'); // Document Record
 
 class ImageTransfer extends Contract {
 
@@ -60,6 +59,25 @@ class ImageTransfer extends Contract {
         return queryResults;
     }
 
+    async createPatient(ctx, args) {
+        args = JSON.parse(args);
+        let patient = await new Patient(args.userId, args.firstName, args.lastName, args.publicKey);
+        patient.age = args.age;
+        patient.insurance = args.insurance;
+        await ctx.stub.putState(args.userId, Buffer.from(JSON.stringify(patient)));
+        let response = `User with userId ${args.userId} is updated in the world state`;
+        return response;
+    }
+
+    async createDoctor(ctx, args) {
+        args = JSON.parse(args);
+        let doctor = await new Doctor(args.userId, args.firstName, args.lastName, args.publicKey);
+        doctor.specialty = args.specialty;
+        await ctx.stub.putState(args.userId, Buffer.from(JSON.stringify(doctor)));
+        let response = `User with userId ${args.userId} is updated in the world state`;
+        return response;
+    }
+
     async createUser(ctx, args) {
         args = JSON.parse(args);
 
@@ -87,6 +105,38 @@ class ImageTransfer extends Contract {
         return (!!buffer && buffer.length > 0);
     }
 
+    async giveAccessTo(ctx, args) {
+        args = JSON.parse(args);
+
+        let patientId = args.userId;
+        let doctorId = args.picked;
+        let role = "primary";
+
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
+
+        if (role == "primary") {
+            patient.primaryDoctor = doctorId;
+        } else {
+            patient.specialist.push(doctorId);
+        }
+        doctor.patientRecords.push({
+            UserId: patientId,
+            Name: patient.firstName,
+            ImageKeys: "",
+            Notes: "",
+            Role: role
+        });
+
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
+        
+        let response = `Transaction giveAccessTo success with patientId ${patientId} and doctorId ${doctorId}`;
+        return response;
+    }
+
     async createDocRecord(ctx, args) {
         args = JSON.parse(args);
 
@@ -97,11 +147,17 @@ class ImageTransfer extends Contract {
         // Update doctor side
         let doctorAsBytes = await ctx.stub.getState(doctorId);
         let doctor = await JSON.parse(doctorAsBytes.toString());
-        doctor.imgKey = imgKey;
-        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
-
         
-        let response = `Transaction between ${patientId} and ${doctorId} succeeded`;
+        var i;
+        for (i = 0; i < doctor.patientRecords.length; i++) {
+            if (doctor.patientRecords[i].UserId == patientId) {
+                doctor.patientRecords[i].ImageKeys = imgKey;
+                break;
+            }
+        }
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        
+        let response = doctor.patientRecords[i].ImageKeys;
         return response;
     }
 

@@ -1,13 +1,30 @@
 'use strict';
 
-class Doctor {
+var User = require('./User.js');
+
+/**
+ * PatientRecords is an array of dictionaries. 
+ * patientRecords = [
+ *      {
+ *          UserId: patient's id,
+            Name: patient's name,
+            ImageKeys: [],
+            Notes: "",
+            Role: primary or specialist     <- indicates access level
+ *      },
+        {
+            UserId: ...,
+            ...
+        }
+ * ]
+ */
+
+class Doctor extends User{
     constructor (userId, firstName, lastName, publicKey) {
-        this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        super(userId, firstName, lastName, publicKey);
         this.type = "Doctor";
-        this.imgKey = "";
-        this.publicKey = publicKey;
+        this.specialty = "";
+        this.patientRecords = [];
     }
 }
 
