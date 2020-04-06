@@ -28,37 +28,41 @@ The healthcare data is stored on a secure, permissioned chain which greatly incr
   - Doctor (Class Name)
     - User ID
     - Name (FirstName + LastName)
-    - Institution ID
-    - (Public Key)
+    - Public Key
+    - Specialty
+    - PatientRecords
+      - UserId: Patient's Id
+      - Name: Patient's Name
+      - ImageKeys: []
+      - Notes: ""
+      - Role: primary or specialist (Indicate access level)
+    - (Institution)
   - Patient (Class Name)
     - User ID
     - Name (FirstName + LastName)
-    - (Public Key)
-- Transaction
-  - Transaction (Class Name)
-    - Doctor User ID
-    - Patient User ID
-    - Transaction ID
-    - Timestamp
-    - Medical Images
-
+    - Public Key
+    - Age
+    - Insurance
+    - Primary Doctor
+    - Specialists (Who has access to the patient's records)
 
 ## Use Cases
 **Case 1: Information transfer between providers to treat a patient**
 
 Parties involved: A patient, Mike; his primary care physician, Dr. A, working in Practice Alpha; a pulmonologist, Dr. B, working in Practice Beta; a radiologist, Dr. C, working in Practice Zeta affiliated with Beta; and a hospital where Dr. B has a privilege.
-Case: Mike is 55 years old, working in a maintenance contractor for a university. He is covered by employer-sponsored insurance. 
 
-He has been feeling chest pain for a while. His primary care physician, Dr. A, referred him to a pulmonologist, Dr. B, for a more careful examination. After Mike visited Dr. B, he was sent to a radiologist, Dr. C, for a CT scan. After Dr. B received the results from Dr. C, he found Mike has a large pneumothorax and needs a chest tube placed into his body, to help drain the air and allow the lung to re-expand. Dr. B can perform this surgery in the hospital, where Mike has to stay for several days until it is safe to remove the tube. 
+Case: Mike is 55 years old, working in a maintenance contractor for a university. He is covered by employer-sponsored insurance.
 
-Information storage and flow: (1) Dr. A has most of the medical records related to Mike. (2) Mike is a new patient to Dr. B, so Dr. B needs to access the relevant health records for Mike and update his records since his visit. (3) Dr. C performs the CT-scan for Mike and sends the image results to Dr. B. (4) Dr. B needs to access all the information to determine the diagnosis in his office. (5) Dr. B needs to access all the information when performing the surgery in the hospital.
+Over the past month, he has noticed a tightness in his chest when he walks quickly, or climbs more than one flight of stairs. This tightness lasts about 10 minutes, if he rests. His primary care physician, Dr. A, referred him to a cardiologist Dr. B, for evaluation. Dr. B was concerned that Mike had coronary artery disease, and scheduled a stress echocardiogram. The results of that test were strongly suggestive of coronary artery disease, so Mike was referred to a radiologist, Dr. C, for a cardiac CT scan, which confirmed the diagnosis. After Dr. B received the results from Dr. C, he referred Mike to Dr. D, an interventional cardiologist, for cardiac stent placement. Dr. D can perform this procedure in the hospital as an outpatient, and Mike will be able to leave the hospital on the day of the procedure in the absence of any complications.
+
+Information storage and flow: (1) Dr. A has most of the medical records related to Mike. (2) Mike is a new patient to Dr. B, so Dr. B needs to access the relevant health records for Mike and update his records since his visit. (3) Dr. C performs the CT-scan for Mike and sends the image results to Dr. B. (4) Dr. B needs to transfer all of the information to Dr. D, who will perform the stent placement (5) Dr. D needs to access all the information before conducting the stent placement in the hospital.
 
 
 **Case 2: Data transfer from medical device to providers and researchers**
 
-Parties involved: A company that sells a heart rate tracker; a payer (i.e. an insurance company) that purchases the device; physicians who distribute the device to patients; patients who use the device; research community that collects the data in the device for research
+Parties involved: A company that sells a device that measures heart rate and can record an electrocardiogram (ECG); a payer (i.e. an insurance company) that purchases the device; physicians who distribute the device to patients; patients who use the device; research community that collects the data in the device for research
 
-Case: A company has designed a heart rate tracker that can monitor patients’ heart rate, (store and) send the data to a central server, and alert patients/providers in case of irregular heartbeat. A payer that believes the tracker can help preventing severe adverse events and improve enrollees’ long-term health purchases the device and encourages affiliated physicians to distribute it to related patients. The company is also working with a university to improve the design of the device, so the data will be shared with the researchers for research purpose. 
+Case: A company has designed a device that can monitor patients’ heart rate, (store and), and record an electrocardiogram, and send the data to a central server, and alert patients/providers in case of irregular heartbeat or abnormal ECG. A payer that believes the device can help to rapidly identify serious cardiac events in patients at risk purchases the device and encourages affiliated physicians to distribute it to appropriate patients. The company is also working with a university to improve the design of the device, so the data will be shared with the researchers for research purpose. 
 
 Information storage and flow: (1) The firm owns and stores data on heart rates, patient behavior, and location. (2) Physicians might access those data for diagnosis when patients visit. (3) Physicians or payers also have access to patient’s complete health records. (4) Researchers access data on the device and some health outcomes for the patients. 
 
