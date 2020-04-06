@@ -51,6 +51,7 @@
 <script>
 import PostsService from "@/services/apiService";
 import ipfs from "../util/ipfs.js";
+import helper from "../util/helpers.js";
 
 export default {
     name: "response",
@@ -94,18 +95,17 @@ export default {
 
         async decrypt() {
             const BufferList = require('bl/BufferList');
-            const file = await ipfs.get(this.patientImageHash);
+            const file = await ipfs.files.get(this.patientImageHash);
             console.log(file);
-            console.log(file[0]);
             
             const content = new BufferList();
-            for await (const chunk of file[0].content) {
-                content.append(chunk);
-            }
-            console.log(content.toString("base64"));    // Need to change this part
+            let array = file[0].content;  
+            console.log(helper.bytestoString(array));
+
+            let decodedString = helper.bytestoString(array);
             
             // decrypt based on selected patient
-            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked);
+            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, decodedString);
             console.log(apiResponse);
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },

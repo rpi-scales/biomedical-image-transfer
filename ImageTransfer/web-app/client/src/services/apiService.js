@@ -30,10 +30,11 @@ export default {
      userId:userId
     })
   },
-  decryptContent(userId, patientId) { // doctor; encrypted imgKey
+  decryptContent(userId, patientId, encrypted) { // doctor; encrypted imgKey
     return Api().post('decryptContent', {
       userId: userId,
-      patientId: patientId
+      patientId: patientId,
+      encrypted: encrypted
     })
   },
   encryptContent(userId, picked, buffer) {

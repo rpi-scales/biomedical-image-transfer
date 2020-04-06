@@ -106,9 +106,7 @@ export default {
     },
 
     async convertToBuffer(reader) {
-      //file is converted to a buffer for upload to IPFS
       const Bufferdata = await Buffer.from(reader.result);
-      //set this buffer -using es6 syntax
       this.buffer = Bufferdata;
       console.log("BUF " + this.buffer);
       const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer);
@@ -117,8 +115,8 @@ export default {
     },
 
     async upload() {
-      event.preventDefault();
-      await ipfs.files.add(Buffer.from(this.encryptedBuffer, 'utf8'), (err, IpfsHash) => {
+      event.preventDefault(); 
+      await ipfs.files.add(Buffer.from(this.encryptedBuffer), (err, IpfsHash) => {
         this.ipfsHash = IpfsHash[0].hash;
       }); 
       //http://localhost:8080/ipfs/<this.ipfsHash>
