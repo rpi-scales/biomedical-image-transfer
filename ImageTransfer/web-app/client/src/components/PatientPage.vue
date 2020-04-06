@@ -1,36 +1,47 @@
 <template>
-  <div class="posts">
+  <div>
     <h1>Patient Page</h1>
-    <h3>Logged in as {{this.$session.get("userId")}}</h3>
-
-    <h4>Select a doctor and upload image</h4>
-    <h3>1. Select Your Primary Doctor</h3>
-
-    <label v-for="item in doctors"> 
-        <input type="radio" v-model="picked" :value="item.Key"> {{ item.Key }}
-        <br>
-    </label>
-
-    <span v-if="picked">
-      Picked:
-      <b>{{ picked }}</b>
+    <span v-if="userInfo">
+      <div id = "userInfo">
+        <h4>User Information: </h4>
+        <p>Your name: {{this.userInfo.firstName}} {{this.userInfo.lastName}}</p>
+        <p>You user id: {{this.$session.get("userId")}}</p>
+        <p>Your primary doctor: {{this.userInfo.primaryDoctor}}</p>
+        <p>Your specialist: {{this.userInfo.specialist}}</p>
+      </div>
     </span>
-    <br>
-
-    <button @click="giveAccess">Submit</button>
-
-    <h3>2. Upload File</h3>
-    <input type="file" @change="captureFile">
-    <button @click="upload">Upload Image</button>
 
     <br>
-    <br>
-    <button @click="submit">Submit</button>
-    <br>    
+    <div id = "register">
+      <h4>Select a doctor and upload image: </h4>
+      <h3>1. Select Your Primary Doctor</h3>
 
-    <h3>{{this.response}}</h3>
-    <h3>The encrypted hash is: {{this.encryptedHash}}</h3>
+      <label v-for="item in doctors"> 
+          <input type="radio" v-model="picked" :value="item.Key"> {{ item.Key }}
+          <br>
+      </label>
 
+      <span v-if="picked">
+        Picked:
+        <b>{{ picked }}</b>
+      </span>
+      <br>
+
+      <button @click="giveAccess">Submit</button>
+
+      <h3>2. Upload File</h3>
+      <input type="file" @change="captureFile">
+      <button @click="upload">Upload Image</button>
+
+      <br>
+      <br>
+      <button @click="submit">Submit</button>
+      <br>    
+
+      <h3>{{this.response}}</h3>
+      <h3>The encrypted hash is: {{this.encryptedHash}}</h3>
+
+    </div>
     <br>
     <button @click="logout">Log Out</button>
     <br>
@@ -58,7 +69,8 @@ export default {
       buffer: "",
       doctors: null,
       encryptedHash: "",
-      encryptedBuffer: ""
+      encryptedBuffer: "",
+      userInfo: null
     };
   },
   
@@ -85,10 +97,12 @@ export default {
     },
 
     async fetchData () {
-      const apiResponse = await PostsService.queryByDoctor();
+      let apiResponse = await PostsService.queryByDoctor();
       this.doctors = JSON.parse(JSON.stringify(apiResponse.data));
       console.log(this.doctors);
 
+      this.userInfo = JSON.parse(this.$session.get("userInfo"));
+      console.log(this.userInfo);
     },
 
     async giveAccess () {

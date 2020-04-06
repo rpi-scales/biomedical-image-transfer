@@ -4,7 +4,8 @@
     
     <h3>Sign In</h3>
     <form v-on:submit="validateUser">
-      <input type="text" v-model="loginData.userId" placeholder="Enter User ID">
+      <label class="grey-text">Enter Your User Id: </label><br>
+      <input type="text" v-model="loginData.userId">
       <br>
 
       <input type="submit" value="Login">
@@ -65,10 +66,11 @@ export default {
         } else {
           this.$session.start();
           this.$session.set('userId', this.loginData.userId);
+          this.$session.set('userInfo', JSON.stringify(apiData));
           if(apiData.type === "Patient"){
-            this.$router.push("SelectDoctor");
+            this.$router.push("PatientPage");
           } else {
-            this.$router.push("DisplayImage");
+            this.$router.push("DoctorPage");
           }
         }
         this.loginResponse = apiResponse;

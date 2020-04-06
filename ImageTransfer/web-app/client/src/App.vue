@@ -1,10 +1,7 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">    
-      
+  <div id="app">      
         <p><router-link to="/">Home</router-link>&nbsp;</p>
-            <h1>BioMed Image Transfer System</h1>
-
+        <h1>BioMed Image Transfer System</h1>
       <router-view></router-view>
     </div>
 </template>
@@ -42,6 +39,16 @@ export default {
 .chart-wrapper {
   position:fixed;
   padding-left:32%;
+}
+
+#register {
+    text-align: left;
+    margin-left: 37%;
+}
+
+#userInfo {
+  text-align: left;
+  margin-left: 10%;
 }
 
 </style>

@@ -2,23 +2,26 @@
     <div>
         <h3>Patient Register Page</h3>
         
-        <form v-on:submit="registerUser">
+        <form v-on:submit="registerUser" id="register">
             <p class="h4 text-center mb-4">Sign up</p>
 
-            <label class="grey-text">Your Name: </label>
-            <input type="text" v-model="registerData.firstName" placeholder="first name">
-            <input type="text" v-model="registerData.lastName" placeholder="last name">
-            <br>
-
-            <label class="grey-text">Your User Id: </label>
+            <label class="grey-text">Your User Id: </label><br>
             <input type="text" v-model="registerData.userId">
             <br>
+            
+            <label class="grey-text">Your First Name: </label><br>
+            <input type="text" v-model="registerData.firstName">
+            <br>
 
-            <label class="grey-text">Your Age: </label>
+            <label class="grey-text">Your Last Name: </label><br>
+            <input type="text" v-model="registerData.lastName">
+            <br>
+
+            <label class="grey-text">Your Age: </label><br>
             <input type="text" v-model="registerData.age">
             <br>
 
-            <label class="grey-text">Your insurance (Yes/No): </label>
+            <label class="grey-text">Your insurance (Yes/No): </label><br>
             <input type="text" v-model="registerData.insurance">
             <br>
 

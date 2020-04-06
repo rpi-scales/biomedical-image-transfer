@@ -1,17 +1,30 @@
 <template>
     <div>
         <h3>Doctor Register Page</h3>
-        <form v-on:submit="registerUser">
-            <input type="text" v-model="registerData.userId" placeholder="Enter User ID">
+        <form v-on:submit="registerUser" id="register">
+
+            <p class="h4 text-center mb-4">Sign up</p>
+
+            <label class="grey-text">Your User Id: </label><br>
+            <input type="text" v-model="registerData.userId">
             <br>
-            <input type="text" v-model="registerData.firstName" placeholder="Enter first name">
+
+            <label class="grey-text">Your First Name: </label><br>
+            <input type="text" v-model="registerData.firstName">
             <br>
-            <input type="text" v-model="registerData.lastName" placeholder="Enter last name">
+
+            <label class="grey-text">Your Last Name: </label><br>
+            <input type="text" v-model="registerData.lastName">
             <br>
-            <input type="text" v-model="registerData.specialty" placeholder="Enter your specialty">
+
+            <label class="grey-text">Your specialty: </label><br>
+            <input type="text" v-model="registerData.specialty">
             <br>
+
+            <div class="text-center mt-4">
+                <input type="submit" value="Register">
+            </div>
             
-            <input type="submit" value="Register">
         </form>
 
         
@@ -30,6 +43,7 @@
 
 import PostsService from "@/services/apiService";
 import VueInstantLoadingSpinner from "vue-instant-loading-spinner/src/components/VueInstantLoadingSpinner.vue";
+import { mdbInput, mdbBtn } from 'mdbvue';
 
 export default {
     name: "response",
@@ -44,7 +58,9 @@ export default {
         };
     },
     components: {
-        VueInstantLoadingSpinner
+        VueInstantLoadingSpinner,
+        mdbInput,
+        mdbBtn
     },
     methods: {
         async registerUser() {
