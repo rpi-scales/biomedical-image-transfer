@@ -60,5 +60,12 @@ export default {
       doctorId:doctorId,
       patientId: patientId
     })
-  } 
+  },
+  shareInfowith(userId, doctorId, patientId) {
+    return Api().post('shareInfowith', {
+      userId: userId,
+      doctorId: doctorId,
+      patientId: patientId
+    })
+  }
 }

@@ -28,6 +28,11 @@
       <br>
 
       <button @click="giveAccess">Submit</button>
+      <br>
+      <span v-if="giveAccessResponse">
+        <p>Your primary doctor is {{picked}}</p>
+      </span>
+      <br>
 
       <h3>2. Upload File</h3>
       <input type="file" @change="captureFile">
@@ -70,7 +75,8 @@ export default {
       doctors: null,
       encryptedHash: "",
       encryptedBuffer: "",
-      userInfo: null
+      userInfo: null,
+      giveAccessResponse: null
     };
   },
   
@@ -108,6 +114,7 @@ export default {
     async giveAccess () {
       const apiResponse = await PostsService.giveAccessTo(this.$session.get("userId"), this.picked);
       console.log(apiResponse);
+      this.giveAccessResponse = apiResponse;
     },
     
     captureFile(event) {

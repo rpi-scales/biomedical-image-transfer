@@ -225,6 +225,17 @@ app.post('/fetchRecord', async(req, res) => {
   }
   console.log(patient);
   res.send(patient)
+});
+
+app.post('/shareInfowith', async(req, res)=> {
+  console.log("Share patient information with another doctor");
+  let userId = req.body.userId;
+  let networkObj = await network.connectToNetwork(userId);
+  if(networkObj.error) {
+    res.send(networkObj.error);
+  }
+  let invokeResponse = await network.invoke(networkObj, false, 'shareInfowith', [JSON.stringify(req.body)]);
+  res.send(invokeResponse);
 })
 
 

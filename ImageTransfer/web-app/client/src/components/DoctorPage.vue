@@ -139,7 +139,8 @@ export default {
         },
 
         async shareInfowith() {
-
+            const apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked);
+            console.log(apiResponse);
         },
 
         logout: function () {

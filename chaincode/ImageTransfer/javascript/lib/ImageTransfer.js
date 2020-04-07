@@ -163,6 +163,34 @@ class ImageTransfer extends Contract {
         return response;
     }
 
+    async shareInfowith(ctx, args){
+        args = JSON.parse(args);
+
+        let doctorId = args.userId;
+        let doctorIdpicked = args.doctorId;
+        let patientId = args.patientId;
+
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+
+        let doctorpickedAsBytes = await ctx.stub.getState(doctorIdpicked);
+        let doctorpicked = await JSON.parse(doctorpickedAsBytes.toString());
+        
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
+        
+        patient.specialist.push(doctorId);
+        let patientrec = this.findPatient(doctor, patientId);
+        if(patientrec == null) return `Patient Record not found`;
+        doctorpicked.patientRecords.push(patientrec);
+        
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
+        await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));
+
+        return `Transaction ${doctorId} shareinfowith ${doctorIdpicked} of patient ${patientId} success`;
+    }
+
     async readMyAsset(ctx, myAssetId) {
         const exists = await this.userExists(ctx, myAssetId);
         if (!exists) {
