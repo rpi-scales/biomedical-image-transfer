@@ -30,26 +30,14 @@ app.get('/queryAll', async (req, res) => {
 
 });
 
-app.get('/queryByPatient', async (req, res) => {
-
-  let networkObj = await network.connectToNetwork(appAdmin);
-  let response = await network.invoke(networkObj, true, 'queryByObjectType', 'Patient');
-  let parsedResponse = await JSON.parse(response);
-  console.log(parsedResponse);
-  res.send(parsedResponse);
-
-});
-
 app.get('/queryByDoctor', async (req, res) => {
-
+  console.log("Query doctor function");
   let networkObj = await network.connectToNetwork(appAdmin);
   let response = await network.invoke(networkObj, true, 'queryByObjectType', 'Doctor');
-  console.log("queryByDoctor!!!!");
   console.log(response);
   let parsedResponse = await JSON.parse(response);
   console.log(parsedResponse);
   res.send(parsedResponse);
-
 });
 
 app.post('/registerUser', async (req, res) => {
@@ -126,7 +114,7 @@ app.post('/encryptContent', async(req, res) => {
   let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', req.body.picked);
   let response = JSON.parse(invokeResponse);
   var encrypted = crypto.publicEncrypt(response.publicKey, Buffer.from(req.body.buffer));
-  res.send(encrypted.toString("base64"));
+  res.send(encrypted);
 });
 
 // Use doctor's private key to decrypt the content
@@ -144,8 +132,8 @@ app.post('/decryptContent', async(req, res) => {
   let user = JSON.parse(rawdata);
 
   let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
-  console.log(decrypted.toString("base64"));
-  res.send(decrypted.toString("base64"));
+  console.log(decrypted);
+  res.send(decrypted);
 });
 
 app.post('/selectDoctor', async(req, res) => {
@@ -199,8 +187,8 @@ app.post('/queryPatients', async(req, res) => {
   let doctor = JSON.parse(invokeResponse);
   let patients = [];
   var i;
-  for (i = 0; i < doctor.patientRecords.length; i++) {
-      patients.push(doctor.patientRecords[i].UserId);
+  for (i = 0; i < doctor.primaryPatientRecords.length; i++) {
+      patients.push(doctor.primaryPatientRecords[i].UserId);
   }
   console.log(patients);
   res.send(patients); //Not sure if this is possible
@@ -217,9 +205,9 @@ app.post('/fetchRecord', async(req, res) => {
   let doctor = JSON.parse(invokeResponse);
   let patient;
   var i;
-  for (i = 0; i < doctor.patientRecords.length; i++) {
-      if(doctor.patientRecords[i].UserId == req.body.patientId) {
-        patient = doctor.patientRecords[i];
+  for (i = 0; i < doctor.primaryPatientRecords.length; i++) {
+      if(doctor.primaryPatientRecords[i].UserId == req.body.patientId) {
+        patient = doctor.primaryPatientRecords[i];
         break;
       }
   }

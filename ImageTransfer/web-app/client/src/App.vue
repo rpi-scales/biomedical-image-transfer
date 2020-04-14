@@ -51,4 +51,12 @@ export default {
   margin-left: 10%;
 }
 
+#PatientRec {
+  margin-left: 15%;
+}
+
+#OtherPatientRec{
+  margin-left: 15%;
+}
+
 </style>

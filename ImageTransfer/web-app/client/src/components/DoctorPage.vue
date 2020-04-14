@@ -7,7 +7,10 @@
                 <h4>User Information: </h4>
                 <p>Your name: {{this.userInfo.firstName}} {{this.userInfo.lastName}}</p>
                 <p>You user id: {{this.$session.get("userId")}}</p>
-                <p>Your patient records: {{this.userInfo.patientRecords}}</p>
+                <p>Primary patient records:</p>
+                <div id="PatientRec"></div>
+                <p>Other patient records:</p>
+                <div id="OtherPatientRec"></div>
             </div>
         </span>
 
@@ -31,6 +34,9 @@
                     <b>{{ picked }}</b>
                     <br>
                     <button @click="shareInfowith"> Share </button> 
+                    <span v-if="shareInfoRes">
+                        <p>{{shareInfoRes}}</p>
+                    </span>
                 </span>
             </span>
             <br>
@@ -74,11 +80,12 @@ import PostsService from "@/services/apiService";
 import ipfs from "../util/ipfs.js";
 import helper from "../util/helpers.js";
 
+
+
 export default {
     name: "response",
     data() {
         return {
-            input: {},
             imgKey: "",
             url:"",
             patients: null,    // Patient list
@@ -87,7 +94,8 @@ export default {
             patientImageHash: null,
             userInfo: null,
             doctors: null,
-            pickedDoctor: null
+            pickedDoctor: null,
+            shareInfoRes: null
         };
     },
 
@@ -105,17 +113,29 @@ export default {
         async fetchData() {
             // Should do querying all patients the doctor has
             let apiResponse = await PostsService.queryPatients(this.$session.get("userId"));
-            console.log(apiResponse);
+            console.log("Query Patients Response: "); console.log(apiResponse);
             this.patients = apiResponse.data;
             this.userInfo = JSON.parse(this.$session.get("userInfo"));
-            console.log(this.userInfo);
+            console.log("Current User Information: "); console.log(this.userInfo);
             apiResponse = await PostsService.queryByDoctor();
             this.doctors = JSON.parse(JSON.stringify(apiResponse.data));
+            var str = '';
+            this.userInfo.primaryPatientRecords.forEach(function(patient) {
+                str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
+                        <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
+            }); 
+            document.getElementById("PatientRec").innerHTML = str;
+            str = '';
+            this.userInfo.otherPatientRecords.forEach(function(patient) {
+                str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
+                        <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
+            }); 
+            document.getElementById("OtherPatientRec").innerHTML = str;
         },
 
         async checkPatientRecord() {
             const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.picked);
-            console.log(apiResponse);
+            console.log("Fetch patient record response: "); console.log(apiResponse);
             let patientRec = apiResponse.data;
             this.patientNote = patientRec.Notes;
             this.patientImageHash = patientRec.ImageKeys;
@@ -124,23 +144,29 @@ export default {
         async decrypt() {
             const BufferList = require('bl/BufferList');
             const file = await ipfs.files.get(this.patientImageHash);
-            console.log(file);
+            console.log("IPFS File Content: "); console.log(file); 
             
             const content = new BufferList();
             let array = file[0].content;  
-            console.log(helper.bytestoString(array));
+            console.log("IPFS File Content bytestoString: " );console.log(helper.bytestoString(array));
 
             let decodedString = helper.bytestoString(array);
             
             // decrypt based on selected patient
             const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, decodedString);
-            console.log(apiResponse);
+            console.log("Decrypted Content Response: ");console.log(apiResponse);
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 
         async shareInfowith() {
+            if(this.$session.get("userId") == this.pickedDoctor) {
+                console.log("ERROR: Share information not sucess: sharing info with yourself");
+                this.shareInfoRes = 'Error: You cannot share information with yourself';
+                return;
+            }
             const apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked);
-            console.log(apiResponse);
+            this.shareInfoRes = 'You shared '+ this.picked + ' information with '+this.pickedDoctor;
+            console.log("Share information response: "); console.log(apiResponse);
         },
 
         logout: function () {

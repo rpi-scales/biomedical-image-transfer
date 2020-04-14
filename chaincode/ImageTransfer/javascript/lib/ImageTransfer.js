@@ -122,8 +122,8 @@ class ImageTransfer extends Contract {
         } else {
             patient.specialist.push(doctorId);
         }
-        if (this.findPatient(doctor, patientId)==null) {
-            doctor.patientRecords.push({
+        if (this.findPatient(doctor, patientId, "primary")==null) {
+            doctor.primaryPatientRecords.push({
                 UserId: patientId,
                 Name: patient.firstName,
                 ImageKeys: "",
@@ -150,16 +150,11 @@ class ImageTransfer extends Contract {
         let doctorAsBytes = await ctx.stub.getState(doctorId);
         let doctor = await JSON.parse(doctorAsBytes.toString());
         
-        var i;
-        for (i = 0; i < doctor.patientRecords.length; i++) {
-            if (doctor.patientRecords[i].UserId == patientId) {
-                doctor.patientRecords[i].ImageKeys = imgKey;
-                break;
-            }
-        }
+        let patientInfo = this.findPatient(doctor, patientId, "primary");
+        patientInfo.ImageKeys = imgKey;
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
         
-        let response = doctor.patientRecords[i].ImageKeys;
+        let response = patientInfo.ImageKeys;
         return response;
     }
 
@@ -179,10 +174,10 @@ class ImageTransfer extends Contract {
         let patientAsBytes = await ctx.stub.getState(patientId);
         let patient = await JSON.parse(patientAsBytes.toString());
         
-        patient.specialist.push(doctorId);
-        let patientrec = this.findPatient(doctor, patientId);
+        patient.specialist.push(doctorIdpicked);
+        let patientrec = this.findPatient(doctor, patientId, "primary");
         if(patientrec == null) return `Patient Record not found`;
-        doctorpicked.patientRecords.push(patientrec);
+        doctorpicked.otherPatientRecords.push(patientrec);
         
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
@@ -202,11 +197,17 @@ class ImageTransfer extends Contract {
     }
 
     //helper
-    findPatient(doctor, patientId) {
+    findPatient(doctor, patientId, role) {
+        let patientInfo;
+        if(role == "primary") {
+            patientInfo = doctor.primaryPatientRecords;
+        } else {
+            patientInfo = doctor.otherPatientRecords;
+        }
         var i;
-        for (i = 0; i < doctor.patientRecords.length; i++) {
-            if (doctor.patientRecords[i].UserId == patientId) {
-                return doctor.patientRecords[i];
+        for (i = 0; i < patientInfo.length; i++) {
+            if (patientInfo[i].UserId == patientId) {
+                return patientInfo[i];
             }
         }
         return;

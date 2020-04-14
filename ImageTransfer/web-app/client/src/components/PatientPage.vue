@@ -5,7 +5,7 @@
       <div id = "userInfo">
         <h4>User Information: </h4>
         <p>Your name: {{this.userInfo.firstName}} {{this.userInfo.lastName}}</p>
-        <p>You user id: {{this.$session.get("userId")}}</p>
+        <p>Your user id: {{this.$session.get("userId")}}</p>
         <p>Your primary doctor: {{this.userInfo.primaryDoctor}}</p>
         <p>Your specialist: {{this.userInfo.specialist}}</p>
       </div>
@@ -29,7 +29,7 @@
 
       <button @click="giveAccess">Submit</button>
       <br>
-      <span v-if="giveAccessResponse">
+      <span v-if="this.response.giveAccessRes">
         <p>Your primary doctor is {{picked}}</p>
       </span>
       <br>
@@ -43,7 +43,7 @@
       <button @click="submit">Submit</button>
       <br>    
 
-      <h3>{{this.response}}</h3>
+      <h3>{{this.response.submitRes}}</h3>
       <h3>The encrypted hash is: {{this.encryptedHash}}</h3>
 
     </div>
@@ -61,6 +61,7 @@
 import PostsService from "@/services/apiService";
 import VueInstantLoadingSpinner from "vue-instant-loading-spinner/src/components/VueInstantLoadingSpinner.vue";
 import ipfs from "../util/ipfs.js";
+import helper from "../util/helpers.js";
 
 export default {
   name: "response",
@@ -69,14 +70,13 @@ export default {
     return {
       input: {},
       picked: null,
-      response: null,
+      response: {},
       ipfsHash: "",
       buffer: "",
       doctors: null,
       encryptedHash: "",
       encryptedBuffer: "",
-      userInfo: null,
-      giveAccessResponse: null
+      userInfo: null
     };
   },
   
@@ -104,17 +104,20 @@ export default {
 
     async fetchData () {
       let apiResponse = await PostsService.queryByDoctor();
-      this.doctors = JSON.parse(JSON.stringify(apiResponse.data));
+      this.doctors = apiResponse.data;
+      console.log("Doctor List: ");
       console.log(this.doctors);
 
       this.userInfo = JSON.parse(this.$session.get("userInfo"));
+      console.log("User Information");
       console.log(this.userInfo);
     },
 
     async giveAccess () {
       const apiResponse = await PostsService.giveAccessTo(this.$session.get("userId"), this.picked);
+      console.log("Give Access ApiResponse");
       console.log(apiResponse);
-      this.giveAccessResponse = apiResponse;
+      this.response.giveAccessRes = apiResponse;
     },
     
     captureFile(event) {
@@ -127,10 +130,14 @@ export default {
     },
 
     async convertToBuffer(reader) {
-      const Bufferdata = await Buffer.from(reader.result);
-      this.buffer = Bufferdata;
-      console.log("BUF " + this.buffer);
-      const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer);
+      this.buffer = await Buffer.from(reader.result); // Output: Hello!
+      console.log("File content: " + this.buffer); 
+
+      var input = new Buffer(this.buffer, 'utf8');
+      let deflatedinput = helper.compressFile(input);
+      console.log("deflated: " + deflatedinput);
+      
+      const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, deflatedinput);
       this.encryptedBuffer = JSON.stringify(apiResponse.data);
       console.log("ENCRYPTED " + this.encryptedBuffer);
     },
@@ -149,10 +156,10 @@ export default {
       console.log("Select doctor response");
       console.log(apiResponse);
       if (apiResponse.data.error){
-        this.response = apiResponse.data.error;
+        this.response.submitError = apiResponse.data.error;
       } else {
         this.encryptedHash = JSON.stringify(apiResponse.data);
-        this.response = "Succeed :)";
+        this.response.submitRes = "Succeed :)";
       }
     },
 

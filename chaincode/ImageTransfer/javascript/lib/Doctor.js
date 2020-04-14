@@ -24,7 +24,8 @@ class Doctor extends User{
         super(userId, firstName, lastName, publicKey);
         this.type = "Doctor";
         this.specialty = "";
-        this.patientRecords = [];
+        this.primaryPatientRecords = [];
+        this.otherPatientRecords = [];
     }
 }
 

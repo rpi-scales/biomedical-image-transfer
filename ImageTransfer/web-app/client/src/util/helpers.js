@@ -1,3 +1,5 @@
+var zlib = require('zlib');
+
 module.exports = {
     bytestoString: (array) => {
         var out, i, len, c;
@@ -30,5 +32,14 @@ module.exports = {
             }
         }   
         return out;
+    },
+
+    // input: a string "Hello!"
+    compressFile: (input, fn) => {
+        return zlib.deflateSync(input);
+    },
+
+    decompressFile: (buf) => {
+        return zlib.inflateSync(new Buffer(buf)).toString();
     }
 }

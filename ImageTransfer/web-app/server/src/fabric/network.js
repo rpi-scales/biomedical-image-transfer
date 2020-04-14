@@ -136,6 +136,4 @@ exports.registerUser = async function (userId, firstName, lastName) {
     response.error = error;
     return response;
   }
-}
-
-;
+};

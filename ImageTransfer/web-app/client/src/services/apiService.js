@@ -11,9 +11,6 @@ export default {
   queryAll() {
     return Api().get('queryAll')
   },
-  queryByPatient() {
-    return Api().get('queryByPatient')
-  },
   queryByDoctor() {
     return Api().get('queryByDoctor')
   },
