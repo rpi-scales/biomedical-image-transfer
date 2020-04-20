@@ -1,7 +1,5 @@
 <template>
-  <div class="posts">
-    
-    
+  <div class="Home Page">
     <h3>Sign In</h3>
     <form v-on:submit="validateUser">
       <label class="grey-text">Enter Your User Id: </label><br>

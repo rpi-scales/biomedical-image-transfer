@@ -10,55 +10,6 @@ let Doctor = require('./Doctor.js');
 
 class ImageTransfer extends Contract {
 
-    async initLedger(ctx) {
-        
-    }
-
-    async queryAll(ctx) {
-        let queryString = {
-            selector: {}
-          };
-          let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
-          return queryResults;
-    }
-
-    async queryWithQueryString(ctx, queryString) {
-        console.log('query String');
-        console.log(JSON.stringify(queryString));
-        let resultsIterator = await ctx.stub.getQueryResult(queryString);
-        let allResults = [];
-        while (true) {
-            let res = await resultsIterator.next();
-            if (res.value && res.value.value.toString()) {
-                let jsonRes = {};
-                console.log(res.value.value.toString('utf8'));
-                jsonRes.Key = res.value.key;
-                try {
-                    jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-                } catch (err) {
-                    console.log(err);
-                    jsonRes.Record = res.value.value.toString('utf8');
-                }
-                allResults.push(jsonRes);
-            }
-            if (res.done) {
-                console.log('end of data');
-                await resultsIterator.close();
-                console.info(allResults);
-                console.log(JSON.stringify(allResults));
-                return JSON.stringify(allResults);
-            }
-        }
-    }
-
-    async queryByObjectType(ctx, objectType) {
-        let queryString = {
-          selector: { type: objectType }
-        };
-        let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
-        return queryResults;
-    }
-
     async createPatient(ctx, args) {
         args = JSON.parse(args);
         let patient = await new Patient(args.userId, args.firstName, args.lastName, args.publicKey);
@@ -78,26 +29,68 @@ class ImageTransfer extends Contract {
         return response;
     }
 
-    async createUser(ctx, args) {
+    // A doctor shares information with another doctor
+    async shareInfowith(ctx, args){
         args = JSON.parse(args);
 
-        let userId = args.userId;
-        let firstName = args.firstName;
-        let lastName = args.lastName;
-        let type = args.type;
-        let publicKey = args.publicKey;
+        let doctorId = args.userId;
+        let doctorIdpicked = args.doctorId;
+        let patientId = args.patientId;
 
-        if (type == "Patient") {
-            let newp = await new Patient(userId, firstName, lastName, publicKey);
-            await ctx.stub.putState(newp.userId, Buffer.from(JSON.stringify(newp)));
-        } else{
-            if (type == "Doctor"){
-                let newd = await new Doctor(userId, firstName, lastName, publicKey);
-                await ctx.stub.putState(newd.userId, Buffer.from(JSON.stringify(newd)));
+        let doctor = this.getInfo(doctorId);
+        let doctorpicked = this.getInfo(doctorIdpicked);
+        let patient = this.getInfo(patientId);
+        
+        if (patient.specialist.indexOf(doctorIdpicked) == -1) {
+            patient.specialist.push(doctorIdpicked);
+            await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
+        }
+        let patientrec = this.findPatient(doctor, patientId, "primary");
+        if(patientrec == null) return `Patient Record not found`;
+        doctorpicked.otherPatientRecords.push(patientrec);
+        
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));
+
+        return `Transaction ${doctorId} shareinfowith ${doctorIdpicked} of patient ${patientId} success`;
+    }
+
+    async queryAll(ctx) {
+        let queryString = {
+            selector: {}
+          };
+          let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
+          return queryResults;
+    }
+
+    async queryWithQueryString(ctx, queryString) {
+        let resultsIterator = await ctx.stub.getQueryResult(queryString);
+        let allResults = [];
+        while (true) {
+            let res = await resultsIterator.next();
+            if (res.value && res.value.value.toString()) {
+                let jsonRes = {};
+                jsonRes.Key = res.value.key;
+                try {
+                    jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
+                } catch (err) {
+                    jsonRes.Record = res.value.value.toString('utf8');
+                }
+                allResults.push(jsonRes);
+            }
+            if (res.done) {
+                await resultsIterator.close();
+                return JSON.stringify(allResults);
             }
         }
-        let response = `User with userId ${userId} is updated in the world state`;
-        return response;
+    }
+
+    async queryByObjectType(ctx, objectType) {
+        let queryString = {
+          selector: { type: objectType }
+        };
+        let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
+        return queryResults;
     }
 
     async userExists(ctx,userId) {
@@ -112,10 +105,8 @@ class ImageTransfer extends Contract {
         let doctorId = args.picked;
         let role = "primary";
 
-        let doctorAsBytes = await ctx.stub.getState(doctorId);
-        let doctor = await JSON.parse(doctorAsBytes.toString());
-        let patientAsBytes = await ctx.stub.getState(patientId);
-        let patient = await JSON.parse(patientAsBytes.toString());
+        let doctor = this.getInfo(doctorId);
+        let patient = this.getInfo(patientId);
 
         if (role == "primary") {
             patient.primaryDoctor = doctorId;
@@ -147,9 +138,7 @@ class ImageTransfer extends Contract {
         let imgKey = args.imgKey;
         
         // Update doctor side
-        let doctorAsBytes = await ctx.stub.getState(doctorId);
-        let doctor = await JSON.parse(doctorAsBytes.toString());
-        
+        let doctor = this.getInfo(doctorId);
         let patientInfo = this.findPatient(doctor, patientId, "primary");
         patientInfo.ImageKeys = imgKey;
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
@@ -158,33 +147,7 @@ class ImageTransfer extends Contract {
         return response;
     }
 
-    async shareInfowith(ctx, args){
-        args = JSON.parse(args);
 
-        let doctorId = args.userId;
-        let doctorIdpicked = args.doctorId;
-        let patientId = args.patientId;
-
-        let doctorAsBytes = await ctx.stub.getState(doctorId);
-        let doctor = await JSON.parse(doctorAsBytes.toString());
-
-        let doctorpickedAsBytes = await ctx.stub.getState(doctorIdpicked);
-        let doctorpicked = await JSON.parse(doctorpickedAsBytes.toString());
-        
-        let patientAsBytes = await ctx.stub.getState(patientId);
-        let patient = await JSON.parse(patientAsBytes.toString());
-        
-        patient.specialist.push(doctorIdpicked);
-        let patientrec = this.findPatient(doctor, patientId, "primary");
-        if(patientrec == null) return `Patient Record not found`;
-        doctorpicked.otherPatientRecords.push(patientrec);
-        
-        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
-        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
-        await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));
-
-        return `Transaction ${doctorId} shareinfowith ${doctorIdpicked} of patient ${patientId} success`;
-    }
 
     async readMyAsset(ctx, myAssetId) {
         const exists = await this.userExists(ctx, myAssetId);
@@ -196,7 +159,7 @@ class ImageTransfer extends Contract {
         return asset;
     }
 
-    //helper
+    // helper functions
     findPatient(doctor, patientId, role) {
         let patientInfo;
         if(role == "primary") {
@@ -211,6 +174,12 @@ class ImageTransfer extends Contract {
             }
         }
         return;
+    }
+
+    async getInfo(inputId) {
+        let userAsBytes = await ctx.stub.getState(inputId);
+        let user = await JSON.parse(userAsBytes.toString());
+        return user;
     }
 }
 

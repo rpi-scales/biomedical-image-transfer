@@ -110,33 +110,40 @@ export default {
     },
     
     methods: {
+        // Fetch all data before the page loads
         async fetchData() {
-            // Should do querying all patients the doctor has
-            let apiResponse = await PostsService.queryPatients(this.$session.get("userId"));
-            console.log("Query Patients Response: "); console.log(apiResponse);
-            this.patients = apiResponse.data;
+            // Display current user's information
             this.userInfo = JSON.parse(this.$session.get("userInfo"));
             console.log("Current User Information: "); console.log(this.userInfo);
+
+            // Display all doctors in the system
             apiResponse = await PostsService.queryByDoctor();
-            this.doctors = JSON.parse(JSON.stringify(apiResponse.data));
+            this.doctors = apiResponse.data;
+            
+            // Display all patients the doctor has
             var str = '';
-            this.userInfo.primaryPatientRecords.forEach(function(patient) {
+            if (this.userInfo.primaryPatientRecords.length != 0) {
+                this.userInfo.primaryPatientRecords.forEach(function(patient) {
                 str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
                         <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
-            }); 
-            document.getElementById("PatientRec").innerHTML = str;
-            str = '';
-            this.userInfo.otherPatientRecords.forEach(function(patient) {
-                str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
-                        <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
-            }); 
-            document.getElementById("OtherPatientRec").innerHTML = str;
+                }); 
+                document.getElementById("PatientRec").innerHTML = str;
+            }
+            
+            if (this.userInfo.otherPatientRecords.length != 0) {
+                str = '';
+                this.userInfo.otherPatientRecords.forEach(function(patient) {
+                    str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
+                            <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
+                }); 
+                document.getElementById("OtherPatientRec").innerHTML = str;
+            }
         },
 
         async checkPatientRecord() {
             const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.picked);
             console.log("Fetch patient record response: "); console.log(apiResponse);
-            let patientRec = apiResponse.data;
+            const patientRec = apiResponse.data;
             this.patientNote = patientRec.Notes;
             this.patientImageHash = patientRec.ImageKeys;
         },
