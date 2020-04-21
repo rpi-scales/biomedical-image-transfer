@@ -10,6 +10,8 @@ let Doctor = require('./Doctor.js');
 
 class ImageTransfer extends Contract {
 
+    async initLedger (ctx) {}
+
     async createPatient(ctx, args) {
         args = JSON.parse(args);
         let patient = await new Patient(args.userId, args.firstName, args.lastName, args.publicKey);
@@ -105,8 +107,10 @@ class ImageTransfer extends Contract {
         let doctorId = args.picked;
         let role = "primary";
 
-        let doctor = this.getInfo(doctorId);
-        let patient = this.getInfo(patientId);
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
 
         if (role == "primary") {
             patient.primaryDoctor = doctorId;
@@ -138,7 +142,9 @@ class ImageTransfer extends Contract {
         let imgKey = args.imgKey;
         
         // Update doctor side
-        let doctor = this.getInfo(doctorId);
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        
         let patientInfo = this.findPatient(doctor, patientId, "primary");
         patientInfo.ImageKeys = imgKey;
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));

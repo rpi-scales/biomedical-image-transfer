@@ -1,8 +1,8 @@
 import Api from '@/services/api'
 
 export default {
-    selectDoctor(userId, picked, imgKey) {
-        return Api().post('selectDoctor', {       
+    updateImageKey(userId, picked, imgKey) {
+        return Api().post('updateImageKey', {       
         userId: userId,
         picked: picked,
         imgKey: imgKey

@@ -14,8 +14,8 @@ const util = require('util');
 var crypto = require("crypto");
 
 let network = require('./fabric/network.js');
-const QuickEncrypt = require('quick-encrypt');
 const fs = require('fs');
+
 
 const app = express();
 
@@ -64,35 +64,49 @@ app.post('/registerUser', async (req, res) => {
     } else {
         let networkObj = await network.connectToNetwork(userId);
         if (networkObj.error) {
-        res.send(networkObj.error);
+            res.send(networkObj.error);
         }
+        // Generate public and private key pair for the user
+        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+            publicKeyEncoding: {
+              type: 'spki',
+              format: 'pem'
+            },
+            privateKeyEncoding: {
+              type: 'pkcs8',
+              format: 'pem',
+              cipher: 'aes-256-cbc',
+              passphrase: 'top secret'
+            }
+        });
 
-        let keys = QuickEncrypt.generate(2048);
-        var keypair = {
-        "userId" : userId,
-        "public" : keys.public,
-        "private" : keys.private
+
+        var keys = {
+            "userId" : userId,
+            "public" : publicKey,
+            "private" : privateKey
         };
         
-        req.body.publicKey = keys.public;
+        req.body.publicKey = publicKey;
         req.body = JSON.stringify(req.body);
         let args = [req.body];
         let invokeResponse;
         
         if (type == "patient") {
-        invokeResponse = await network.invoke(networkObj, false, 'createPatient', args); 
+            invokeResponse = await network.invoke(networkObj, false, 'createPatient', args); 
         } else {
-        invokeResponse = await network.invoke(networkObj, false, 'createDoctor', args); 
+            invokeResponse = await network.invoke(networkObj, false, 'createDoctor', args); 
         }
         
-        fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keypair));
+        fs.writeFileSync("keys/"+userId+".json", JSON.stringify(keys));
 
         if (invokeResponse.error) {
-        res.send(invokeResponse.error);
+            res.send(invokeResponse.error);
         } else {
-        let parsedResponse = invokeResponse;
-        parsedResponse += '. Use userId to login above.';
-        res.send(parsedResponse);
+            let parsedResponse = invokeResponse;
+            parsedResponse += '. Use userId to login above.';
+            res.send(parsedResponse);
         }
     }
 });
@@ -111,10 +125,10 @@ app.post('/validateUser', async (req, res) => {
         res.send(invokeResponse);
     } else {
         try{
-        let parsedResponse = await JSON.parse(invokeResponse);
-        res.send(parsedResponse);
+            let parsedResponse = await JSON.parse(invokeResponse);
+            res.send(parsedResponse);
         } catch (error) {
-        res.send(error);
+            res.send(error);
         }
     }
 });
@@ -129,9 +143,15 @@ app.post('/encryptContent', async(req, res) => {
         res.send(networkObj.error);
     }
     let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', req.body.picked);
-    let response = JSON.parse(invokeResponse);
-    var encrypted = crypto.publicEncrypt(response.publicKey, Buffer.from(req.body.buffer));
-    res.send(encrypted);
+    try {
+        let user = JSON.parse(invokeResponse);
+        console.log(req.body.buffer);
+        var encrypted = crypto.publicEncrypt(user.publicKey, Buffer.from(req.body.buffer));
+        res.send(encrypted);
+    } catch (error) {
+        res.send(error);
+    }
+    
 });
 
 // Use doctor's private key to decrypt the content
@@ -144,17 +164,21 @@ app.post('/decryptContent', async(req, res) => {
     if (networkObj.error) {
         res.send(networkObj.error);
     }
+    try {
+        let rawdata = fs.readFileSync('keys/'+ userId + '.json');
+        let user = JSON.parse(rawdata);
 
-    let rawdata = fs.readFileSync('keys/'+ userId + '.json');
-    let user = JSON.parse(rawdata);
-
-    let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
-    console.log(decrypted);
-    res.send(decrypted);
+        let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
+        console.log(decrypted);
+        res.send(decrypted);
+    } catch (error) {
+        res.send(error);
+    }
+    
 });
 
-app.post('/selectDoctor', async(req, res) => {
-    console.log("Select doctor function");
+app.post('/updateImageKey', async(req, res) => {
+    console.log("Update Image Key function");
     let userId = req.body.userId;
     let networkObj = await network.connectToNetwork(userId);
     if (networkObj.error) {

@@ -14,7 +14,7 @@
             </div>
         </span>
 
-        <div id="register">
+        <div id="register">  
             <h4>Do you want to share your patient information with other doctors?</h4>
             <label v-for="item in doctors"> 
                 <input type="radio" v-model="pickedDoctor" :value="item.Key"> {{ item.Key }}
@@ -25,8 +25,8 @@
                 <b>{{ pickedDoctor }}</b>
             
                 <h4>Whose information do you want to share?</h4>
-                <label v-for="item in patients"> 
-                    <input type="radio" v-model="picked" :value="item"> {{ item }}
+                <label v-for="item in userInfo.primaryPatientRecords"> 
+                    <input type="radio" v-model="picked" :value="item.UserId"> {{ item.UserId }}
                     <br>
                 </label>
                 <span v-if="picked">
@@ -39,6 +39,11 @@
                     </span>
                 </span>
             </span>
+            <h4>Upload File</h4>
+                <input type="file" @change="captureFile">
+                <br><br>
+                <button @click="submit">Submit</button>
+            <br> 
             <br>
             <span v-if="picked">
                 <p>Do you want to check patient {{picked}}'s records?</p>
@@ -110,6 +115,18 @@ export default {
     },
     
     methods: {
+        captureFile(event) {
+            
+        },
+
+        async convertToBuffer(reader) {
+            
+        },
+
+        //http://localhost:8080/ipfs/<this.ipfsHash>
+        async submit() {
+            
+        },
         // Fetch all data before the page loads
         async fetchData() {
             // Display current user's information
@@ -117,7 +134,7 @@ export default {
             console.log("Current User Information: "); console.log(this.userInfo);
 
             // Display all doctors in the system
-            apiResponse = await PostsService.queryByDoctor();
+            let apiResponse = await PostsService.queryByDoctor();
             this.doctors = apiResponse.data;
             
             // Display all patients the doctor has
@@ -158,9 +175,15 @@ export default {
             console.log("IPFS File Content bytestoString: " );console.log(helper.bytestoString(array));
 
             let decodedString = helper.bytestoString(array);
+            ipfs.files.get(this.patientImageHash, function (err, files) {
+                files.forEach((file) => {
+                    console.log(file.path)
+                    console.log("File content >> ",file.content.toString('utf8'))
+                })
+            });
             
             // decrypt based on selected patient
-            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, decodedString);
+            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, file[0].content);
             console.log("Decrypted Content Response: ");console.log(apiResponse);
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
