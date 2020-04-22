@@ -38,31 +38,34 @@ class ImageTransfer extends Contract {
         let doctorId = args.userId;
         let doctorIdpicked = args.doctorId;
         let patientId = args.patientId;
+        let imgKey = args.imgKey;
 
-        let doctor = this.getInfo(doctorId);
-        let doctorpicked = this.getInfo(doctorIdpicked);
-        let patient = this.getInfo(patientId);
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+
+        let doctorpickedAsBytes = await ctx.stub.getState(doctorIdpicked);
+        let doctorpicked = await JSON.parse(doctorpickedAsBytes.toString());
         
-        if (patient.specialist.indexOf(doctorIdpicked) == -1) {
-            patient.specialist.push(doctorIdpicked);
-            await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
-        }
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
+        
+        patient.specialist.push(doctorId);  // Problem with this line, not sure what's happening
         let patientrec = this.findPatient(doctor, patientId, "primary");
         if(patientrec == null) return `Patient Record not found`;
-        doctorpicked.otherPatientRecords.push(patientrec);
+        patientrec.ImageKeys = imgKey;  // Update the original Image key, which is only available for the specialist
+        doctorpicked.patientRecords.push(patientrec);
         
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
         await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));
 
         return `Transaction ${doctorId} shareinfowith ${doctorIdpicked} of patient ${patientId} success`;
     }
 
     async queryAll(ctx) {
-        let queryString = {
-            selector: {}
-          };
-          let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
-          return queryResults;
+        let queryString = { selector: {} };
+        let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
+        return queryResults;
     }
 
     async queryWithQueryString(ctx, queryString) {
@@ -134,7 +137,7 @@ class ImageTransfer extends Contract {
         return response;
     }
 
-    async createDocRecord(ctx, args) {
+    async updateImageKey(ctx, args) {
         args = JSON.parse(args);
 
         let patientId = args.userId;
@@ -182,6 +185,7 @@ class ImageTransfer extends Contract {
         return;
     }
 
+    //Not working
     async getInfo(inputId) {
         let userAsBytes = await ctx.stub.getState(inputId);
         let user = await JSON.parse(userAsBytes.toString());

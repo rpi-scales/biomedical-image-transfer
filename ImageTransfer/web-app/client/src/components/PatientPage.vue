@@ -136,14 +136,13 @@ export default {
         const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer);
         this.encryptedBuffer = JSON.stringify(apiResponse.data);
         console.log("ENCRYPTED " + this.encryptedBuffer);
+    },
+
+    async submit() {
         event.preventDefault(); 
         await ipfs.files.add(Buffer.from(this.encryptedBuffer), (err, IpfsHash) => {
             this.ipfsHash = IpfsHash[0].hash;
         }); 
-    },
-
-    async submit() {
-        
         //http://localhost:8080/ipfs/<this.ipfsHash>
         console.log("Submitted");
         const apiResponse = await PostsService.updateImageKey(this.$session.get("userId"), this.picked, this.ipfsHash);

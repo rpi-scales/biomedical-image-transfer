@@ -12,8 +12,8 @@ The healthcare data is stored on a secure, permissioned chain which greatly incr
    1. This step enrolls an admin (in ImageTransfer/web-app/server/wallet); otherwise you won’t be able to register user without an admin. 
 5. Go to web-app folder inside ImageTransfer. 
 6. Open two terminals, one goes to server folder, one goes to client folder. Run `npm install` in both folders to install necessary node_modules. Run `npm audit fix` if necessary. 
-7. In server terminal, run `node start`. 
-8. In client terminal, run `node run serve`. 
+7. In server terminal, run `npm start`. 
+8. In client terminal, run `npm run serve`. 
 9. Go to localhost 8080. 
 10. Run `ipfs daemon` if you want to test upload image feature. 
 

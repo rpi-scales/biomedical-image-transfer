@@ -65,7 +65,7 @@ export default {
           this.$session.start();
           this.$session.set('userId', this.loginData.userId);
           this.$session.set('userInfo', JSON.stringify(apiData));
-          if(apiData.type === "Patient"){
+          if(apiData.type == "Patient"){
             this.$router.push("PatientPage");
           } else {
             this.$router.push("DoctorPage");

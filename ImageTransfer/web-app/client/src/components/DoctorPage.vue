@@ -33,17 +33,18 @@
                     Picked:
                     <b>{{ picked }}</b>
                     <br>
+                    <h4>Upload File</h4>
+                    <input type="file" @change="captureFile">
+                    <br><br>
+                    <button @click="submit">Submit</button>
+                    <br> 
                     <button @click="shareInfowith"> Share </button> 
                     <span v-if="shareInfoRes">
                         <p>{{shareInfoRes}}</p>
                     </span>
                 </span>
             </span>
-            <h4>Upload File</h4>
-                <input type="file" @change="captureFile">
-                <br><br>
-                <button @click="submit">Submit</button>
-            <br> 
+            
             <br>
             <span v-if="picked">
                 <p>Do you want to check patient {{picked}}'s records?</p>
@@ -100,7 +101,8 @@ export default {
             userInfo: null,
             doctors: null,
             pickedDoctor: null,
-            shareInfoRes: null
+            shareInfoRes: null,
+            ipfsHash: null
         };
     },
 
@@ -116,17 +118,33 @@ export default {
     
     methods: {
         captureFile(event) {
-            
+            event.stopPropagation();
+            event.preventDefault();
+            const file = event.target.files[0];
+            let reader = new window.FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onloadend = () => this.convertToBuffer(reader);
         },
 
         async convertToBuffer(reader) {
+            console.log("Original reader result:" + reader.result);
+            this.buffer = await Buffer.from(reader.result); // Output: Hello!
+            console.log("File content: " + this.buffer); 
             
+            const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.pickedDoctor, this.buffer);
+            this.encryptedBuffer = JSON.stringify(apiResponse.data);
+            console.log("ENCRYPTED " + this.encryptedBuffer);
         },
 
-        //http://localhost:8080/ipfs/<this.ipfsHash>
         async submit() {
-            
+            event.preventDefault(); 
+            await ipfs.files.add(Buffer.from(this.encryptedBuffer), (err, IpfsHash) => {
+                this.ipfsHash = IpfsHash[0].hash;
+            }); 
+            //http://localhost:8080/ipfs/<this.ipfsHash>
+            console.log("Submitted");
         },
+
         // Fetch all data before the page loads
         async fetchData() {
             // Display current user's information
@@ -138,23 +156,13 @@ export default {
             this.doctors = apiResponse.data;
             
             // Display all patients the doctor has
-            var str = '';
-            if (this.userInfo.primaryPatientRecords.length != 0) {
-                this.userInfo.primaryPatientRecords.forEach(function(patient) {
-                str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
-                        <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
-                }); 
-                document.getElementById("PatientRec").innerHTML = str;
-            }
-            
-            if (this.userInfo.otherPatientRecords.length != 0) {
-                str = '';
-                this.userInfo.otherPatientRecords.forEach(function(patient) {
-                    str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
-                            <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
-                }); 
-                document.getElementById("OtherPatientRec").innerHTML = str;
-            }
+            console.log("Doctor's primary patients:")
+            console.log(this.userInfo.primaryPatientRecords);
+            this.getPatientRecord(this.userInfo.primaryPatientRecords, "PatientRec", "You don't have any primary patients yet.");
+
+            console.log("Doctor's other patients:");
+            console.log(this.userInfo.otherPatientRecords);
+            this.getPatientRecord(this.userInfo.otherPatientRecords, "OtherPatientRec", "You don't have any other patients yet.");
         },
 
         async checkPatientRecord() {
@@ -194,7 +202,7 @@ export default {
                 this.shareInfoRes = 'Error: You cannot share information with yourself';
                 return;
             }
-            const apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked);
+            const apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked, this.ipfsHash);
             this.shareInfoRes = 'You shared '+ this.picked + ' information with '+this.pickedDoctor;
             console.log("Share information response: "); console.log(apiResponse);
         },
@@ -202,6 +210,19 @@ export default {
         logout: function () {
             this.$session.destroy();
             this.$router.push('/');
+        },
+
+        getPatientRecord(patientList, elementId, response) {
+            if (patientList.length != 0) {
+                let str = '';
+                patientList.forEach(function(patient) {
+                    str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
+                            <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
+                }); 
+                document.getElementById(elementId).innerHTML = str;
+            } else {
+                document.getElementById(elementId).innerHTML = response;
+            }
         }
     }
 }

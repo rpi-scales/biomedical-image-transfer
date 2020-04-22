@@ -187,7 +187,7 @@ app.post('/updateImageKey', async(req, res) => {
 
     req.body = JSON.stringify(req.body);
     let args = [req.body];
-    let invokeResponse = await network.invoke(networkObj, false, 'createDocRecord', args);
+    let invokeResponse = await network.invoke(networkObj, false, 'updateImageKey', args);
 
     if (invokeResponse.error) {
         res.send(invokeResponse.error);

@@ -8,7 +8,7 @@ var User = require('./User.js');
  *      {
  *          UserId: patient's id,
             Name: patient's name,
-            ImageKeys: [],
+            ImageKeys: "",
             Notes: "",
             Role: primary or specialist     <- indicates access level
  *      },
