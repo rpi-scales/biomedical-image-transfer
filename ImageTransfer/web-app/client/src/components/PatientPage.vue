@@ -132,8 +132,9 @@ export default {
         console.log("Original reader result:" + reader.result);
         this.buffer = await Buffer.from(reader.result); // Output: Hello!
         console.log("File content: " + this.buffer); 
+        console.log(this.buffer.toString())
         
-        const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer);
+        const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, this.buffer.toString());
         this.encryptedBuffer = JSON.stringify(apiResponse.data);
         console.log("ENCRYPTED " + this.encryptedBuffer);
     },

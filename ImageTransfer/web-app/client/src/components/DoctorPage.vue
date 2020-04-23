@@ -65,6 +65,9 @@
             </form> 
 
             <br>
+            <span v-if="decryptedContent">
+                <p>Decrypted Content is {{this.decryptedContent}}</p>
+            </span>
 
             <span v-if="imgKey">
                 <b>Decrypted Image Key is {{this.imgKey}}</b>
@@ -102,7 +105,8 @@ export default {
             doctors: null,
             pickedDoctor: null,
             shareInfoRes: null,
-            ipfsHash: null
+            ipfsHash: null,
+            decryptedContent: null
         };
     },
 
@@ -191,8 +195,11 @@ export default {
             });
             
             // decrypt based on selected patient
-            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, file[0].content);
+            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, helper.bytestoString(array));
+            
             console.log("Decrypted Content Response: ");console.log(apiResponse);
+            console.log(apiResponse.data);
+            this.decryptedContent = apiResponse.data;
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 

@@ -15,6 +15,7 @@ var crypto = require("crypto");
 
 let network = require('./fabric/network.js');
 const fs = require('fs');
+const NodeRSA = require('node-rsa');
 
 
 const app = express();
@@ -66,32 +67,20 @@ app.post('/registerUser', async (req, res) => {
         if (networkObj.error) {
             res.send(networkObj.error);
         }
-        // Generate public and private key pair for the user
-        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-            modulusLength: 2048,
-            publicKeyEncoding: {
-              type: 'spki',
-              format: 'pem'
-            },
-            privateKeyEncoding: {
-              type: 'pkcs8',
-              format: 'pem',
-              cipher: 'aes-256-cbc',
-              passphrase: 'top secret'
-            }
-        });
-
-
-        var keys = {
-            "userId" : userId,
-            "public" : publicKey,
-            "private" : privateKey
-        };
+        const key = new NodeRSA( { b: 512 } );
+        let publicKey = key.exportKey('pkcs8-public-pem');
+        let privateKey = key.exportKey('pkcs1-private-pem');    //not sure pks1 or pks8
         
         req.body.publicKey = publicKey;
         req.body = JSON.stringify(req.body);
         let args = [req.body];
         let invokeResponse;
+
+        var keys = {
+            "userId" : userId,
+            "public" : publicKey,
+            "private": privateKey
+        };
         
         if (type == "patient") {
             invokeResponse = await network.invoke(networkObj, false, 'createPatient', args); 
@@ -108,6 +97,7 @@ app.post('/registerUser', async (req, res) => {
             parsedResponse += '. Use userId to login above.';
             res.send(parsedResponse);
         }
+        
     }
 });
 
@@ -146,7 +136,11 @@ app.post('/encryptContent', async(req, res) => {
     try {
         let user = JSON.parse(invokeResponse);
         console.log(req.body.buffer);
-        var encrypted = crypto.publicEncrypt(user.publicKey, Buffer.from(req.body.buffer));
+
+        var tempKey = new NodeRSA();
+        tempKey.importKey(user.publicKey, 'pkcs8-public-pem');
+        var encrypted = tempKey.encrypt(req.body.buffer, 'base64');
+        console.log(req.body.buffer);
         res.send(encrypted);
     } catch (error) {
         res.send(error);
@@ -168,8 +162,11 @@ app.post('/decryptContent', async(req, res) => {
         let rawdata = fs.readFileSync('keys/'+ userId + '.json');
         let user = JSON.parse(rawdata);
 
-        let decrypted = crypto.privateDecrypt(user.private, Buffer.from(req.body.encrypted));
-        console.log(decrypted);
+        var tempKey = new NodeRSA();
+        tempKey.importKey(user.private, 'pkcs1-private-pem');
+        console.log(req.body.encrypted);
+        var decrypted = tempKey.decrypt(req.body.encrypted);
+        console.log(decrypted.toString());
         res.send(decrypted);
     } catch (error) {
         res.send(error);
