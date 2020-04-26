@@ -200,6 +200,13 @@ export default {
             console.log("Decrypted Content Response: ");console.log(apiResponse);
             console.log(apiResponse.data);
             this.decryptedContent = apiResponse.data;
+
+            console.log("Base 64 Image: " + this.decryptedContent);
+
+            var img = new Image();
+            img.src = this.decryptedContent;
+            document.body.appendChild(img);
+
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 
