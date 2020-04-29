@@ -11,8 +11,10 @@ export default {
     queryAll() {
         return Api().get('queryAll')
     },
-    queryByDoctor() {
-        return Api().get('queryByDoctor')
+    queryByDoctor(userId) {
+        return Api().post('queryByDoctor', {
+            userId: userId
+        })
     },
     registerUser(userId, firstName, lastName, type) {
         return Api().post('registerUser', {

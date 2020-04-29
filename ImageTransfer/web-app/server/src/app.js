@@ -41,12 +41,19 @@ app.get('/queryAll', async (req, res) => {
 });
 
 // query all doctors in the world state
-app.get('/queryByDoctor', async (req, res) => {
+app.post('/queryByDoctor', async (req, res) => {
     console.log("Query doctor function");
+    let userId = req.body.userId;
     let networkObj = await network.connectToNetwork(appAdmin);
     let response = await network.invoke(networkObj, true, 'queryByObjectType', 'Doctor');
     try {
         let parsedResponse = await JSON.parse(response);
+        let index = -1;
+        for (let i = 0; i < parsedResponse.length; i++) {
+            if (parsedResponse[i].Key == userId) index = i;
+        }
+        if (index > -1) 
+            parsedResponse.splice(index, 1);
         res.send(parsedResponse);
     } catch (error) {
         console.log(`Unable to run queryByDoctor: ${error}`);

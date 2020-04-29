@@ -9,8 +9,70 @@
                 <p>You user id: {{this.$session.get("userId")}}</p>
                 <p>Primary patient records:</p>
                 <div id="PatientRec"></div>
+                <div id="PatientRec" v-for="patient in userInfo.primaryPatientRecords">
+                    <input type="radio" v-model="checkPatientPicked" name="profileImg" :value="patient.UserId"> 
+                        Paitient UserId: {{patient.UserId}} <br>
+                        Patient Name: {{patient.Name}} <br>
+                        Notes: {{patient.Notes}} <br>
+                        Image Keys: {{patient.ImageKeys}} <br>
+                </div>
+                <br>
+                <span v-if="checkPatientPicked">
+                    <p>Do you want to check patient {{checkPatientPicked}}'s records?</p>
+                    <button @click="checkPatientRecord"> Check Record </button> 
+                </span>
+                <br>
+                <span v-if = "patientImageHash"> 
+                    Patient Note: <b>{{patientNote}}</b>
+                    <br>
+                    Patient Image Hash: <b>{{patientImageHash}}</b>
+                    <form v-on:submit = "decrypt">
+                        <input type="submit" value="Decrypt Image Hash">
+                    </form> 
+                    <br>
+                    <span v-if="decryptedContent">
+                        <p>Decrypted Content is {{this.decryptedContent}}</p>
+                    </span>
+                    <br>
+                    <img id="DecryptedImage">
+                </span>
+
+                <br>
+                <br>
+
+                
                 <p>Other patient records:</p>
                 <div id="OtherPatientRec"></div>
+                <div id="OtherPatientRec" v-for="patient in userInfo.otherPatientRecords">
+                    <input type="radio" v-model="checkOtherPatientPicked" name="profileImg" :value="patient.UserId"> 
+                        Paitient UserId: {{patient.UserId}} <br>
+                        Patient Name: {{patient.Name}} <br>
+                        Notes: {{patient.Notes}} <br>
+                        Image Keys: {{patient.ImageKeys}} <br>
+                </div>
+                <br>
+                <span v-if="checkOtherPatientPicked">
+                    <p>Do you want to check patient {{checkOtherPatientPicked}}'s records?</p>
+                    <button @click="checkPatientRecord"> Check Record </button> 
+                </span>
+                <br>
+                <span v-if = "patientImageHash"> 
+                    Patient Note: <b>{{patientNote}}</b>
+                    <br>
+                    Patient Image Hash: <b>{{patientImageHash}}</b>
+                    <form v-on:submit = "decrypt">
+                        <input type="submit" value="Decrypt Image Hash">
+                    </form> 
+                    <br>
+                    <span v-if="decryptedContent">
+                        <p>Decrypted Content is {{this.decryptedContent}}</p>
+                    </span>
+                    <br>
+                    <img id="DecryptedImage">
+                </span>
+
+                <br>
+                <br>
             </div>
         </span>
 
@@ -45,29 +107,6 @@
                 </span>
             </span>
             
-            <br>
-            <span v-if="picked">
-                <p>Do you want to check patient {{picked}}'s records?</p>
-                <button @click="checkPatientRecord"> Yes </button> 
-            </span>
-
-            <span v-if = "patientImageHash">
-                Patient Note: <b>{{patientNote}}</b>
-                <br>
-                Patient Image Hash: <b>{{patientImageHash}}</b>
-            </span>
-
-            <br>
-            <br>
-
-            <form v-on:submit = "decrypt">
-                <input type="submit" value="Decrypt Image Hash">
-            </form> 
-
-            <br>
-            <span v-if="decryptedContent">
-                <p>Decrypted Content is {{this.decryptedContent}}</p>
-            </span>
 
             <span v-if="imgKey">
                 <b>Decrypted Image Key is {{this.imgKey}}</b>
@@ -106,7 +145,9 @@ export default {
             pickedDoctor: null,
             shareInfoRes: null,
             ipfsHash: null,
-            decryptedContent: null
+            decryptedContent: null,
+            checkPatientPicked: null,
+            checkOtherPatientPicked: null
         };
     },
 
@@ -156,21 +197,21 @@ export default {
             console.log("Current User Information: "); console.log(this.userInfo);
 
             // Display all doctors in the system
-            let apiResponse = await PostsService.queryByDoctor();
+            let apiResponse = await PostsService.queryByDoctor(this.$session.get("userId"));
             this.doctors = apiResponse.data;
             
             // Display all patients the doctor has
             console.log("Doctor's primary patients:")
             console.log(this.userInfo.primaryPatientRecords);
-            this.getPatientRecord(this.userInfo.primaryPatientRecords, "PatientRec", "You don't have any primary patients yet.");
+            //this.getPatientRecord(this.userInfo.primaryPatientRecords, "PatientRec", "You don't have any primary patients yet.");
 
             console.log("Doctor's other patients:");
             console.log(this.userInfo.otherPatientRecords);
-            this.getPatientRecord(this.userInfo.otherPatientRecords, "OtherPatientRec", "You don't have any other patients yet.");
+            //this.getPatientRecord(this.userInfo.otherPatientRecords, "OtherPatientRec", "You don't have any other patients yet.");
         },
 
         async checkPatientRecord() {
-            const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.picked);
+            const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.checkPatientPicked);
             console.log("Fetch patient record response: "); console.log(apiResponse);
             const patientRec = apiResponse.data;
             this.patientNote = patientRec.Notes;
@@ -205,7 +246,7 @@ export default {
 
             var img = new Image();
             img.src = this.decryptedContent;
-            document.body.appendChild(img);
+            document.getElementById("DecryptedImage").src = this.decryptedContent;
 
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
@@ -227,16 +268,7 @@ export default {
         },
 
         getPatientRecord(patientList, elementId, response) {
-            if (patientList.length != 0) {
-                let str = '';
-                patientList.forEach(function(patient) {
-                    str += `Patient UserId: ${patient.UserId} <br> Patient Name: ${patient.Name} 
-                            <br> Notes: ${patient.Notes} <br> Image Keys: ${patient.ImageKeys} <br>`;
-                }); 
-                document.getElementById(elementId).innerHTML = str;
-            } else {
-                document.getElementById(elementId).innerHTML = response;
-            }
+            
         }
     }
 }
