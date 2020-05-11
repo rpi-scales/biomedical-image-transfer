@@ -17,7 +17,6 @@ let network = require('./fabric/network.js');
 const fs = require('fs');
 const NodeRSA = require('node-rsa');
 
-
 const app = express();
 
 app.use(morgan('combined'));
@@ -122,7 +121,10 @@ app.post('/validateUser', async (req, res) => {
         res.send(invokeResponse);
     } else {
         try{
+            console.log("Validate User RESPONSE!!!!!!!");
+            console.log(invokeResponse);
             let parsedResponse = await JSON.parse(invokeResponse);
+            console.log(parsedResponse);
             res.send(parsedResponse);
         } catch (error) {
             res.send(error);
@@ -253,11 +255,19 @@ app.post('/fetchRecord', async(req, res) => {
     }
     let invokeResponse = await network.invoke(networkObj, true, 'readMyAsset', doctorId);
     let doctor = JSON.parse(invokeResponse);
+    const type = req.body.type;
+    let patientList;
+    if (type == "primary") {
+        patientList = doctor.primaryPatientRecords;
+    } else {
+        patientList = doctor.otherPatientRecords;
+    }
+    console.log(patientList);
     let patient;
     var i;
-    for (i = 0; i < doctor.primaryPatientRecords.length; i++) {
-        if(doctor.primaryPatientRecords[i].UserId == req.body.patientId) {
-            patient = doctor.primaryPatientRecords[i];
+    for (i = 0; i < patientList.length; i++) {
+        if(patientList[i].UserId == req.body.patientId) {
+            patient = patientList[i];
             break;
         }
     }
@@ -273,6 +283,9 @@ app.post('/shareInfowith', async(req, res)=> {
         res.send(networkObj.error);
     }
     let invokeResponse = await network.invoke(networkObj, false, 'shareInfowith', [JSON.stringify(req.body)]);
+    console.log(invokeResponse);
+    console.log(JSON.stringify(invokeResponse));
+    console.log(invokeResponse.toString());
     res.send(invokeResponse);
 })
 

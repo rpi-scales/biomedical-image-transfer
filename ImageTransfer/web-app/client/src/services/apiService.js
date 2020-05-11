@@ -54,10 +54,11 @@ export default {
             doctorId: doctorId
         })
     },
-    fetchRecord(doctorId, patientId) {
+    fetchRecord(doctorId, patientId, type) {
         return Api().post('fetchRecord', {
             doctorId:doctorId,
-            patientId: patientId
+            patientId: patientId,
+            type: type
         })
     },
     shareInfowith(userId, doctorId, patientId, imgKey) {

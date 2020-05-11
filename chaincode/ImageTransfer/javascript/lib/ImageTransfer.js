@@ -49,12 +49,14 @@ class ImageTransfer extends Contract {
         let patientAsBytes = await ctx.stub.getState(patientId);
         let patient = await JSON.parse(patientAsBytes.toString());
         
-        patient.specialist.push(doctorId);  // Problem with this line, not sure what's happening
+        if(patient.specialist.indexOf(doctorIdpicked) == -1) {
+            patient.specialist.push(doctorIdpicked);  
+        }
         let patientrec = this.findPatient(doctor, patientId, "primary");
         if(patientrec == null) return `Patient Record not found`;
         patientrec.ImageKeys = imgKey;  // Update the original Image key, which is only available for the specialist
-        doctorpicked.patientRecords.push(patientrec);
-        
+        doctorpicked.otherPatientRecords.push(patientrec);
+    
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
         await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));

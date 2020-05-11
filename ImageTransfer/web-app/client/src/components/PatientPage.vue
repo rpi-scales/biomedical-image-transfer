@@ -7,7 +7,7 @@
             <p>Your name: {{this.userInfo.firstName}} {{this.userInfo.lastName}}</p>
             <p>Your user id: {{this.$session.get("userId")}}</p>
             <p>Your primary doctor: {{this.userInfo.primaryDoctor}}</p>
-            <p>Your specialist: {{this.userInfo.specialist}}</p>
+            <p>{{specialistArray}}</p>
         </div>
         </span>
 
@@ -29,7 +29,7 @@
 
         <button @click="giveAccess">Submit</button>
         <br>
-        <p>{{this.response.giveAccessRes}}</p>
+        <p>{{giveAccessRes}}</p>
         <br>
 
         <h3>2. Upload File</h3>
@@ -75,7 +75,9 @@ export default {
       doctors: null,
       encryptedHash: "",
       encryptedBuffer: "",
-      userInfo: null
+      userInfo: null,
+      specialistArray: null,
+      giveAccessRes: null
     };
   },
   
@@ -110,22 +112,24 @@ export default {
         this.userInfo = JSON.parse(this.$session.get("userInfo"));
         console.log("User Information");
         console.log(this.userInfo);
+        let str = 'Your specialist: ';
+        for (var i = 0; i < this.userInfo.specialist.length; i++) {
+            str += `${this.userInfo.specialist[i]}  `;
+        }
+        this.specialistArray = str;
     },
 
     async giveAccess () {
         const apiResponse = await PostsService.giveAccessTo(this.$session.get("userId"), this.picked);
         console.log("Give Access ApiResponse");
         console.log(apiResponse);
-        this.response.giveAccessRes = apiResponse.data;
+        this.giveAccessRes = apiResponse.data;
     },
     
     async captureFile(event) {
         event.stopPropagation();
         event.preventDefault();
         const file = event.target.files[0];
-        //let reader = new window.FileReader();
-        //reader.readAsArrayBuffer(file);
-        //reader.onloadend = () => this.convertToBuffer(reader);
         const toBase64 = file => new Promise((resolve, reject) => {
             const reader = new window.FileReader();
             reader.readAsDataURL(file);
@@ -137,24 +141,25 @@ export default {
         const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.picked, bufferfile);
         this.encryptedBuffer = JSON.stringify(apiResponse.data);
         console.log("ENCRYPTED " + this.encryptedBuffer);
-    },
-
-    async submit() {
         event.preventDefault(); 
         await ipfs.files.add(Buffer.from(this.encryptedBuffer), (err, IpfsHash) => {
             this.ipfsHash = IpfsHash[0].hash;
         }); 
+    },
+
+    async submit() {
+        
         //http://localhost:8080/ipfs/<this.ipfsHash>
         console.log("Submitted");
-        const apiResponse = await PostsService.updateImageKey(this.$session.get("userId"), this.picked, this.ipfsHash);
-        console.log("Select doctor response");
-        console.log(apiResponse);
-        if (apiResponse.data.error){
-            this.response.submitError = apiResponse.data.error;
-        } else {
+        if (this.ipfsHash) {
+            const apiResponse = await PostsService.updateImageKey(this.$session.get("userId"), this.picked, this.ipfsHash);
+            console.log("Select doctor response");
+            console.log(apiResponse);
+            
             this.encryptedHash = JSON.stringify(apiResponse.data);
-            this.response.submitRes = "Succeed :)";
+            //this.response.submitRes = "Succeed :)";
         }
+        
     },
 
     logout: function () {

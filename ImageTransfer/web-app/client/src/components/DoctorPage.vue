@@ -54,22 +54,23 @@
                 <span v-if="checkOtherPatientPicked">
                     <p>Do you want to check patient {{checkOtherPatientPicked}}'s records?</p>
                     <button @click="checkPatientRecord"> Check Record </button> 
+                    <span v-if = "patientImageHash"> 
+                        Patient Note: <b>{{patientNote}}</b>
+                        <br>
+                        Patient Image Hash: <b>{{patientImageHash}}</b>
+                        <form v-on:submit = "decrypt">
+                            <input type="submit" value="Decrypt Image Hash">
+                        </form> 
+                        <br>
+                        <span v-if="decryptedContent">
+                            <p>Decrypted Content is {{this.decryptedContent}}</p>
+                        </span>
+                        <br>
+                        <img id="DecryptedImage">
+                    </span>
                 </span>
                 <br>
-                <span v-if = "patientImageHash"> 
-                    Patient Note: <b>{{patientNote}}</b>
-                    <br>
-                    Patient Image Hash: <b>{{patientImageHash}}</b>
-                    <form v-on:submit = "decrypt">
-                        <input type="submit" value="Decrypt Image Hash">
-                    </form> 
-                    <br>
-                    <span v-if="decryptedContent">
-                        <p>Decrypted Content is {{this.decryptedContent}}</p>
-                    </span>
-                    <br>
-                    <img id="DecryptedImage">
-                </span>
+                
 
                 <br>
                 <br>
@@ -94,11 +95,6 @@
                 <span v-if="picked">
                     Picked:
                     <b>{{ picked }}</b>
-                    <br>
-                    <h4>Upload File</h4>
-                    <input type="file" @change="captureFile">
-                    <br><br>
-                    <button @click="submit">Submit</button>
                     <br> 
                     <button @click="shareInfowith"> Share </button> 
                     <span v-if="shareInfoRes">
@@ -162,33 +158,6 @@ export default {
     },
     
     methods: {
-        captureFile(event) {
-            event.stopPropagation();
-            event.preventDefault();
-            const file = event.target.files[0];
-            let reader = new window.FileReader();
-            reader.readAsArrayBuffer(file);
-            reader.onloadend = () => this.convertToBuffer(reader);
-        },
-
-        async convertToBuffer(reader) {
-            console.log("Original reader result:" + reader.result);
-            this.buffer = await Buffer.from(reader.result); // Output: Hello!
-            console.log("File content: " + this.buffer); 
-            
-            const apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.pickedDoctor, this.buffer);
-            this.encryptedBuffer = JSON.stringify(apiResponse.data);
-            console.log("ENCRYPTED " + this.encryptedBuffer);
-        },
-
-        async submit() {
-            event.preventDefault(); 
-            await ipfs.files.add(Buffer.from(this.encryptedBuffer), (err, IpfsHash) => {
-                this.ipfsHash = IpfsHash[0].hash;
-            }); 
-            //http://localhost:8080/ipfs/<this.ipfsHash>
-            console.log("Submitted");
-        },
 
         // Fetch all data before the page loads
         async fetchData() {
@@ -201,17 +170,20 @@ export default {
             this.doctors = apiResponse.data;
             
             // Display all patients the doctor has
-            console.log("Doctor's primary patients:")
-            console.log(this.userInfo.primaryPatientRecords);
-            //this.getPatientRecord(this.userInfo.primaryPatientRecords, "PatientRec", "You don't have any primary patients yet.");
+            console.log("Doctor's primary patients:"); console.log(this.userInfo.primaryPatientRecords);
 
-            console.log("Doctor's other patients:");
-            console.log(this.userInfo.otherPatientRecords);
-            //this.getPatientRecord(this.userInfo.otherPatientRecords, "OtherPatientRec", "You don't have any other patients yet.");
+            console.log("Doctor's other patients:"); console.log(this.userInfo.otherPatientRecords);
         },
 
         async checkPatientRecord() {
-            const apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.checkPatientPicked);
+            let apiResponse;
+            if (this.checkPatientPicked) {
+                apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.checkPatientPicked, "primary");
+            } else {
+                if (this.checkOtherPatientPicked) {
+                    apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.checkOtherPatientPicked, "other");
+                }
+            }
             console.log("Fetch patient record response: "); console.log(apiResponse);
             const patientRec = apiResponse.data;
             this.patientNote = patientRec.Notes;
@@ -228,15 +200,9 @@ export default {
             console.log("IPFS File Content bytestoString: " );console.log(helper.bytestoString(array));
 
             let decodedString = helper.bytestoString(array);
-            ipfs.files.get(this.patientImageHash, function (err, files) {
-                files.forEach((file) => {
-                    console.log(file.path)
-                    console.log("File content >> ",file.content.toString('utf8'))
-                })
-            });
             
             // decrypt based on selected patient
-            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, helper.bytestoString(array));
+            const apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.checkPatientPicked, helper.bytestoString(array));
             
             console.log("Decrypted Content Response: ");console.log(apiResponse);
             console.log(apiResponse.data);
@@ -244,31 +210,48 @@ export default {
 
             console.log("Base 64 Image: " + this.decryptedContent);
 
-            var img = new Image();
+            let img = new Image();
             img.src = this.decryptedContent;
             document.getElementById("DecryptedImage").src = this.decryptedContent;
 
             //this.url = "http://localhost:8080/ipfs/" + this.imgKey;
         },
 
+        // Get pickedPatient's image, encrypt, upload to ipfs, return hash
+        // this.picked is patient; this.pickedDoctor is the doctor
         async shareInfowith() {
             if(this.$session.get("userId") == this.pickedDoctor) {
                 console.log("ERROR: Share information not sucess: sharing info with yourself");
                 this.shareInfoRes = 'Error: You cannot share information with yourself';
                 return;
             }
-            const apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked, this.ipfsHash);
-            this.shareInfoRes = 'You shared '+ this.picked + ' information with '+this.pickedDoctor;
-            console.log("Share information response: "); console.log(apiResponse);
+            // fetch the picked patient's imageKey
+            let apiResponse = await PostsService.fetchRecord(this.$session.get("userId"), this.picked, "primary");
+            let imagekey = apiResponse.data.ImageKeys;
+            console.log(imagekey);
+
+            // decrypt the content 
+            const BufferList = require('bl/BufferList');
+            const file = await ipfs.files.get(imagekey);
+            const content = new BufferList();
+            apiResponse = await PostsService.decryptContent(this.$session.get("userId"), this.picked, helper.bytestoString(file[0].content));
+            
+            let imgsrc = apiResponse.data;
+            apiResponse = await PostsService.encryptContent(this.$session.get("userId"), this.pickedDoctor, imgsrc);
+            await ipfs.files.add(Buffer.from(JSON.stringify(apiResponse.data)), (err, IpfsHash) => {
+                this.ipfsHash = IpfsHash[0].hash;
+            });
+            console.log(this.ipfsHash); // need to press submit twice
+            if (this.ipfsHash != null) {
+                apiResponse = await PostsService.shareInfowith(this.$session.get("userId"), this.pickedDoctor, this.picked, this.ipfsHash);
+                this.shareInfoRes = 'You shared '+ this.picked + ' information with '+this.pickedDoctor;
+                console.log("Share information response: "); console.log(apiResponse);
+            }
         },
 
         logout: function () {
             this.$session.destroy();
             this.$router.push('/');
-        },
-
-        getPatientRecord(patientList, elementId, response) {
-            
         }
     }
 }
