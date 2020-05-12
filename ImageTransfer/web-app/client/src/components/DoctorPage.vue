@@ -22,6 +22,7 @@
                     <button @click="checkPatientRecord"> Check Record </button> 
                 </span>
                 <br>
+                <br>
                 <span v-if = "patientImageHash"> 
                     Patient Note: <b>{{patientNote}}</b>
                     <br>
@@ -54,6 +55,7 @@
                 <span v-if="checkOtherPatientPicked">
                     <p>Do you want to check patient {{checkOtherPatientPicked}}'s records?</p>
                     <button @click="checkPatientRecord"> Check Record </button> 
+                    <br>
                     <span v-if = "patientImageHash"> 
                         Patient Note: <b>{{patientNote}}</b>
                         <br>

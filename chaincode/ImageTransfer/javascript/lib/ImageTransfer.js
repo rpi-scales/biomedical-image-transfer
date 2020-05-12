@@ -54,8 +54,18 @@ class ImageTransfer extends Contract {
         }
         let patientrec = this.findPatient(doctor, patientId, "primary");
         if(patientrec == null) return `Patient Record not found`;
-        patientrec.ImageKeys = imgKey;  // Update the original Image key, which is only available for the specialist
-        doctorpicked.otherPatientRecords.push(patientrec);
+        let patientrecpicked = this.findPatient(doctorpicked, patientId, "other");
+        if (patientrecpicked == null) { // create another patient without changing the origin
+            doctorpicked.otherPatientRecords.push({
+                UserId: patientrec.UserId,
+                Name: patientrec.Name,
+                ImageKeys: imgKey,
+                Notes: patientrec.Notes,
+                Role: patientrec.Role
+            });
+        } else {
+            patientrecpicked.ImageKeys = imgKey;
+        }
     
         await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
