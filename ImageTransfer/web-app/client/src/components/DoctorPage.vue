@@ -20,23 +20,24 @@
                 <span v-if="checkPatientPicked">
                     <p>Do you want to check patient {{checkPatientPicked}}'s records?</p>
                     <button @click="checkPatientRecord"> Check Record </button> 
-                </span>
-                <br>
-                <br>
-                <span v-if = "patientImageHash"> 
-                    Patient Note: <b>{{patientNote}}</b>
                     <br>
-                    Patient Image Hash: <b>{{patientImageHash}}</b>
-                    <form v-on:submit = "decrypt">
-                        <input type="submit" value="Decrypt Image Hash">
-                    </form> 
                     <br>
-                    <span v-if="decryptedContent">
-                        <p>Decrypted Content is {{this.decryptedContent}}</p>
+                    <span v-if = "patientImageHash"> 
+                        Patient Note: <b>{{patientNote}}</b>
+                        <br>
+                        Patient Image Hash: <b>{{patientImageHash}}</b>
+                        <form v-on:submit = "decrypt">
+                            <input type="submit" value="Decrypt Image Hash">
+                        </form> 
+                        <br>
+                        <span v-if="decryptedContent">
+                            <p>Decrypted Content is {{this.decryptedContent}}</p>
+                        </span>
+                        <br>
+                        <img id="DecryptedImage">
                     </span>
-                    <br>
-                    <img id="DecryptedImage">
                 </span>
+                
 
                 <br>
                 <br>
