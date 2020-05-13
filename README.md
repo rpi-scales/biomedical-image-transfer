@@ -53,6 +53,10 @@ The healthcare data is stored on a secure, permissioned chain which greatly incr
     - Primary Doctor
     - Specialists (Who has access to the patient's records)
 
+### Workflow
+
+![Diagram](/docs/workflow.png)
+
 ## Use Cases
 
 **Case 1: Information transfer between providers to treat a patient**
