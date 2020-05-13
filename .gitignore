@@ -75,3 +75,8 @@ typings/
 
 # Serverless directories
 .serverless
+
+wallet
+!wallet/.gitkeep
+
+first-network

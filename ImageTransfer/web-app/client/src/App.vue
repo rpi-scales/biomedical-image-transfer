@@ -1,11 +1,7 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">    
-      
-        <p><router-link to="/">Home</router-link>&nbsp;          
-        <!-- <router-link to="/castBallot">Cast Ballot</router-link>&nbsp; -->
-        <router-link to="/QueryAll">QueryAll</router-link></p>
-      
+  <div id="app">      
+        <p><router-link to="/">Home</router-link>&nbsp;</p>
+        <h1>BioMed Image Transfer System</h1>
       <router-view></router-view>
     </div>
 </template>
@@ -44,4 +40,23 @@ export default {
   position:fixed;
   padding-left:32%;
 }
+
+#register {
+    text-align: left;
+    margin-left: 37%;
+}
+
+#userInfo {
+  text-align: left;
+  margin-left: 10%;
+}
+
+#PatientRec {
+  margin-left: 15%;
+}
+
+#OtherPatientRec{
+  margin-left: 15%;
+}
+
 </style>

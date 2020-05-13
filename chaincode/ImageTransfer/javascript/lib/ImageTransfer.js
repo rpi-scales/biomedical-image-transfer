@@ -10,48 +10,93 @@ let Doctor = require('./Doctor.js');
 
 class ImageTransfer extends Contract {
 
-    async initLedger(ctx) {
-        console.info('============= START : Initialize Ledger ===========');
-        let p1 = await new Patient("P1", "A", "B");
-        await ctx.stub.putState(p1.userId, Buffer.from(JSON.stringify(p1)));
+    async initLedger (ctx) {}
 
-        let d1 = await new Doctor("D1", "E", "F");
-        await ctx.stub.putState(d1.userId, Buffer.from(JSON.stringify(d1)));
-        console.info('============= END : Initialize Ledger ===========');
+    async createPatient(ctx, args) {
+        args = JSON.parse(args);
+        let patient = await new Patient(args.userId, args.firstName, args.lastName, args.publicKey);
+        patient.age = args.age;
+        patient.insurance = args.insurance;
+        await ctx.stub.putState(args.userId, Buffer.from(JSON.stringify(patient)));
+        let response = `User with userId ${args.userId} is updated in the world state`;
+        return response;
+    }
+
+    async createDoctor(ctx, args) {
+        args = JSON.parse(args);
+        let doctor = await new Doctor(args.userId, args.firstName, args.lastName, args.publicKey);
+        doctor.specialty = args.specialty;
+        await ctx.stub.putState(args.userId, Buffer.from(JSON.stringify(doctor)));
+        let response = `User with userId ${args.userId} is updated in the world state`;
+        return response;
+    }
+
+    // A doctor shares information with another doctor
+    async shareInfowith(ctx, args){
+        args = JSON.parse(args);
+
+        let doctorId = args.userId;
+        let doctorIdpicked = args.doctorId;
+        let patientId = args.patientId;
+        let imgKey = args.imgKey;
+
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+
+        let doctorpickedAsBytes = await ctx.stub.getState(doctorIdpicked);
+        let doctorpicked = await JSON.parse(doctorpickedAsBytes.toString());
+        
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
+        
+        if(patient.specialist.indexOf(doctorIdpicked) == -1) {
+            patient.specialist.push(doctorIdpicked);  
+        }
+        let patientrec = this.findPatient(doctor, patientId, "primary");
+        if(patientrec == null) return `Patient Record not found`;
+        let patientrecpicked = this.findPatient(doctorpicked, patientId, "other");
+        if (patientrecpicked == null) { // create another patient without changing the origin
+            doctorpicked.otherPatientRecords.push({
+                UserId: patientrec.UserId,
+                Name: patientrec.Name,
+                ImageKeys: imgKey,
+                Notes: patientrec.Notes,
+                Role: patientrec.Role
+            });
+        } else {
+            patientrecpicked.ImageKeys = imgKey;
+        }
+    
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
+        await ctx.stub.putState(doctorIdpicked, Buffer.from(JSON.stringify(doctorpicked)));
+
+        return `Transaction ${doctorId} shareinfowith ${doctorIdpicked} of patient ${patientId} success`;
     }
 
     async queryAll(ctx) {
-        let queryString = {
-            selector: {}
-          };
-          let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
-          return queryResults;
+        let queryString = { selector: {} };
+        let queryResults = await this.queryWithQueryString(ctx, JSON.stringify(queryString));
+        return queryResults;
     }
 
     async queryWithQueryString(ctx, queryString) {
-        console.log('query String');
-        console.log(JSON.stringify(queryString));
         let resultsIterator = await ctx.stub.getQueryResult(queryString);
         let allResults = [];
         while (true) {
             let res = await resultsIterator.next();
             if (res.value && res.value.value.toString()) {
                 let jsonRes = {};
-                console.log(res.value.value.toString('utf8'));
                 jsonRes.Key = res.value.key;
                 try {
                     jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
                 } catch (err) {
-                    console.log(err);
                     jsonRes.Record = res.value.value.toString('utf8');
                 }
                 allResults.push(jsonRes);
             }
             if (res.done) {
-                console.log('end of data');
                 await resultsIterator.close();
-                console.info(allResults);
-                console.log(JSON.stringify(allResults));
                 return JSON.stringify(allResults);
             }
         }
@@ -65,35 +110,65 @@ class ImageTransfer extends Contract {
         return queryResults;
     }
 
-    async createUser(ctx, args) {
-        args = JSON.parse(args);
-
-        let userId = args.userId;
-        let firstName = args.firstName;
-        let lastName = args.lastName;
-        let type = args.type;
-
-        if (type == "Patient") {
-            let newp = await new Patient(userId, firstName, lastName);
-            await ctx.stub.putState(newp.userId, Buffer.from(JSON.stringify(newp)));
-        } else{
-            if (type == "Doctor"){
-                let newd = await new Doctor(userId, firstName, lastName);
-                await ctx.stub.putState(newd.userId, Buffer.from(JSON.stringify(newd)));
-            }
-        }
-        let response = `User with userId ${userId} is updated in the world state`;
-        return response;
-    }
-
     async userExists(ctx,userId) {
         const buffer = await ctx.stub.getState(userId);
         return (!!buffer && buffer.length > 0);
     }
 
-    async selectDoctor(ctx, args) {
+    async giveAccessTo(ctx, args) {
+        args = JSON.parse(args);
+
+        let patientId = args.userId;
+        let doctorId = args.picked;
+        let role = "primary";
+
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        let patientAsBytes = await ctx.stub.getState(patientId);
+        let patient = await JSON.parse(patientAsBytes.toString());
+
+        if (role == "primary") {
+            patient.primaryDoctor = doctorId;
+        } else {
+            patient.specialist.push(doctorId);
+        }
+        if (this.findPatient(doctor, patientId, "primary")==null) {
+            doctor.primaryPatientRecords.push({
+                UserId: patientId,
+                Name: patient.firstName,
+                ImageKeys: "",
+                Notes: "",
+                Role: role
+            });
+        }
         
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(patient)));
+        
+        let response = `Transaction giveAccessTo success with patientId ${patientId} and doctorId ${doctorId}`;
+        return response;
     }
+
+    async updateImageKey(ctx, args) {
+        args = JSON.parse(args);
+
+        let patientId = args.userId;
+        let doctorId = args.picked;
+        let imgKey = args.imgKey;
+        
+        // Update doctor side
+        let doctorAsBytes = await ctx.stub.getState(doctorId);
+        let doctor = await JSON.parse(doctorAsBytes.toString());
+        
+        let patientInfo = this.findPatient(doctor, patientId, "primary");
+        patientInfo.ImageKeys = imgKey;
+        await ctx.stub.putState(doctorId, Buffer.from(JSON.stringify(doctor)));
+        
+        let response = patientInfo.ImageKeys;
+        return response;
+    }
+
+
 
     async readMyAsset(ctx, myAssetId) {
         const exists = await this.userExists(ctx, myAssetId);
@@ -101,8 +176,32 @@ class ImageTransfer extends Contract {
             throw new Error(`The my asset ${myAssetId} does not exist`);
         }
         const buffer = await ctx.stub.getState(myAssetId);
-        const asset = JSON.parse(buffer.toString());
+        const asset = buffer.toString();
         return asset;
+    }
+
+    // helper functions
+    findPatient(doctor, patientId, role) {
+        let patientInfo;
+        if(role == "primary") {
+            patientInfo = doctor.primaryPatientRecords;
+        } else {
+            patientInfo = doctor.otherPatientRecords;
+        }
+        var i;
+        for (i = 0; i < patientInfo.length; i++) {
+            if (patientInfo[i].UserId == patientId) {
+                return patientInfo[i];
+            }
+        }
+        return;
+    }
+
+    //Not working
+    async getInfo(inputId) {
+        let userAsBytes = await ctx.stub.getState(inputId);
+        let user = await JSON.parse(userAsBytes.toString());
+        return user;
     }
 }
 

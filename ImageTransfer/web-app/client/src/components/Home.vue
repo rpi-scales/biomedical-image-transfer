@@ -1,9 +1,9 @@
 <template>
-  <div class="posts">
-    <h1>BioMed Image Transfer System</h1>
-    <h3>If you are a registered user, enter your User ID below</h3>
+  <div class="Home Page">
+    <h3>Sign In</h3>
     <form v-on:submit="validateUser">
-      <input type="text" v-model="loginData.userId" placeholder="Enter User ID">
+      <label class="grey-text">Enter Your User Id: </label><br>
+      <input type="text" v-model="loginData.userId">
       <br>
 
       <input type="submit" value="Login">
@@ -16,23 +16,13 @@
     </form>
 
     <br>
-    <h3>Otherwise, fill out the form below to register!</h3>
-    <form v-on:submit="registerUser">
-      <input type="text" v-model="registerData.userId" placeholder="Enter User ID/Drivers License">
-      <br>
-      <input type="text" v-model="registerData.firstName" placeholder="Enter first name">
-      <br>
-      <input type="text" v-model="registerData.lastName" placeholder="Enter last name">
-      <br>
-      <input type="text" v-model="registerData.type" placeholder="Enter Patient/Doctor">
-      <br>
-      <input type="submit" value="Register">
-    </form>
+    <h3>Sign Up</h3>
+    
+    <router-link to="/registerDoctor">Register as Doctor</router-link>&nbsp;
     <br>
-    <span v-if="registerResponse">
-      <b>{{ registerResponse.data }}</b>
-    </span>
+    <router-link to="/registerPatient">Register as Patient</router-link>&nbsp;
     <br>
+    
     <vue-instant-loading-spinner id='loader' ref="Spinner"></vue-instant-loading-spinner>
   </div>
 </template>
@@ -46,10 +36,6 @@ export default {
   data() {
     return {
       loginData: {},
-      registerData: {},
-      registerResponse: {
-        data: ""
-      },
       loginResponse: {
         data: ""
       }
@@ -59,25 +45,11 @@ export default {
     VueInstantLoadingSpinner
   },
   methods: {
-    async registerUser() {
-
-      await this.runSpinner();
-      const apiResponse = await PostsService.registerUser(
-        this.registerData.userId,
-        this.registerData.firstName,
-        this.registerData.lastName,
-        this.registerData.type
-      );
-      console.log(apiResponse);
-      this.registerResponse = apiResponse;
-      await this.hideSpinner();
-    },
 
     async validateUser() {
       await this.runSpinner();
 
       if (!this.loginData.userId) {
-        console.log("!thislogin");
         let response = 'Please enter a userId';
         this.loginResponse.data = response;
         await this.hideSpinner();
@@ -85,20 +57,21 @@ export default {
         const apiResponse = await PostsService.validateUser(
           this.loginData.userId
         );
-        console.log("apiResponse");
-        console.log(apiResponse.data);
+        let apiData = JSON.parse(JSON.stringify(apiResponse.data));
 
         if (apiResponse.data.error) {
-          // console.log(apiResponse);
-          console.log(apiResponse.data.error);
           this.loginResponse = apiResponse.data.error;
         } else {
-          this.$router.push("SelectDoctor");
+          this.$session.start();
+          this.$session.set('userId', this.loginData.userId);
+          this.$session.set('userInfo', JSON.stringify(apiData));
+          if(apiData.type == "Patient"){
+            this.$router.push("PatientPage");
+          } else {
+            this.$router.push("DoctorPage");
+          }
         }
-
-        console.log(apiResponse);
         this.loginResponse = apiResponse;
-        // this.$router.push('castBallot')
         await this.hideSpinner();
       }
     },

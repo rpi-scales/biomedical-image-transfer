@@ -1,11 +1,15 @@
 'use strict';
 
-class Patient {
-    constructor (userId, firstName, lastName) {
-        this.userId =userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
+var User = require('./User.js');
+
+class Patient extends User{
+    constructor (userId, firstName, lastName, publicKey) {
+        super(userId, firstName, lastName, publicKey);
+        this.age = "";
+        this.insurance = "";
         this.type = "Patient";
+        this.primaryDoctor = "";
+        this.specialist = [];
     }
 }
 
